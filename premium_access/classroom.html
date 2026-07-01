@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bahan-Bahan Pembinaan - Akademi Abang Rumah</title>
+  <link rel="stylesheet" href="../output.css">
+</head>
+<body class="min-h-screen bg-white flex flex-col font-sans overflow-x-hidden">
+
+  <!-- TOP NAVBAR -->
+  <header class="bg-[#4a7425] text-white p-1 flex items-center shadow-md z-50">
+    <button id="menu-btn" class="text-2xl mr-4 focus:outline-none">☰</button>
+    <span class="text-lg font-bold tracking-wide">AKADEMI ABANG RUMAH</span>
+    <img src="../assets/images/ayjo ventures logo.png" alt="Akademi Abang Rumah Logo" class="ms-auto mt-2 w-24 h-auto">
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <div class="flex flex-1 relative">
+    
+    <!-- SYLLABUS SIDEBAR (Hidden everywhere by default) -->
+    <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-[#4a7425] text-white pt-28 p-4 z-40 transform -translate-x-full transition-all duration-300 ease-in-out shadow-2xl overflow-y-auto">
+      
+    </aside>
+
+    <!-- MAIN CANVAS -->
+    <main class="flex-1 p-4 lg:p-8 bg-gray-50 transition-all duration-300">
+      <div class="max-w-4xl mx-auto">
+        <!-- Active Lesson Title -->
+        <h1 id="lesson-title" class="text-3xl font-bold text-gray-800 mb-6 text-center lg:text-left">
+          Jenis-Jenis Simen
+        </h1>
+        
+        <!-- Responsive Video Container Player Using HTML iframe -->
+        <div class="aspect-video w-full bg-black rounded-lg shadow-inner overflow-hidden">
+          <iframe id="video-player" class="w-full h-full" src="https://www.youtube.com/embed/F5nOQ2QpIMo?si=6ZanFpsxSGsbpqe_" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+
+        <p class="lg:hidden block sm:hidden text-center text-sm text-gray-500 mb-2 pt-10">
+          Tip: Putarkan peranti secara melintang untuk melihat video dengan lebih baik.
+        </p>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script src="sidebar_filter.js"></script>
+</body>
+</html>
