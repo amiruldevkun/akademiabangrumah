@@ -8,7 +8,9 @@ Feature yang ada setakat ini:
 - [x] Mengimplemen menu sidebar yang interaktif
 - [x] Gambar yang releven dengan website
 - [x] Script menjana sidebar yang efektif and mudah
+- [] Lengkapkan video yang diperlukan
 - [] Tag video mengikut content video
-- [] About me section
+- [x] About me section
 - [] Pengiklanan
-- [] Collapsable Menu Headings
+- [x] Collapsable Menu Headings
+- [] Link payment page to main home button
