@@ -37,8 +37,8 @@ export default defineConfig({
 
       manifest: {
         ApplicationName: 'Akademi Abang Rumah',
-        short_name: 'AAR',
-        description: 'Platform pembelajaran online untuk Akademi Abang Rumah.',
+        short_name: 'Akademi Abang Rumah',
+        description: 'Platform pembelajaran online untuk Pelanggan Akademi Abang Rumah.',
         theme_color: '#4a7425',
         icons: [
           {
