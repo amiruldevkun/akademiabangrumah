@@ -14,3 +14,4 @@ Feature yang ada setakat ini:
 - [] Pengiklanan
 - [x] Collapsable Menu Headings
 - [] Link payment page to main home button
+- [x] Make it a PWA

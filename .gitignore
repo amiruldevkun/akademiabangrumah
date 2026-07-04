@@ -2,3 +2,10 @@ input.css
 node_modules/
 build_sidebar.py
 Video Panduan VVIP Akademi Abang Rumah.txt
+dist/
+build_sidebarV2.py
+index.html.bak
+output.css
+sidebar.html.bak
+sidebar_filter.js.bak
+
