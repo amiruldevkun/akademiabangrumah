@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kelas - Akademi Abang Rumah</title>
-  <link rel="stylesheet" href="../output.css">
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="icon" href="/assets/images/akademilogov2.png" type="image/png">
 </head>
 <body class="min-h-screen bg-white flex flex-col font-sans overflow-x-hidden">
 
@@ -12,8 +13,8 @@
   <header class="bg-[#4a7425] text-white p-1 flex items-center shadow-md z-50">
     <button id="menu-btn" class="text-2xl mr-4 ml-4 mb-1 focus:outline-none">☰</button>
     <span class="text-lg font-bold tracking-wide">AKADEMI ABANG RUMAH</span>
-    <a href="../about.html" class="ms-auto">
-      <img src="../assets/images/akademilogov2.png" alt="Akademi Abang Rumah Logo" class="p-2 w-22 h-auto">
+    <a href="/about.html" class="ms-auto">
+      <img src="/assets/images/akademilogov2.png" alt="Akademi Abang Rumah Logo" class="p-2 w-22 h-auto">
     </a>
   </header>
 
@@ -41,12 +42,17 @@
         <p class="lg:hidden block sm:hidden text-center text-sm text-gray-500 mb-2 pt-10">
           Tip: Putarkan peranti secara melintang untuk melihat video dengan lebih baik.
         </p>
-
+         <!-- PWA Download Button -->
+        <button id="install-button" class="bg-[#4a7425] text-white px-4 py-2 rounded shadow md" hidden>
+          Pasang Aplikasi
+        </button>
       </div>
     </main>
   </div>
 
   <!-- JAVASCRIPT LOGIC -->
-  <script src="sidebar_filter.js"></script>
+  <script type="module" src="main.js"></script>
+  <script type="module" src="sidebar_filter.js"></script>
+  
 </body>
 </html>
