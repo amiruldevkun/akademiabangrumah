@@ -1,0 +1,9 @@
+App Project.
+
+Akademi Abang Rumah
+
+1. Video Panduan Belajar jadi Tukang
+
+
+            <li class="lesson-item cursor-pointer hover:text-white p-1 rounded transform transition-all duration-200 hover:translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm" data-lesson="1.4 Kerja Piling" data-video="https://www.youtube.com/embed/KoyYZeH6QDs?si=kibKSK05RZuUcfS0">1.4 Kerja Piling</li>
+            <li class="lesson-item cursor-pointer hover:text-white p-1 rounded transform transition-all duration-200 hover:translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm" data-lesson="1.5 Kerja Acuan dan Tuang Konkrit Asas" data-video="https://www.youtube.com/embed/2VPd-9rScV8?si=I_A1ZAmLQLAEM8ne">1.5 Kerja Acuan dan Tuang Konkrit Asas</li>
