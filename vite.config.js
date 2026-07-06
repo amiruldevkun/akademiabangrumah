@@ -1,45 +1,22 @@
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
-import { VitePWA } from 'vite-plugin-pwa'
-import { resolve } from 'path'
-import { svelte } from '@sveltejs/vite-plugin-svelte'
-import {sveltekit} from '@sveltejs/kit/vite'
-import adapter from '@sveltejs/adapter-netlify'
+import { SvelteKitPWA } from '@vite-pwa/sveltekit' // Swapped to SvelteKit specific plugin
+import { sveltekit } from '@sveltejs/kit/vite'
 
 export default defineConfig({
-  build: {
-    rollupOptions: {
-      output: {
-        // Keeps main JS files clean
-        entryFileNames: 'assets/[name].js',
-        chunkFileNames: 'assets/[name].js',
-        // Forces CSS and images to keep their clean names without hashes
-        assetFileNames: 'assets/[name].[ext]'
-      }
-    },
-  },
+  // REMOVED: build.rollupOptions.output (SvelteKit must control its own asset generation)
 
-  
   plugins: [
-    sveltekit({
-			compilerOptions: {
-				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
-				runes: ({ filename }) =>
-					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
-			},
-
-			// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
-			// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
-			// See https://svelte.dev/docs/kit/adapters for more information about adapters.
-			
-		}),
+    sveltekit(),
     tailwindcss(),
-    VitePWA({ 
-      registerType: 'autoUpdate', 
-      workbox: { globPatterns: [
-        '**/*.{js,css,html,ico,png,svg}',
-        'premium_access/**/*.{js,css,html,json}',
-        'assets/**/*.{js,css,html,ico,png,svg}'
+    SvelteKitPWA({ 
+      registerType: 'autoUpdate',
+      // This empty kit object triggers the specialized SvelteKit behaviors 
+      kit: {}, 
+      workbox: { 
+        globPatterns: [
+          '**/*.{js,css,html,ico,png,svg,webp,woff2}',
+          'client/**/*.{js,css,html,ico,png,svg,webp,woff2}'
         ],
         maximumFileSizeToCacheInBytes: 3000000
       },
@@ -51,10 +28,14 @@ export default defineConfig({
       ],
 
       manifest: {
-        ApplicationName: 'Akademi Abang Rumah',
+        name: 'Akademi Abang Rumah', // FIXED: Changed from ApplicationName to name
         short_name: 'Akademi Abang Rumah',
         description: 'Platform pembelajaran online untuk Pelanggan Akademi Abang Rumah.',
         theme_color: '#4a7425',
+        background_color: '#ffffff',
+        display: 'standalone',
+        start_url: '/',
+        scope: '/', // FIXED: Use relative roots instead of hardcoded absolute URLs
         icons: [
           {
             src: 'pwa-64x64.png',
@@ -79,9 +60,6 @@ export default defineConfig({
             purpose: 'maskable'
           }
         ],
-
-        scope: "https://akademiabangrumah.netlify.app/",
-
         screenshots: [
           {
             src: 'assets/Desktop_Richer.png',

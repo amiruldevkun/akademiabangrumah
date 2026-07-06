@@ -1,6 +1,7 @@
 <script>
   import './style.css';
   import { onMount } from 'svelte';
+  import { pwaInfo } from 'virtual:pwa-info'
   import { createBrowserClient } from '@supabase/ssr';
   import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
   import { invalidate } from '$app/navigation';
@@ -46,6 +47,13 @@
       console.log('App successfully installed!');
     });
   });
+
+  onMount(async () => {
+		if (pwaInfo) {
+			const { registerSW } = await import('virtual:pwa-register');
+			registerSW({ immediate: true });
+		}
+	});
 
   async function installPWA() {
     if (!deferredPrompt) return;

@@ -1,16 +1,13 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-netlify'; // FIXED: Moved your Netlify adapter import here
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	kit: {
-		adapter: adapter(),
+		adapter: adapter(), // FIXED: Handled by Netlify adapter now instead of adapter-auto
         paths: {
-            assets: '/assets',
             base: ''
         }
-        
-	},
-    adapter: adapter()
+	}
 };
 
 export default config;
