@@ -15,3 +15,7 @@ Feature yang ada setakat ini:
 - [x] Collapsable Menu Headings
 - [] Link payment page to main home button
 - [x] Make it a PWA
+- [] Make mobile viewport better
+- [] Paywall new trial users
+- [] Make a login system
+- [] Improve SEO
