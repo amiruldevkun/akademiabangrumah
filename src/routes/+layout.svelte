@@ -1,5 +1,5 @@
 <script>
-  import './style.css';
+  import '../style.css';
   import { onMount } from 'svelte';
   import { pwaInfo } from 'virtual:pwa-info'
   import { createBrowserClient } from '@supabase/ssr';
