@@ -2,16 +2,16 @@
   import '../style.css';
   import { onMount } from 'svelte';
   import { pwaInfo } from 'virtual:pwa-info'
-  import { createBrowserClient } from '@supabase/ssr';
-  import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+  import { supabase } from '$lib/supabaseClient';
+  // import { createClient } from '@supabase/supabase-js'
   import { invalidate } from '$app/navigation';
+  import { page } from '$app/state'; 
 
   let { data, children } = $props();
 
   // Browser-side Supabase client — separate from the server one in hooks.server.js.
   // This lets the UI react live to login state (e.g. showing name/avatar)
   // without needing a full page reload.
-  const supabase = createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
   let user = $state(data.session?.user ?? null);
 
@@ -25,9 +25,24 @@
     return () => authListener.subscription.unsubscribe();
   });
 
+  // onMount(() => {
+  //   const handlePageShow = (event) => {
+  //     if (event.persisted) {
+  //       window.location.reload();
+  //     }
+  //   };
+  //   window.addEventListener('pageshow', handlePageShow);
+  //   return () => window.removeEventListener('pageshow', handlePageShow); 
+  // });
+
   async function signOut() {
-    await supabase.auth.signOut();
-    window.location.href = '/login';
+    console.log('signOut called');
+    const result = await Promise.race([
+      supabase.auth.signOut(),
+      new Promise((_, reject) => setTimeout(() => reject('TIMEOUT'), 3000))
+    ]);
+  console.log('signOut result:', result);
+  window.location.href = '/login';
   }
 
   // --- PWA install banner logic (unchanged from before) ---
@@ -49,10 +64,15 @@
   });
 
   onMount(async () => {
+    const {pwaInfo} = await import('virtual:pwa-info');
 		if (pwaInfo) {
 			const { registerSW } = await import('virtual:pwa-register');
 			registerSW({ immediate: true });
 		}
+
+    window.addEventListener('beforeInstallPrompt', (e) => {
+      console.log("beforeInstallPrompt fired");
+    });
 	});
 
   async function installPWA() {
@@ -63,7 +83,9 @@
     deferredPrompt = null;
     showBanner = false;
   }
+
 </script>
+
 
 <header class="bg-[#4a7425] text-white p-1 flex items-center shadow-md z-50 h-24 pt-[env(safe-area-inset-top)]">
   <span class="text-lg font-bold tracking-wide mx-4">AKADEMI ABANG RUMAH</span>
@@ -83,7 +105,7 @@
         />
       {/if}
       <span class="text-sm hidden sm:inline">{user.user_metadata?.full_name ?? user.email}</span>
-      <button
+      <button type="button"
         onclick={signOut}
         class="text-xs bg-white text-[#4a7425] font-semibold px-3 py-1.5 rounded hover:bg-gray-100 transition"
       >

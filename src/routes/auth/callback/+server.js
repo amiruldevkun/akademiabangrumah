@@ -6,6 +6,13 @@ export async function GET({ url, locals }) {
   const error = url.searchParams.get('error');
   const errorDescription = url.searchParams.get('error_description');
 
+  // If user accidentally went back to google acc selector, redirect to /
+  if (code) {
+    const {data : {session}} = await locals.supabase.auth.getSession();
+    if (session) {
+      throw redirect(303, '/')
+    }
+  }
   // User cancelled, denied access, or Google returned some other error
   if (error) {
     console.warn('OAuth error:', error, errorDescription);
@@ -21,7 +28,7 @@ export async function GET({ url, locals }) {
     }
 
     // Only reach here if we actually have a valid session now
-    throw redirect(303, '/');
+    throw redirect(303, '/pay_landing');
   }
 
   // Neither a code nor an error param — something unexpected, safest to send back to login

@@ -1,9 +1,6 @@
 <script>
-  import { createBrowserClient } from '@supabase/ssr';
-  import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+  import { supabase } from '$lib/supabaseClient';
   import { page } from '$app/stores';
-
-  const supabase = createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
   let errorMessage = $derived($page.url.searchParams.get('error'));
 
