@@ -27,9 +27,10 @@ export async function GET({ url, locals }) {
       console.error('Session exchange failed:', exchangeError.message);
       throw redirect(303, `/login?error=${encodeURIComponent(exchangeError.message)}`);
     }
-    
+
     // Only reach here if we actually have a valid session now
-    throw redirect(303, '/pay_landing');
+    const paid = await hasPaidAccess(session.user.id);
+    throw redirect(303, paid ? '/' : '/pay_landing');
   }
 
   // Neither a code nor an error param — something unexpected, safest to send back to login
