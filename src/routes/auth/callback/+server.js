@@ -1,5 +1,6 @@
 // src/routes/auth/callback/+server.js
 import { redirect } from '@sveltejs/kit';
+import { hasPaidAccess } from '$lib/access.js';
 
 export async function GET({ url, locals }) {
   const code = url.searchParams.get('code');
@@ -26,7 +27,7 @@ export async function GET({ url, locals }) {
       console.error('Session exchange failed:', exchangeError.message);
       throw redirect(303, `/login?error=${encodeURIComponent(exchangeError.message)}`);
     }
-
+    
     // Only reach here if we actually have a valid session now
     throw redirect(303, '/pay_landing');
   }

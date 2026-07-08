@@ -1,9 +1,11 @@
 <script>
   import { onMount } from 'svelte';
 
+  /** @type {{ data: { sections: any[], hasPaid: boolean } }} */
+  let { data } = $props();
+
   // Reactive state (Svelte 5 runes)
   let sidebarOpen = $state(false);
-  let sections = $state([]);
   let searchQuery = $state('');
   let selectedLesson = $state('Ketik menu ☰ untuk melihat senarai video pembelajaran.');
   let currentVideo = $state('');
@@ -12,14 +14,7 @@
   let sidebarEl = $state(null);
   let menuBtnEl = $state(null);
 
-  onMount(async () => {
-    try {
-      const response = await fetch('/sidebar-data.json');
-      sections = await response.json();
-    } catch (error) {
-      console.error('Error loading sidebar data:', error);
-    }
-
+  onMount(() => {
     function handleOutsideClick(e) {
       if (sidebarEl && !sidebarEl.contains(e.target) && e.target !== menuBtnEl) {
         sidebarOpen = false;
@@ -30,9 +25,11 @@
     return () => document.removeEventListener('click', handleOutsideClick);
   });
 
-  // Recomputes automatically whenever `sections` or `searchQuery` change
+  // Recomputes automatically whenever `data.sections` or `searchQuery` change.
+  // Sections/items now come from the server load (already filtered/locked),
+  // not from a public JSON file fetched client-side.
   let filteredSections = $derived(
-    sections.map((section) => {
+    data.sections.map((section) => {
       const filterText = searchQuery.toLowerCase();
       const titleMatches = section.title.toLowerCase().includes(filterText);
 
@@ -53,6 +50,11 @@
   );
 
   function selectLesson(item) {
+    if (item.locked) {
+      // Send them to the payment landing page instead of doing nothing.
+      window.location.href = '/';
+      return;
+    }
     if (!item.video) return; // "Akan Datang" items aren't clickable
     selectedLesson = item.label;
     currentVideo = item.video;
@@ -86,6 +88,15 @@
       : '-translate-x-full'}"
   >
 
+    {#if !data.hasPaid}
+      <a
+        href="/"
+        class="block mb-4 bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-xs text-center hover:bg-white/20 transition"
+      >
+        🔓 Naik taraf untuk buka semua video
+      </a>
+    {/if}
+
     <div class="mb-6">
       <input
         type="text"
@@ -108,7 +119,15 @@
             <ul class="pl-2 space-y-1 text-sm text-slate-200 mt-2">
               {#each section.items as item}
                 {#if item.visible}
-                  {#if item.video}
+                  {#if item.locked}
+                    <li
+                      onclick={() => selectLesson(item)}
+                      class="lesson-item cursor-pointer p-1 rounded flex items-center justify-between text-amber-200 hover:text-white transform transition-all duration-200 hover:translate-y-0.5"
+                    >
+                      <span>{item.label}</span>
+                      <span class="text-xs shrink-0 ml-2">🔒</span>
+                    </li>
+                  {:else if item.video}
                     <li
                       onclick={() => selectLesson(item)}
                       class="lesson-item cursor-pointer hover:text-white p-1 rounded transform transition-all duration-200 hover:translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm {selectedLesson ===
@@ -161,9 +180,3 @@
   </main>
 </div>
 
-<style>
-  /* Hide the default disclosure marker in Safari/Chrome */
-  details > summary::-webkit-details-marker {
-    display: none;
-  }
-</style>

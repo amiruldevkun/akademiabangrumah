@@ -9,7 +9,7 @@ export async function load({ locals }) {
   
   const paid = await hasPaidAccess(locals.user.id);
 	if (!paid) {
-		throw redirect(303, '/'); // back to the payment landing page
+		throw redirect(303, '/pay_landing'); // back to the payment landing page
 	}
  
 	return {};
