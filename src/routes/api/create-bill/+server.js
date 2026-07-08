@@ -83,4 +83,6 @@ export async function POST({ request, url, locals }) {
 		await supabaseAdmin.from('orders').update({ status: 'failed' }).eq('id', orderId);
 		throw error(502, 'Could not start payment with ToyyibPay');
 	}
+
+	console.log("[create-bill] callbackUrl is: ", {callbackUrl});
 }
