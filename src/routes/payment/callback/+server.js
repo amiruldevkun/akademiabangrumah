@@ -18,7 +18,7 @@
 import { createHash } from 'crypto';
 import { text } from '@sveltejs/kit';
 import { TOYYIBPAY_SECRET_KEY } from '$env/static/private';
-import { supabaseAdmin } from '$lib/server/supabaseAdmin';
+import { supabaseAdmin } from '$lib/supabaseAdmin';
 
 function md5(str) {
 	return createHash('md5').update(str).digest('hex');
