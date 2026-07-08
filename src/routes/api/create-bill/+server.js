@@ -10,16 +10,18 @@
 
 import { json, error } from '@sveltejs/kit';
 import { randomUUID } from 'crypto';
-import { supabaseAdmin } from '$lib/server/supabaseAdmin';
-import { createBill } from '$lib/server/toyyibpay';
+import { supabaseAdmin } from '$lib/supabaseAdmin';
+import { createBill } from '$lib/toyyibpay';
+// import { PUBLIC_TESTING_NGROK_URL } from '$env/static/public';
+
 
 // TODO: replace with your real product, or look this up from a products
 // table if you sell more than one thing.
-// const PRODUCT = {
-// 	name: 'Your Product Name',
-// 	description: 'One-time purchase',
-// 	amountRM: 67.0
-// };
+const PRODUCT = {
+	name: 'Akademi Abang Rumah VVIP Access',
+	description: 'MARI BELAJAR CARA BUAT RUMAH DENGAN ABANG RUMAH!',
+	amountRM: 1.0
+};
 
 export async function POST({ request, url, locals }) {
 	const { user } = await locals.safeGetSession();
@@ -53,6 +55,8 @@ export async function POST({ request, url, locals }) {
 		console.error('Supabase insert error:', insertError);
 		throw error(500, 'Could not create order');
 	}
+
+	// const origin = PUBLIC_TESTING_NGROK_URL || url.origin;
 
 	// 2. Ask ToyyibPay for a bill for that order.
 	try {

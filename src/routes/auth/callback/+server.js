@@ -31,8 +31,11 @@ export async function GET({ url, locals }) {
 			throw redirect(303, '/login');
 		}
 
+		// Put as a placeholder and redirect to main menu
+		// throw redirect(303, '/main_menu');
+
 		const paid = await hasPaidAccess(session.user.id);
-		throw redirect(303, paid ? '/' : '/pay_landing');
+		throw redirect(303, paid ? '/main_menu' : '/pay_landing');
 	}
 
 	// Neither a code nor an error param — something unexpected, safest to send back to login
