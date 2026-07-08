@@ -10,8 +10,7 @@
 import {
 	TOYYIBPAY_SECRET_KEY,
 	TOYYIBPAY_CATEGORY_CODE,
-	TOYYIBPAY_BASE_URL // e.g. "https://dev.toyyibpay.com" while testing,
-	                    // "https://toyyibpay.com" in production
+	TOYYIBPAY_BASE_URL 
 } from '$env/static/private';
 
 /**
