@@ -3,9 +3,7 @@
 // SERVER ONLY — this file uses your ToyyibPay secret key, which must never
 // reach the browser. Only import it from +server.js files.
 //
-// Docs: https://toyyibpay.com/apireference/
-// Sandbox base: https://dev.toyyibpay.com
-// Production base: https://toyyibpay.com
+
 
 import {
 	TOYYIBPAY_SECRET_KEY,
