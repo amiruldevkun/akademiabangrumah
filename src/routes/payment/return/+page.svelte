@@ -28,7 +28,7 @@
 
 	$effect(() => {
 		const status = data.order?.status;
-		const destination = status === 'paid' ? '/classroom' : status === 'failed' ? '/pay_landing' : null;
+		const destination = status === 'paid' ? '/' : status === 'failed' ? '/pay_landing' : null;
 
 		if (!destination) return;
 

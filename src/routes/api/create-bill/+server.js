@@ -12,15 +12,16 @@ import { json, error } from '@sveltejs/kit';
 import { randomUUID } from 'crypto';
 import { supabaseAdmin } from '$lib/supabaseAdmin';
 import { createBill } from '$lib/toyyibpay';
+import {product_name, product_description, product_amountRM} from '$lib/productMeta.json';
 // import { PUBLIC_TESTING_NGROK_URL } from '$env/static/public';
 
 
 // TODO: replace with your real product, or look this up from a products
 // table if you sell more than one thing.
 const PRODUCT = {
-	name: 'Akademi Abang Rumah VVIP Access',
-	description: 'MARI BELAJAR CARA BUAT RUMAH DENGAN ABANG RUMAH!',
-	amountRM: 1.0
+	name: product_name,
+	description: product_description,
+	amountRM: product_amountRM
 };
 
 export async function POST({ request, url, locals }) {

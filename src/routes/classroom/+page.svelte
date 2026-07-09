@@ -16,6 +16,9 @@
 
   onMount(() => {
     function handleOutsideClick(e) {
+      // menuBtnEl now lives inside sidebarEl, so sidebarEl.contains(e.target)
+      // already covers clicks on the button too — the explicit check is
+      // just a harmless belt-and-suspenders.
       if (sidebarEl && !sidebarEl.contains(e.target) && e.target !== menuBtnEl) {
         sidebarOpen = false;
       }
@@ -52,7 +55,7 @@
   function selectLesson(item) {
     if (item.locked) {
       // Send them to the payment landing page instead of doing nothing.
-      window.location.href = '/';
+      window.location.href = '/pay_landing';
       return;
     }
     if (!item.video) return; // "Akan Datang" items aren't clickable
@@ -69,87 +72,95 @@
 
 <!-- MAIN CONTAINER -->
 <div class="flex flex-1 relative">
-
-  <!-- Menu button styled as a half-circle tab attached to the navbar's bottom edge -->
-  <!-- top-16 must match the header's height (h-16) set in +layout.svelte -->
-  <button
-      bind:this={menuBtnEl}
-      onclick={toggleSidebar}
-      class="absolute top-10 left-4 z-50 w-11 h-9 bg-[#4a7425] rounded-b-full shadow-md flex items-start justify-center focus:outline-none "
-    >
-      <span class="text-white text-lg leading-none m-0.5">☰</span>
-  </button>
-
   <!-- SYLLABUS SIDEBAR (Hidden everywhere by default) -->
   <aside
     bind:this={sidebarEl}
-    class="fixed top-0 left-0 w-64 h-full bg-[#4a7425] text-white pt-28 p-4 z-40 transform transition-all duration-300 ease-in-out shadow-2xl overflow-y-auto {sidebarOpen
+    class="fixed top-0 left-0 w-64 h-full bg-[#4a7425] text-white z-40 transform transition-all duration-300 ease-in-out shadow-2xl {sidebarOpen
       ? ''
       : '-translate-x-full'}"
   >
+    <!-- Toggle tab — lives INSIDE the sidebar and sticks out past its right
+         edge, so it slides together with the sidebar instead of staying
+         pinned in a fixed spot. Sits directly on <aside>, NOT inside the
+         scrollable wrapper below — overflow-y-auto on a container clips
+         overflow-x too (per the CSS overflow computation rule), so
+         anything positioned to stick out past the edge needs to live
+         outside that scroll container, not inside it. -->
+    <button
+      bind:this={menuBtnEl}
+      onclick={toggleSidebar}
+      class="absolute top-24 right-0 bottom-10 translate-x-full w-9 h-11 bg-[#4a7425] rounded-r-full shadow-md flex items-center justify-center focus:outline-none"
+      aria-label="Toggle menu"
+    >
+      <span class="text-white text-lg leading-none">☰</span>
+    </button>
 
-    {#if !data.hasPaid}
-      <a
-        href="/"
-        class="block mb-4 bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-xs text-center hover:bg-white/20 transition"
-      >
-        🔓 Naik taraf untuk buka semua video
-      </a>
-    {/if}
+    <!-- Scrollable content wrapper — overflow-y-auto lives here instead of
+         on <aside> itself. -->
+    <div class="h-full overflow-y-auto p-4 pt-28">
+      {#if !data.hasPaid}
+        <a
+          href="/pay_landing"
+          class="block mb-4 bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-xs text-center hover:bg-white/20 transition"
+        >
+          🔓 Naik taraf untuk buka semua video
+        </a>
+      {/if}
 
-    <div class="mb-6">
-      <input
-        type="text"
-        bind:value={searchQuery}
-        onclick={(e) => e.stopPropagation()}
-        placeholder="Cari topik/video..."
-        class="w-full px-3 py-2 text-sm text-black rounded bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300 shadow-inner"
-      />
-    </div>
+      <div class="mb-6">
+        <input
+          type="text"
+          bind:value={searchQuery}
+          onclick={(e) => e.stopPropagation()}
+          placeholder="Cari topik/video..."
+          class="w-full px-3 py-2 text-sm text-black rounded bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300 shadow-inner"
+        />
+      </div>
 
-    <div class="space-y-6">
-      {#each filteredSections as section}
-        {#if section.anySectionItemVisible}
-          <details class="lesson-section space-y-2 group" open={section.forceOpen}>
-            <summary
-              class="lesson-section-title bg-white text-black font-semibold px-3 py-1.5 rounded text-center shadow-sm cursor-pointer list-none select-none outline-none"
-            >
-              {section.title}
-            </summary>
-            <ul class="pl-2 space-y-1 text-sm text-slate-200 mt-2">
-              {#each section.items as item}
-                {#if item.visible}
-                  {#if item.locked}
-                    <li
-                      onclick={() => selectLesson(item)}
-                      class="lesson-item cursor-pointer p-1 rounded flex items-center justify-between text-amber-200 hover:text-white transform transition-all duration-200 hover:translate-y-0.5"
-                    >
-                      <span>{item.label}</span>
-                      <span class="text-xs shrink-0 ml-2">🔒</span>
-                    </li>
-                  {:else if item.video}
-                    <li
-                      onclick={() => selectLesson(item)}
-                      class="lesson-item cursor-pointer hover:text-white p-1 rounded transform transition-all duration-200 hover:translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm {selectedLesson ===
-                      item.label
-                        ? 'bg-blue-800 text-white'
-                        : ''}"
-                    >
-                      {item.label}
-                    </li>
-                  {:else}
-                    <li
-                      class="lesson-item lesson-item-disabled p-1 rounded text-slate-400 italic cursor-not-allowed select-none"
-                    >
-                      {item.label} <span class="text-xs">(Akan Datang)</span>
-                    </li>
+      <div class="space-y-6">
+        {#each filteredSections as section}
+          {#if section.anySectionItemVisible}
+            <details class="lesson-section space-y-2 group" open={section.forceOpen}>
+              <summary
+                class="lesson-section-title bg-white text-black font-semibold px-3 py-1.5 rounded text-center shadow-sm cursor-pointer list-none select-none outline-none"
+              >
+                {section.title}
+              </summary>
+              <ul class="pl-2 space-y-1 text-sm text-slate-200 mt-2">
+                {#each section.items as item}
+                  {#if item.visible}
+                    {#if item.locked}
+                      <li
+                        onclick={() => selectLesson(item)}
+                        class="lesson-item cursor-pointer p-1 rounded flex items-center justify-between text-amber-200 hover:text-white transform transition-all duration-200 hover:translate-y-0.5"
+                      >
+                        <span>{item.label}</span>
+                        <span class="text-xs shrink-0 ml-2">🔒</span>
+                      </li>
+                    {:else if item.video}
+                      <li
+                        onclick={() => selectLesson(item)}
+                        class="lesson-item cursor-pointer hover:text-white p-1 rounded transform transition-all duration-200 hover:translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm {selectedLesson ===
+                        item.label
+                          ? 'bg-blue-800 text-white'
+                          : ''}"
+                      >
+                        {item.label}
+                      </li>
+                    {:else}
+                      <li
+                        class="lesson-item lesson-item-disabled p-1 rounded text-slate-400 italic cursor-not-allowed select-none"
+                      >
+                        {item.label} <span class="text-xs">(Akan Datang)</span>
+                      </li>
+                    {/if}
                   {/if}
-                {/if}
-              {/each}
-            </ul>
-          </details>
-        {/if}
-      {/each}
+                {/each}
+              </ul>
+            </details>
+          {/if}
+        {/each}
+      </div>
     </div>
   </aside>
 
@@ -179,4 +190,3 @@
     </div>
   </main>
 </div>
-

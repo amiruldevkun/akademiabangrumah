@@ -1,5 +1,6 @@
 <script>
   /** @type {{ data: { userEmail: string | null, suggestedName: string } }} */
+	import {product_name, product_description, product_amountRM} from '$lib/productMeta.json';
 	let { data } = $props();
 
 	let name = $state(data.suggestedName ?? '');
@@ -8,9 +9,9 @@
 	let errorMsg = $state('');
 
 	const PRODUCT = {
-		name: 'Akademi Abang Rumah',
-		tagline: 'test test',
-		amountRM: 1,
+		name: product_name,
+		tagline: product_description,
+		amountRM: product_amountRM
 		
 	};
 
@@ -33,6 +34,17 @@
 			submitting = false;
 		}
 	};
+
+	let checkoutHighlighted = $state(false);
+
+	function highlightForm() {
+		document.getElementById('checkout-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+		checkoutHighlighted = true;
+		setTimeout(() => {
+			checkoutHighlighted = false;
+		}, 1500);
+	}
   const modules = [
     'Persediaan sebelum membina rumah', 'Proses pelan dan kelulusan', 'Kerja tapak dan asas rumah',
     'Ground beam dan struktur', 'Kerja dinding dan bumbung', 'Kerja elektrik dan paip',
@@ -68,16 +80,16 @@
 				<h2 class="text-2xl font-extrabold mb-2">Harga Pengenalan RM{PRODUCT.amountRM} Sahaja</h2>
 				<p class="font-bold text-lg mb-6">Daftar sekarang dan dapatkan akses segara ke video panduan group support VIP. 
                     Slot EarlyBird terhad 100 orang terawal sahaja!</p>
-				<a
-					href="#checkout-form"
-					class="inline-block bg-[#4a7425] text-white font-bold py-4 px-8 rounded-lg text-lg hover:bg-[#3d5f1f] transition shadow-md"
+				<button
+					type="button" onclick={highlightForm}
+					class="inline-block cursor-pointer bg-[#4a7425] text-white font-bold py-4 px-8 rounded-lg text-lg hover:bg-[#3d5f1f] transition shadow-md"
 				>
 					YA, SAYA NAK SERTAI AKADEMI ABANG RUMAH
-				</a>
+				</button>
 			</div>
 
 			<!-- Masalah -->
-			<div class="bg-red-600 p-8 rounded-xl shadow-md">
+			<div class="bg-red-600 text-white p-8 rounded-xl shadow-md">
 				<h3 class="text-xl font-bold mb-4 underline">Pernah alami masalah ini?</h3>
 				<ul class="space-y-3">
 					{#each ['Tak tahu proses bina rumah dari awal', 'Takut ditipu kontraktor', 'Tak tahu harga sebenar kerja pembinaan', 'Tak tahu kerja mana yang perlu dipantau', 'Tak pandai membaca pelan', 'Tak tahu bagaimana mengelakkan kerugian'] as item}
@@ -128,7 +140,12 @@
 		</section>
 
 		<!-- Right column: sticky checkout card -->
-		<div id="checkout-form" class="scroll-mt-8 lg:sticky lg:top-8">
+		<div
+			id="checkout-form"
+			class="scroll-mt-8 lg:sticky lg:top-8 rounded-xl transition-all duration-500 {checkoutHighlighted
+				? 'ring-4 ring-[#dd1010] ring-offset-4 ring-offset-gray-50'
+				: 'ring-4 ring-transparent ring-offset-4 ring-offset-gray-50'}"
+		>
 			<form onsubmit={submit} class="bg-white rounded-xl shadow-lg p-8 flex flex-col gap-1">
 				<div class="flex items-baseline justify-between mb-2">
 					<span class="text-xs font-semibold uppercase tracking-wide text-gray-400"> Bil kepada </span>
@@ -183,10 +200,21 @@
 					disabled={submitting}
 					class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg
 					       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
-					       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full"
+					       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full cursor-pointer"
 				>
 					{submitting ? 'Memulakan pembayaran…' : 'Bayar dengan ToyyibPay'}
 				</button>
+				<br />
+				<hr class="bg-gray-400 opacity-20">
+
+				<p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">
+					OR
+				</p>
+
+				<a href="/main_menu" aria-label="go to main menu">
+
+					<p class="text-center"> Masuk app sebagai "trial user" </p>
+				</a>
 
 				<p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">
 					Pembayaran selamat dikendalikan oleh ToyyibPay. Anda akan diarahkan untuk
