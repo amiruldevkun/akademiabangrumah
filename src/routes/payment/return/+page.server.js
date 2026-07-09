@@ -3,10 +3,16 @@
 // This is the customer-facing return URL (billReturnUrl). ToyyibPay
 // redirects the browser here with query params (status_id, order_id, etc.)
 // but those come from the customer's browser, so they're a hint, not proof.
-// We look up the real status in Supabase, which is only ever written by our
-// own server (create-bill) and the verified webhook (callback).
+//
+// Rather than only passively reading whatever's in Supabase (and waiting
+// for the webhook to eventually update it), this actively asks ToyyibPay
+// directly whenever the order is still "pending" — self-healing exactly
+// the gap that caused real customers to get stuck when webhook delivery
+// didn't fire. The page's existing client-side polling (every 2s, up to
+// 6 times) means this effectively retries the live check automatically
+// for ~12 seconds without any extra work.
 
-import { supabaseAdmin } from '$lib/supabaseAdmin';
+import { reconcileOrder } from '$lib/reconcileOrder';
 
 export async function load({ url }) {
 	const orderId = url.searchParams.get('order_id');
@@ -15,14 +21,10 @@ export async function load({ url }) {
 		return { order: null };
 	}
 
-	const { data: order, error } = await supabaseAdmin
-		.from('orders')
-		.select('id, product_name, amount, currency, status, customer_name, customer_email')
-		.eq('id', orderId)
-		.single();
+	const { order, error } = await reconcileOrder(orderId);
 
-	if (error) {
-		console.error('Could not load order:', error);
+	if (error && !order) {
+		console.error('Could not load/reconcile order:', error, { orderId });
 		return { order: null };
 	}
 
