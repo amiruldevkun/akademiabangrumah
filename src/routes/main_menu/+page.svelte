@@ -201,7 +201,7 @@
 
 	<!-- Bottom nav (mobile) -->
 	<nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2 sm:hidden z-40">
-		<a href="/" class="flex flex-col items-center text-[#4a7425] text-xs gap-0.5">
+		<a href="/main_menu" class="flex flex-col items-center text-[#4a7425] text-xs gap-0.5">
 			<span class="text-lg">🏠</span> Home
 		</a>
 		<a href="/classroom" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
