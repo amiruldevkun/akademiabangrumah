@@ -14,6 +14,10 @@
   };
 </script>
 
+<svelte:head>
+  <title>Login - Akademi Abang Rumah</title>
+</svelte:head>
+
 <div class="max-h-screen flex items-center justify-center bg-gray-50">
   <div class="bg-white p-8 rounded-lg shadow-md text-center">
 
