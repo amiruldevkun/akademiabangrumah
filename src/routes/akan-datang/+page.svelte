@@ -10,5 +10,5 @@
 <div class="flex flex-row justify-center items-center gap-4">
         <img src="https://media1.tenor.com/m/wcDBzYCQyOgAAAAd/ice-cream-cat.gif" class="w-auto h-auto">
         <img src="https://media1.tenor.com/m/FOAOsmaGFE0AAAAd/cat-flying-propeller-hat.gif" class="w-auto h-auto">
-        <img src="https://media1.tenor.com/m/o6NUHXaVxukAAAAC/zazu-cat-zazu-chicken.gif" class="w-auto h-auto">
+        <img src="https://media.tenor.com/Z1z6jkp2d30AAAAi/confused.gif" class="w-auto h-auto">
 </div>
