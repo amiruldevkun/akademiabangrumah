@@ -26,8 +26,17 @@
 				body: JSON.stringify({ name, phone })
 			});
 			if (!res.ok) throw new Error('Could not start checkout');
-			const { paymentUrl } = await res.json();
-			window.location.href = paymentUrl;
+			const result = await res.json();
+
+			if (result.alreadyPaid) {
+				window.location.href = '/classroom';
+				return;
+			}
+
+			// result.resumed=true means this is an existing bill being
+			// resumed rather than a brand new one — same redirect either way,
+			// just noted here in case you want to show different copy later.
+			window.location.href = result.paymentUrl;
 		} catch (err) {
 			console.error(err);
 			errorMsg = 'Something went wrong starting checkout. Please try again.';
@@ -52,6 +61,12 @@
     'Proses sehingga serahan kunci'
   ];
 </script>
+
+<svelte:head>
+	<title>
+		Payment - Akademi Abang Rumah
+	</title>
+</svelte:head>
 
 
 <main class="min-h-screen bg-gray-50">
@@ -82,7 +97,7 @@
                     Slot EarlyBird terhad 100 orang terawal sahaja!</p>
 				<button
 					type="button" onclick={highlightForm}
-					class="inline-block cursor-pointer bg-[#4a7425] text-white font-bold py-4 px-8 rounded-lg text-lg hover:bg-[#3d5f1f] transition shadow-md"
+					class="inline-block bg-[#4a7425] text-white font-bold py-4 px-8 rounded-lg text-lg hover:bg-[#3d5f1f] transition shadow-md"
 				>
 					YA, SAYA NAK SERTAI AKADEMI ABANG RUMAH
 				</button>
@@ -143,7 +158,7 @@
 		<div
 			id="checkout-form"
 			class="scroll-mt-8 lg:sticky lg:top-8 rounded-xl transition-all duration-500 {checkoutHighlighted
-				? 'ring-4 ring-[#dd1010] ring-offset-4 ring-offset-gray-50'
+				? 'ring-4 ring-[#4a7425] ring-offset-4 ring-offset-gray-50'
 				: 'ring-4 ring-transparent ring-offset-4 ring-offset-gray-50'}"
 		>
 			<form onsubmit={submit} class="bg-white rounded-xl shadow-lg p-8 flex flex-col gap-1">
@@ -200,21 +215,10 @@
 					disabled={submitting}
 					class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg
 					       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
-					       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full cursor-pointer"
+					       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full"
 				>
 					{submitting ? 'Memulakan pembayaran…' : 'Bayar dengan ToyyibPay'}
 				</button>
-				<br />
-				<hr class="bg-gray-400 opacity-20">
-
-				<p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">
-					OR
-				</p>
-
-				<a href="/main_menu" aria-label="go to main menu">
-
-					<p class="text-center"> Masuk app sebagai "trial user" </p>
-				</a>
 
 				<p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">
 					Pembayaran selamat dikendalikan oleh ToyyibPay. Anda akan diarahkan untuk
