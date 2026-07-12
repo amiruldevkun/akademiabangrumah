@@ -1,5 +1,6 @@
 <script>
-	/** @type {{ data: { userEmail: string | null, suggestedName: string } }} */
+  /** @type {{ data: { userEmail: string | null, suggestedName: string } }} */
+	import {product_name, product_description, product_amountRM} from '$lib/productMeta.json';
 	let { data } = $props();
 
 	let name = $state(data.suggestedName ?? '');
@@ -8,14 +9,10 @@
 	let errorMsg = $state('');
 
 	const PRODUCT = {
-		name: 'Akademi Abang Rumah',
-		tagline: 'test test',
-		amountRM: 1,
-		features: [
-			'Whatever the customer actually gets, line one',
-			'A second concrete thing they get',
-			'A third — keep these specific, not generic'
-		]
+		name: product_name,
+		tagline: product_description,
+		amountRM: product_amountRM
+		
 	};
 
 	async function submit(e) {
@@ -29,79 +26,158 @@
 				body: JSON.stringify({ name, phone })
 			});
 			if (!res.ok) throw new Error('Could not start checkout');
-			const { paymentUrl } = await res.json();
-			window.location.href = paymentUrl;
+			const result = await res.json();
+
+			if (result.alreadyPaid) {
+				window.location.href = '/classroom';
+				return;
+			}
+
+			// result.resumed=true means this is an existing bill being
+			// resumed rather than a brand new one — same redirect either way,
+			// just noted here in case you want to show different copy later.
+			window.location.href = result.paymentUrl;
 		} catch (err) {
 			console.error(err);
 			errorMsg = 'Something went wrong starting checkout. Please try again.';
 			submitting = false;
 		}
+	};
+
+	let checkoutHighlighted = $state(false);
+
+	function highlightForm() {
+		document.getElementById('checkout-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+		checkoutHighlighted = true;
+		setTimeout(() => {
+			checkoutHighlighted = false;
+		}, 1500);
 	}
+  const modules = [
+    'Persediaan sebelum membina rumah', 'Proses pelan dan kelulusan', 'Kerja tapak dan asas rumah',
+    'Ground beam dan struktur', 'Kerja dinding dan bumbung', 'Kerja elektrik dan paip',
+    'Kerja kemasan', 'Cara memantau kerja kontraktor', 'Kesilapan yang menyebabkan kerugian',
+    'Proses sehingga serahan kunci'
+  ];
 </script>
 
 <svelte:head>
-	<title>{PRODUCT.name}</title>
+	<title>
+		Payment - Akademi Abang Rumah
+	</title>
 </svelte:head>
 
+
 <main class="min-h-screen bg-gray-50">
-	<section class="max-w-5xl mx-auto px-6 py-16 grid gap-12 md:grid-cols-2 md:items-start">
-		<!-- Pitch -->
-		<div>
-			<p class="text-xs font-bold uppercase tracking-wide text-[#4a7425] mb-3">
-				Bayaran sekali sahaja · Tiada akaun diperlukan
-			</p>
-			<h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
-				{PRODUCT.name}
-			</h1>
-			<p class="text-lg text-gray-600 mb-8 max-w-md">
-				{PRODUCT.tagline}
-			</p>
+	<div class="max-w-6xl mx-auto px-6 py-16 grid gap-12 lg:grid-cols-[1.6fr_1fr] items-start">
+		<!-- Left column: all marketing content -->
+		<section class="space-y-20">
+			<!-- Header Hero -->
+			<div class="text-center">
+				<div class="inline-block bg-[#4a7425] text-white font-semibold text-lg px-2 py-2 rounded-xl shadow-lg mb-8">
+					<img
+						src="/assets/images/poster aar cta.jpg"
+						alt="AAR CTA Poster"
+						class="w-full max-w-md rounded-lg shadow-lg"
+					/>
+				</div>
+				<h1 class="text-3xl sm:text-4xl font-extrabold text-red-600 mb-4 tracking-tight">
+					TAKUT KENA TIPU KONTRAKTOR PULUHAN RIBU??
+				</h1>
+				<p class="text-lg text-gray-700 leading-relaxed max-w-2xl mx-auto">
+					{PRODUCT.description}
+				</p>
+			</div>
 
-			<ul class="space-y-3">
-				{#each PRODUCT.features as feature}
-					<li class="flex items-start gap-3 text-gray-700">
-						<span
-							class="mt-1 shrink-0 w-5 h-5 rounded-full bg-emerald-50 text-[#4a7425] flex items-center justify-center text-xs font-bold"
-						>
-							✓
-						</span>
-						<span>{feature}</span>
-					</li>
-				{/each}
-			</ul>
-		</div>
+			<!-- Harga & CTA Utama -->
+			<div class="bg-yellow-300 border-2 border-dotted border-black p-8 rounded-xl text-center shadow-lg">
+				<h2 class="text-2xl font-extrabold mb-2">Harga Pengenalan RM{PRODUCT.amountRM} Sahaja</h2>
+				<p class="font-bold text-lg mb-6">Daftar sekarang dan dapatkan akses segara ke video panduan group support VIP. 
+                    Slot EarlyBird terhad 100 orang terawal sahaja!</p>
+				<button
+					type="button" onclick={highlightForm}
+					class="inline-block bg-[#4a7425] text-white font-bold py-4 px-8 rounded-lg text-lg hover:bg-[#3d5f1f] transition shadow-md"
+				>
+					YA, SAYA NAK SERTAI AKADEMI ABANG RUMAH
+				</button>
+			</div>
 
-		<!-- Checkout card -->
-		<div class="md:sticky md:top-8">
-			<form
-				onsubmit={submit}
-				class="bg-white rounded-xl shadow-lg p-8 flex flex-col gap-1"
-			>
+			<!-- Masalah -->
+			<div class="bg-red-600 text-white p-8 rounded-xl shadow-md">
+				<h3 class="text-xl font-bold mb-4 underline">Pernah alami masalah ini?</h3>
+				<ul class="space-y-3">
+					{#each ['Tak tahu proses bina rumah dari awal', 'Takut ditipu kontraktor', 'Tak tahu harga sebenar kerja pembinaan', 'Tak tahu kerja mana yang perlu dipantau', 'Tak pandai membaca pelan', 'Tak tahu bagaimana mengelakkan kerugian'] as item}
+						<li class="flex items-center gap-2"><span>❌</span> {item}</li>
+					{/each}
+				</ul>
+				<p class="mt-6 font-bold">Jika salah satu di atas pernah berlaku, modul ini dibina khas untuk membantu abang.</p>
+			</div>
+
+			<!-- Tentang Abang Rumah -->
+			<div class="bg-[#94bd7b] p-8 rounded-xl text-gray-900">
+				<h3 class="text-2xl font-bold mb-4">SIAPA ABANG RUMAH?</h3>
+				<p class="leading-relaxed">
+					Saya Ayub Suleiman. Sepanjang lebih 20 tahun dalam bidang pembinaan, saya telah
+					mengumpulkan pengalaman daripada tukang sehingga mengurus projek, dan kini saya
+					kongsikan dalam bentuk video untuk mengelakkan kerugian besar.
+				</p>
+			</div>
+
+			<!-- Modul Pembelajaran -->
+			<div>
+				<h3 class="text-2xl font-bold mb-6">APA YANG ABANG AKAN BELAJAR?</h3>
+				<div class="grid sm:grid-cols-2 gap-4">
+					{#each modules as mod, i}
+						<div class="bg-white p-4 rounded-lg shadow border-l-4 border-[#ff9c00]">
+							<span class="font-bold block text-sm text-[#ff9c00] mb-1">Modul {i + 1}</span>
+							{mod}
+						</div>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Bonus & Testimoni -->
+			<div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+				<h3 class="text-xl font-bold mb-4">BONUS KHAS</h3>
+				<ul class="list-disc pl-5 space-y-2">
+					<li>Akses Group Support VVIP</li>
+					<li>Boleh bertanya terus dengan Abang Rumah</li>
+					<li>Video tambahan daripada projek sebenar</li>
+					<li>Update ilmu baru sepanjang tempoh akses</li>
+				</ul>
+
+				<div class="italic text-gray-700 border-t pt-6 mt-8">
+					<h4 class="text-red-600 font-bold text-xl mb-2 not-italic">TESTIMONI</h4>
+					<p>"Dari kerja berkuli, akhirnya dapat menyiapkan rumah sendiri dan berjimat hampir RM48,300."</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Right column: sticky checkout card -->
+		<div
+			id="checkout-form"
+			class="scroll-mt-8 lg:sticky lg:top-8 rounded-xl transition-all duration-500 {checkoutHighlighted
+				? 'ring-4 ring-[#4a7425] ring-offset-4 ring-offset-gray-50'
+				: 'ring-4 ring-transparent ring-offset-4 ring-offset-gray-50'}"
+		>
+			<form onsubmit={submit} class="bg-white rounded-xl shadow-lg p-8 flex flex-col gap-1">
 				<div class="flex items-baseline justify-between mb-2">
-					<span class="text-xs font-semibold uppercase tracking-wide text-gray-400">
-						Bil kepada
-					</span>
-					<span class="text-xs font-mono text-gray-400">
-						No. {new Date().getFullYear()}-CHK
-					</span>
+					<span class="text-xs font-semibold uppercase tracking-wide text-gray-400"> Bil kepada </span>
+					<span class="text-xs font-mono text-gray-400"> No. {new Date().getFullYear()}-CHK </span>
 				</div>
 
 				{#if data.userEmail}
-					<div class="flex items-center gap-2 bg-emerald-50 rounded-lg px-3 py-2 mb-5">
-						<span class="w-2 h-2 rounded-full bg-[#4a7425] shrink-0"></span>
+					<div class="flex items-center gap-2 bg-emerald-50 rounded-lg px-3 py-1 mb-5">
 						<span class="text-sm font-medium text-gray-700 truncate">{data.userEmail}</span>
 					</div>
 				{:else}
 					<div class="bg-red-50 rounded-lg px-3 py-2 mb-5">
-						<span class="text-sm text-red-600">
-							Tidak dapat mengesahkan e-mel — sila log masuk semula.
-						</span>
+						<span class="text-sm text-red-600"> Tidak dapat mengesahkan e-mel — sila log masuk semula. </span>
 					</div>
 				{/if}
 
-				<label for="name" class="text-xs font-semibold text-gray-600 mb-1.5">
-					Nama penuh
-				</label>
+				<label for="name" class="text-xs font-semibold text-gray-600 mb-1.5"> Nama penuh </label>
 				<input
 					id="name"
 					type="text"
@@ -113,9 +189,7 @@
 					       focus:outline-none focus:ring-2 focus:ring-[#4a7425] focus:border-[#4a7425]"
 				/>
 
-				<label for="phone" class="text-xs font-semibold text-gray-600 mb-1.5">
-					Nombor telefon
-				</label>
+				<label for="phone" class="text-xs font-semibold text-gray-600 mb-1.5"> Nombor telefon </label>
 				<input
 					id="phone"
 					type="tel"
@@ -123,17 +197,13 @@
 					required
 					placeholder="01X-XXXXXXX"
 					autocomplete="tel"
-					class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 mb-5
+					class="w-full rounded-lg border border-[#d1d5dc] px-3 py-2.5 text-sm text-gray-900 mb-5
 					       focus:outline-none focus:ring-2 focus:ring-[#4a7425] focus:border-[#4a7425]"
 				/>
 
-				<div class="border-t border-dashed border-gray-300 my-3 -mx-8"></div>
-
 				<div class="flex items-baseline justify-between mb-5">
 					<span class="text-sm text-gray-500">Jumlah perlu dibayar</span>
-					<span class="text-xl font-mono font-semibold text-gray-900">
-						RM {PRODUCT.amountRM.toFixed(2)}
-					</span>
+					<span class="text-xl font-mono font-semibold text-gray-900"> RM {PRODUCT.amountRM.toFixed(2)} </span>
 				</div>
 
 				{#if errorMsg}
@@ -156,5 +226,5 @@
 				</p>
 			</form>
 		</div>
-	</section>
+	</div>
 </main>

@@ -10,16 +10,19 @@
 
 import { json, error } from '@sveltejs/kit';
 import { randomUUID } from 'crypto';
-import { supabaseAdmin } from '$lib/server/supabaseAdmin';
-import { createBill } from '$lib/server/toyyibpay';
+import { supabaseAdmin } from '$lib/supabaseAdmin';
+import { createBill } from '$lib/toyyibpay';
+import {product_name, product_description, product_amountRM} from '$lib/productMeta.json';
+// import { PUBLIC_TESTING_NGROK_URL } from '$env/static/public';
+
 
 // TODO: replace with your real product, or look this up from a products
 // table if you sell more than one thing.
-// const PRODUCT = {
-// 	name: 'Your Product Name',
-// 	description: 'One-time purchase',
-// 	amountRM: 67.0
-// };
+const PRODUCT = {
+	name: product_name,
+	description: product_description,
+	amountRM: product_amountRM
+};
 
 export async function POST({ request, url, locals }) {
 	const { user } = await locals.safeGetSession();
@@ -54,6 +57,8 @@ export async function POST({ request, url, locals }) {
 		throw error(500, 'Could not create order');
 	}
 
+	// const origin = PUBLIC_TESTING_NGROK_URL || url.origin;
+
 	// 2. Ask ToyyibPay for a bill for that order.
 	try {
 		const { billCode, paymentUrl } = await createBill({
@@ -79,4 +84,6 @@ export async function POST({ request, url, locals }) {
 		await supabaseAdmin.from('orders').update({ status: 'failed' }).eq('id', orderId);
 		throw error(502, 'Could not start payment with ToyyibPay');
 	}
+
+	console.log("[create-bill] callbackUrl is: ", {callbackUrl});
 }

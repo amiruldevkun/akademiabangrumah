@@ -7,7 +7,9 @@
   import { invalidate } from '$app/navigation';
   import { page } from '$app/state'; 
 
+    
   let { data, children } = $props();
+  let profileOpen = $state(false);
 
   // Browser-side Supabase client — separate from the server one in hooks.server.js.
   // This lets the UI react live to login state (e.g. showing name/avatar)
@@ -83,36 +85,35 @@
     deferredPrompt = null;
     showBanner = false;
   }
-
 </script>
 
 
 <header class="bg-[#4a7425] text-white p-1 flex items-center shadow-md z-50 h-24 pt-[env(safe-area-inset-top)]">
-  <span class="text-lg font-bold tracking-wide mx-4">AKADEMI ABANG RUMAH</span>
-
-  <a href="/about" class="ms-auto">
+  <a href="/about">
     <img src="/assets/images/akademilogov2.png" alt="Akademi Abang Rumah Logo" class="p-2 w-22 h-auto">
   </a>
-
-  <!-- Logged-in user info + logout, only shown once we know who's logged in -->
-  {#if user}
-    <div class="flex items-center gap-2 mx-4">
-      {#if user.user_metadata?.avatar_url}
-        <img
-          src={user.user_metadata.avatar_url}
-          alt={user.user_metadata?.full_name ?? 'User avatar'}
-          class="w-8 h-8 rounded-full border-2 border-white"
-        />
-      {/if}
-      <span class="text-sm hidden sm:inline">{user.user_metadata?.full_name ?? user.email}</span>
-      <button type="button"
-        onclick={signOut}
-        class="text-xs bg-white text-[#4a7425] font-semibold px-3 py-1.5 rounded hover:bg-gray-100 transition"
-      >
-        Log Keluar
-      </button>
-    </div>
-  {/if}
+  <span class="text-lg font-bold tracking-wide mx-4">AKADEMI ABANG RUMAH</span>
+  <div class="ms-auto">
+    <!-- Logged-in user info + logout, only shown once we know who's logged in -->
+    {#if user}
+      <div class="flex items-center gap-2 mx-4">
+        {#if user.user_metadata?.avatar_url}
+          <img
+            src={user.user_metadata.avatar_url}
+            alt={user.user_metadata?.full_name ?? 'User avatar'}
+            class="w-8 h-8 rounded-full border-2 border-white"
+          />
+        {/if}
+        <span class="text-sm hidden sm:inline">{user.user_metadata?.full_name ?? user.email}</span>
+        <button type="button"
+          onclick={signOut}
+          class="text-xs cursor-pointer bg-white text-[#4a7425] font-semibold px-3 py-1.5 rounded hover:bg-gray-100 transition"
+        >
+          Log Keluar
+        </button>
+      </div>
+    {/if}
+  </div>
 </header>
 
 {#if showBanner}

@@ -20,6 +20,14 @@ Features:
   so the same content pasted twice anywhere in the doc doesn't produce
   duplicate entries.
 - Converts both YouTube and Google Drive links into embed formats.
+- Assigns a stable slug `id` to every item, derived from its final
+  label. This is the key the Supabase video_progress table uses to
+  track per-user watched/resume state, so it needs to survive
+  re-running this script on an updated doc export — re-running with
+  unchanged labels reproduces the same ids. Only a label edit (typo
+  fix, rewording) changes an id, which orphans that item's existing
+  progress rows; that's an accepted tradeoff since the source doc has
+  no other stable identifier to key off of.
 - Supports a verbose flag (-v / --verbose) for detailed console logging
   of what got added, merged, or skipped and why.
 - Outputs sidebar-data.json, which sidebar_filter.js fetches and
@@ -36,6 +44,7 @@ import sys
 import os
 import json
 import argparse
+import unicodedata
 
 INPUT_TXT_PATH = "/mnt/user-data/uploads/Video_Panduan_VVIP_Akademi_Abang_Rumah.txt"
 OUTPUT_PATH = r"C:\Users\m1rul\Documents\akademiabangrumah\sidebar-data.json"
@@ -52,6 +61,41 @@ def vprint(*args, **kwargs):
     """Prints only when --verbose is passed."""
     if VERBOSE:
         print(*args, **kwargs)
+
+
+# ---------------------------------------------------------------------
+# Stable id generation
+# ---------------------------------------------------------------------
+
+def slugify(label):
+    """
+    Turns an item label into a lowercase, ASCII-ish, hyphenated slug
+    suitable for use as a Supabase row key. Strips diacritics (so
+    "Teknik Nak Elak" and any accented variant slug the same way),
+    drops punctuation, collapses whitespace to single hyphens.
+    """
+    normalized = unicodedata.normalize("NFKD", label)
+    ascii_text = normalized.encode("ascii", "ignore").decode("ascii")
+    ascii_text = ascii_text.lower()
+    ascii_text = re.sub(r"[^a-z0-9\s-]", "", ascii_text)
+    ascii_text = re.sub(r"[\s_-]+", "-", ascii_text).strip("-")
+    return ascii_text[:80] or "item"
+
+
+def make_unique_id(label, used_ids):
+    """
+    Slugifies `label` and, if that slug is already taken (e.g. two
+    different sections happen to contain an identically worded step),
+    appends -2, -3, ... until it's unique. Mutates `used_ids`.
+    """
+    base = slugify(label)
+    candidate = base
+    n = 2
+    while candidate in used_ids:
+        candidate = f"{base}-{n}"
+        n += 1
+    used_ids.add(candidate)
+    return candidate
 
 
 # ---------------------------------------------------------------------
@@ -152,18 +196,24 @@ def load_entries(text):
     return entries
 
 
-def _add_items(section_list, label, raw_urls, seen_urls, seen_labels_no_url):
+def _add_items(section_list, label, raw_urls, seen_urls, seen_labels_no_url, used_ids):
     """
     Appends items for one entry to section_list, skipping anything
     already seen globally:
       - a video already added under ANY section (same embed URL) is skipped
       - a no-video "Akan Datang" label already added under ANY section is skipped
+
+    Each appended item is a (id, label, url_or_None) triple — the id is
+    assigned here, once, per final label (post multi-part suffixing),
+    using the same global `used_ids` set across the whole document so
+    ids never collide even across sections.
     """
     if not raw_urls:
         if label.lower() not in seen_labels_no_url:
-            section_list.append((label, None))
+            item_id = make_unique_id(label, used_ids)
+            section_list.append((item_id, label, None))
             seen_labels_no_url.add(label.lower())
-            vprint(f"      + Added: {label} (Akan Datang)")
+            vprint(f"      + Added: {label} (Akan Datang) [id={item_id}]")
         else:
             vprint(f"      ~ Skipped duplicate label: {label}")
         return
@@ -182,18 +232,21 @@ def _add_items(section_list, label, raw_urls, seen_urls, seen_labels_no_url):
         seen_urls.add(embed_u)
 
     if len(valid) == 1:
-        section_list.append((label, valid[0]))
-        vprint(f"      + Added video: {label}")
+        item_id = make_unique_id(label, used_ids)
+        section_list.append((item_id, label, valid[0]))
+        vprint(f"      + Added video: {label} [id={item_id}]")
     elif len(valid) > 1:
         for idx, embed_u in enumerate(valid, start=1):
             item_label = f"{label} - {idx}"
-            section_list.append((item_label, embed_u))
-            vprint(f"      + Added multi-part video: {item_label}")
+            item_id = make_unique_id(item_label, used_ids)
+            section_list.append((item_id, item_label, embed_u))
+            vprint(f"      + Added multi-part video: {item_label} [id={item_id}]")
 
 
 def group_into_sections(entries):
     """
-    Turns the flat entry list into [(section_title, [(item_label, embed_url_or_None), ...]), ...]
+    Turns the flat entry list into
+    [(section_title, [(id, item_label, embed_url_or_None), ...]), ...]
     per the "Kerja = big title" rule. Sections with the same title
     anywhere in the doc are merged into one, and items are de-duplicated
     globally (see _add_items), so scattered or repeated content doesn't
@@ -206,6 +259,7 @@ def group_into_sections(entries):
 
     seen_urls = set()
     seen_labels_no_url = set()
+    used_ids = set()
 
     def ensure_section(title):
         if title not in sections_dict:
@@ -222,17 +276,18 @@ def group_into_sections(entries):
             current_title = label.upper()
             ensure_section(current_title)
             if raw_urls:
-                _add_items(sections_dict[current_title], label, raw_urls, seen_urls, seen_labels_no_url)
+                _add_items(sections_dict[current_title], label, raw_urls, seen_urls, seen_labels_no_url, used_ids)
         else:
             ensure_section(current_title)
-            _add_items(sections_dict[current_title], label, raw_urls, seen_urls, seen_labels_no_url)
+            _add_items(sections_dict[current_title], label, raw_urls, seen_urls, seen_labels_no_url, used_ids)
 
     vprint("\n--- Finalizing data structure ---")
     sections = []
     for title in section_order:
         items = sections_dict[title]
         if not items:
-            items.append((title, None))
+            item_id = make_unique_id(title, used_ids)
+            items.append((item_id, title, None))
         sections.append((title, items))
 
     return sections
@@ -244,15 +299,15 @@ def group_into_sections(entries):
 
 def to_json_structure(sections):
     """
-    Converts [(title, [(label, url_or_None), ...]), ...] into a plain
+    Converts [(title, [(id, label, url_or_None), ...]), ...] into a plain
     JSON-serializable structure the frontend JS renders directly:
 
     [
       {
         "title": "BAHAN-BAHAN PEMBINAAN",
         "items": [
-          {"label": "Jenis2 jenis simen", "video": "https://www.youtube.com/embed/..."},
-          {"label": "Kerja Pengorekan Tapak Asas", "video": null}
+          {"id": "jenis2-jenis-simen", "label": "Jenis2 jenis simen", "video": "https://www.youtube.com/embed/..."},
+          {"id": "kerja-pengorekan-tapak-asas", "label": "Kerja Pengorekan Tapak Asas", "video": null}
         ]
       },
       ...
@@ -261,7 +316,7 @@ def to_json_structure(sections):
     return [
         {
             "title": title,
-            "items": [{"label": label, "video": url} for label, url in items],
+            "items": [{"id": item_id, "label": label, "video": url} for item_id, label, url in items],
         }
         for title, items in sections
     ]
