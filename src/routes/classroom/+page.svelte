@@ -1,7 +1,9 @@
 <script>
   import { onMount } from 'svelte';
+  import { page } from '$app/state';
+  import { supabase } from '$lib/supabaseClient';
 
-  /** @type {{ data: { sections: any[], hasPaid: boolean } }} */
+  /** @type {{ data: { sections: any[], hasPaid: boolean, userId: string | null } }} */
   let { data } = $props();
 
   // Reactive state (Svelte 5 runes)
@@ -9,10 +11,21 @@
   let searchQuery = $state('');
   let selectedLesson = $state('Ketik menu ☰ untuk melihat senarai video pembelajaran.');
   let currentVideo = $state('');
+  let selectedItem = $state(null); // full item object — carries id/watched/resumeSeconds
 
   // Element refs, needed for "click outside sidebar to close"
   let sidebarEl = $state(null);
   let menuBtnEl = $state(null);
+
+  // --- Progress tracking state ---
+  // YouTube: driven by the IFrame Player API (postMessage under the hood),
+  // which exposes currentTime/duration — real resume + watched detection.
+  // Google Drive's /preview iframe has no equivalent public API (cross-origin,
+  // no postMessage contract Google exposes), so Drive items fall back to a
+  // manual "mark as watched" button — see markDriveWatched() below.
+  let ytPlayer = null;
+  let ytApiReady = $state(false);
+  let progressSaveInterval = null;
 
   onMount(() => {
     function handleOutsideClick(e) {
@@ -25,12 +38,46 @@
     }
     document.addEventListener('click', handleOutsideClick);
 
-    return () => document.removeEventListener('click', handleOutsideClick);
+    // Deep link from the home page's "Sambung Belajar" card — resume the
+    // exact lesson instead of just landing on the classroom listing.
+    // Only auto-selects items the server already deemed unlocked/playable;
+    // a stale or tampered ?item= for a locked/missing lesson is a silent no-op.
+    const requestedItemId = page.url.searchParams.get('item');
+    if (requestedItemId) {
+      const requestedItem = data.sections
+        .flatMap((section) => section.items)
+        .find((item) => item.id === requestedItemId && item.video && !item.locked);
+      if (requestedItem) selectLesson(requestedItem);
+    }
+
+    // Load the YouTube IFrame API once per page load.
+    if (window.YT && window.YT.Player) {
+      ytApiReady = true;
+    } else {
+      const previousCallback = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        previousCallback?.();
+        ytApiReady = true;
+      };
+      if (!document.getElementById('youtube-iframe-api')) {
+        const tag = document.createElement('script');
+        tag.id = 'youtube-iframe-api';
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+      }
+    }
+
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+      clearInterval(progressSaveInterval);
+      ytPlayer?.destroy?.();
+    };
   });
 
   // Recomputes automatically whenever `data.sections` or `searchQuery` change.
-  // Sections/items now come from the server load (already filtered/locked),
-  // not from a public JSON file fetched client-side.
+  // Sections/items now come from the server load (already filtered/locked,
+  // and merged with watched/resumeSeconds), not from a public JSON file
+  // fetched client-side.
   let filteredSections = $derived(
     data.sections.map((section) => {
       const filterText = searchQuery.toLowerCase();
@@ -52,6 +99,15 @@
     })
   );
 
+  function isYouTube(url) {
+    return !!url && url.includes('youtube.com/embed/');
+  }
+
+  function extractYouTubeId(embedUrl) {
+    const match = embedUrl.match(/embed\/([A-Za-z0-9_-]+)/);
+    return match ? match[1] : null;
+  }
+
   function selectLesson(item) {
     if (item.locked) {
       // Send them to the payment landing page instead of doing nothing.
@@ -59,9 +115,105 @@
       return;
     }
     if (!item.video) return; // "Akan Datang" items aren't clickable
+
+    // Tear down the previous player before switching lessons. The #key
+    // block around the player container (in the markup) also forces a
+    // fresh DOM node per lesson, so there's no leftover element for the
+    // old player to be confused about.
+    clearInterval(progressSaveInterval);
+    ytPlayer?.destroy?.();
+    ytPlayer = null;
+
     selectedLesson = item.label;
-    currentVideo = item.video;
+    selectedItem = item;
+    currentVideo = item.video; // only used for isYouTube()/Drive branching + display
     sidebarOpen = false; // auto-hide panel after picking a lesson
+  }
+
+  // Attaches a YT.Player to a plain <div id="yt-player-frame"> once it's in
+  // the DOM and the API script has loaded. Deliberately targets a *div*,
+  // never an <iframe> Svelte also renders reactively — YT.Player replaces
+  // whatever element it's given with its own iframe under the hood, and if
+  // that element is one Svelte still thinks it owns (e.g. an iframe with a
+  // reactive src binding), Svelte's next DOM patch throws trying to update
+  // a node that's no longer the one it created. That's what was breaking
+  // every click after the first video: the thrown error inside this effect
+  // was silently killing reactivity for the rest of the component.
+  $effect(() => {
+    if (!selectedItem || !ytApiReady || !isYouTube(currentVideo)) return;
+
+    const videoId = extractYouTubeId(currentVideo);
+    if (!videoId) return;
+
+    const el = document.getElementById('yt-player-frame');
+    if (!el) return;
+
+    const thisItem = selectedItem; // capture for the closures below
+
+    ytPlayer = new window.YT.Player('yt-player-frame', {
+      videoId,
+      events: {
+        onReady: (e) => {
+          if (thisItem.resumeSeconds > 5) {
+            e.target.seekTo(thisItem.resumeSeconds, true);
+          }
+        },
+        onStateChange: (e) => {
+          if (e.data === window.YT.PlayerState.PLAYING) {
+            clearInterval(progressSaveInterval);
+            progressSaveInterval = setInterval(() => saveYouTubeProgress(thisItem), 10000);
+          } else {
+            clearInterval(progressSaveInterval);
+            if (e.data === window.YT.PlayerState.PAUSED) saveYouTubeProgress(thisItem);
+            if (e.data === window.YT.PlayerState.ENDED) saveYouTubeProgress(thisItem, true);
+          }
+        }
+      }
+    });
+  });
+
+  async function saveYouTubeProgress(item, forceWatched = false) {
+    if (!ytPlayer?.getCurrentTime || !data.userId) return;
+    const current = ytPlayer.getCurrentTime();
+    const duration = ytPlayer.getDuration?.() ?? 0;
+    const watched = forceWatched || (duration > 0 && current / duration >= 0.9);
+    await persistProgress(
+      item.id,
+      Math.floor(current),
+      watched,
+      duration > 0 ? Math.floor(duration) : null
+    );
+    if (watched && selectedItem?.id === item.id) {
+      selectedItem = { ...selectedItem, watched: true };
+    }
+  }
+
+  async function markDriveWatched() {
+    if (!selectedItem || !data.userId) return;
+    // No duration available for Drive — omit it so an existing value (if
+    // any) isn't clobbered, and the resume concept doesn't apply here.
+    await persistProgress(selectedItem.id, 0, true, null);
+    selectedItem = { ...selectedItem, watched: true };
+  }
+
+  async function persistProgress(itemId, resumeSeconds, watched, durationSeconds = null) {
+    const payload = {
+      user_id: data.userId,
+      item_id: itemId,
+      resume_seconds: resumeSeconds,
+      watched,
+      watched_at: watched ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString()
+    };
+    // Only include duration_seconds when we actually know it, so an upsert
+    // from a source that doesn't know duration (e.g. the Drive fallback)
+    // doesn't overwrite a previously-recorded value with null.
+    if (durationSeconds !== null) payload.duration_seconds = durationSeconds;
+
+    const { error } = await supabase
+      .from('video_progress')
+      .upsert(payload, { onConflict: 'user_id,item_id' });
+    if (error) console.error('Failed to save video progress:', error);
   }
 
   function toggleSidebar(e) {
@@ -69,6 +221,10 @@
     sidebarOpen = !sidebarOpen;
   }
 </script>
+
+<svelte:head>
+  <title>Koleksi Modul-Modul - Akademi Abang Rumah</title>
+</svelte:head>
 
 <!-- MAIN CONTAINER -->
 <div class="flex flex-1 relative">
@@ -140,12 +296,15 @@
                     {:else if item.video}
                       <li
                         onclick={() => selectLesson(item)}
-                        class="lesson-item cursor-pointer hover:text-white p-1 rounded transform transition-all duration-200 hover:translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm {selectedLesson ===
+                        class="lesson-item cursor-pointer hover:text-white p-1 rounded flex items-center justify-between transform transition-all duration-200 hover:translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm {selectedLesson ===
                         item.label
                           ? 'bg-blue-800 text-white'
                           : ''}"
                       >
-                        {item.label}
+                        <span>{item.label}</span>
+                        {#if item.watched}
+                          <span class="text-xs shrink-0 ml-2 text-emerald-300" title="Sudah ditonton">✔</span>
+                        {/if}
                       </li>
                     {:else}
                       <li
@@ -174,15 +333,40 @@
 
       <!-- Responsive Video Container Player Using HTML iframe -->
       <div class="aspect-video w-full bg-black rounded-lg shadow-inner overflow-hidden">
-        <iframe
-          class="w-full h-full"
-          src={currentVideo}
-          title={selectedLesson}
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-        ></iframe>
+        {#key selectedItem?.id}
+          {#if isYouTube(currentVideo)}
+            <!-- YT.Player owns this div entirely — never give it a node
+                 Svelte also patches reactively (see the $effect above). -->
+            <div id="yt-player-frame" class="w-full h-full"></div>
+          {:else}
+            <iframe
+              class="w-full h-full"
+              src={currentVideo}
+              title={selectedLesson}
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          {/if}
+        {/key}
       </div>
+
+      <!-- Google Drive videos have no playback API to auto-track, so
+           watched status is a manual toggle here instead. -->
+      {#if selectedItem?.video && !isYouTube(selectedItem.video) && data.userId}
+        <div class="mt-3 text-center">
+          {#if selectedItem.watched}
+            <span class="text-emerald-600 text-sm font-medium">✔ Selesai ditonton</span>
+          {:else}
+            <button
+              onclick={markDriveWatched}
+              class="text-sm px-4 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition"
+            >
+              Tandakan sebagai selesai
+            </button>
+          {/if}
+        </div>
+      {/if}
 
       <p class="lg:hidden block sm:hidden text-center text-sm text-gray-500 mb-2 pt-10">
         Tip: Putarkan peranti secara melintang untuk melihat video dengan lebih baik.

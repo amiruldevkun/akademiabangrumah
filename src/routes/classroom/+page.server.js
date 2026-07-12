@@ -1,41 +1,51 @@
 // src/routes/classroom/+page.server.js
 //
-// Real enforcement happens here, not in the component. Walks the
-// sections in order and counts real videos (video !== null) — the first
-// FREE_VIDEO_LIMIT of those, across the WHOLE course, stay playable. Every
-// one after that gets its real video URL stripped server-side if the user
-// hasn't paid, so a non-paying visitor's network response never contains
-// a locked video's actual link.
-//
-// `video === null` items ("Akan Datang" / coming soon) are untouched —
-// that's a different state from "locked", not something payment unlocks.
+// Real enforcement happens in $lib/server/sections.js (shared with the
+// home page's "Sambung Belajar" card), not in the component. This file
+// just merges per-user watched/resume progress on top of the
+// already-paywalled sections.
 
-import { hasPaidAccess } from '$lib/access';
-import { FREE_VIDEO_LIMIT } from '$lib/config';
-import rawSections from '$lib/sidebar-data.json';
+import { getSectionsWithAccess } from '$lib/sections.js';
 
 export async function load({ locals }) {
-	const paid = locals.user ? await hasPaidAccess(locals.user.id) : false;
+	const { sections: accessSections, paid } = await getSectionsWithAccess(locals.user?.id);
 
-	let freeVideosLeft = FREE_VIDEO_LIMIT;
+	// locals.supabase is the SSR client hooks.server.js creates via
+	// createServer(cookies) — bound to the visitor's own session/cookies,
+	// so RLS (auth.uid() = user_id) scopes this query to their own rows.
+	let progressByItemId = {};
+	if (locals.user) {
+		const { data: rows, error } = await locals.supabase
+			.from('video_progress')
+			.select('item_id, watched, resume_seconds')
+			.eq('user_id', locals.user.id);
 
-	const sections = rawSections.map((section) => ({
+		if (error) {
+			console.error('Failed to load video progress:', error);
+		} else {
+			progressByItemId = Object.fromEntries(rows.map((r) => [r.item_id, r]));
+		}
+	}
+
+	// Merge progress onto unlocked items only — a locked item's watched/resume
+	// state shouldn't leak to a non-payer any more than its video URL does.
+	const sections = accessSections.map((section) => ({
 		...section,
 		items: section.items.map((item) => {
-			// "Coming soon" — not paywalled, just not released yet.
-			if (!item.video) {
-				return { ...item, locked: false };
-			}
+			if (item.locked || !item.video) return item;
 
-			if (paid || freeVideosLeft > 0) {
-				if (!paid) freeVideosLeft -= 1;
-				return { ...item, locked: false };
-			}
-
-			// Locked — strip the real video URL entirely. Only label survives.
-			return { label: item.label, video: null, locked: true };
+			const progress = progressByItemId[item.id];
+			return {
+				...item,
+				watched: progress?.watched ?? false,
+				resumeSeconds: progress?.resume_seconds ?? 0
+			};
 		})
 	}));
 
-	return { sections, hasPaid: paid };
+	return {
+		sections,
+		hasPaid: paid,
+		userId: locals.user?.id ?? null
+	};
 }

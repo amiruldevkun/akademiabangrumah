@@ -3,14 +3,17 @@
     "title": "BAHAN-BAHAN PEMBINAAN",
     "items": [
       {
+        "id": "jenis2-jenis-simen",
         "label": "Jenis2 jenis simen",
         "video": "https://www.youtube.com/embed/F5nOQ2QpIMo?si=28lLjmLzJhJ1BNXt"
       },
       {
+        "id": "kelebihan-dan-kelemahan-batu-blok",
         "label": "Kelebihan dan Kelemahan Batu Blok",
         "video": "https://drive.google.com/file/d/1SB67EcqHjtKTQf_BdLoIbUH0yQUO49Bd/preview"
       },
       {
+        "id": "cara-kira-sebutharga-rumah-bina-di-tapak-sendiri",
         "label": "Cara kira sebutharga Rumah Bina Di Tapak Sendiri",
         "video": "https://www.youtube.com/embed/qO37-P5ke9c?si=Fj4x4cnJ3WDX6RMm"
       }
@@ -20,10 +23,12 @@
     "title": "KERJA PERSEDIAAN TAPAK DAN SETTING BANGUNAN",
     "items": [
       {
+        "id": "teknik-cari-siku-bangunan-1",
         "label": "Teknik Cari Siku Bangunan - 1",
         "video": "https://www.youtube.com/embed/RPHFgG1a8Ok?si=2Qkp-694USku6Omo"
       },
       {
+        "id": "teknik-cari-siku-bangunan-2",
         "label": "Teknik Cari Siku Bangunan - 2",
         "video": "https://www.youtube.com/embed/_nkjK7IVtS0?si=az-E1NqwtU4D012K"
       }
@@ -33,6 +38,7 @@
     "title": "KERJA PILING",
     "items": [
       {
+        "id": "piling-4x4x10",
         "label": "Piling 4x4x10",
         "video": "https://www.youtube.com/embed/KoyYZeH6QDs?si=kibKSK05RZuUcfS0"
       }
@@ -42,6 +48,7 @@
     "title": "KERJA PENGOREKAN TAPAK ASAS",
     "items": [
       {
+        "id": "kerja-pengorekan-tapak-asas",
         "label": "KERJA PENGOREKAN TAPAK ASAS",
         "video": null
       }
@@ -51,6 +58,7 @@
     "title": "KERJA BESI ASAS (FOOTING)",
     "items": [
       {
+        "id": "kerja-besi-asas-footing",
         "label": "KERJA BESI ASAS (FOOTING)",
         "video": null
       }
@@ -60,10 +68,12 @@
     "title": "KERJA ACUAN DAN TUANG KONKRIT ASAS",
     "items": [
       {
+        "id": "basic-kiraan-formwork-dari-bahan-plywood-dan-kayu-2x1",
         "label": "Basic Kiraan Formwork dari bahan plywood dan kayu 2x1",
         "video": "https://www.youtube.com/embed/2VPd-9rScV8?si=I_A1ZAmLQLAEM8ne"
       },
       {
+        "id": "re-curing-konkrit",
         "label": "Re-curing konkrit",
         "video": "https://www.youtube.com/embed/ridNGyUSZMM?si=ZJXFFf7WF4s_hBag"
       }
@@ -73,10 +83,12 @@
     "title": "KERJA GROUND BEAM",
     "items": [
       {
+        "id": "teknik-cetak-beam-batu-dan-papan",
         "label": "Teknik cetak beam batu dan papan",
         "video": "https://drive.google.com/file/d/1z5euVEuFyBr42yQgcrlIrBytcoHUIFWc/preview"
       },
       {
+        "id": "teknik-kuatkan-beam",
         "label": "Teknik Kuatkan Beam",
         "video": "https://drive.google.com/file/d/1JXAo7DovIpjLCbGs55E0KEmXUrd5_tCI/preview"
       }
@@ -86,10 +98,12 @@
     "title": "KERJA BATA",
     "items": [
       {
+        "id": "batu-ringan-vs-batu-pasir-mana-lebih-jimat",
         "label": "Batu Ringan vs Batu Pasir | Mana lebih jimat?",
         "video": "https://www.youtube.com/embed/jUyDcjHzoAY?si=ga-4klJTSTVRBhgz"
       },
       {
+        "id": "langkah-sebelum-mengikat-batu",
         "label": "Langkah sebelum mengikat batu",
         "video": "https://drive.google.com/file/d/1F_fHKuxsMhmgf5jlpiqgkuLX0q581uwM/preview"
       }
@@ -99,6 +113,7 @@
     "title": "KERJA TAMBAKAN TANAH DAN PEMADATAN",
     "items": [
       {
+        "id": "kerja-tambakan-tanah-dan-pemadatan",
         "label": "KERJA TAMBAKAN TANAH DAN PEMADATAN",
         "video": null
       }
@@ -108,6 +123,7 @@
     "title": "KERJA BRC DAN TUANG LANTAI KONKRIT",
     "items": [
       {
+        "id": "teknik-konkrit-sekali-kaki-lima",
         "label": "Teknik konkrit sekali kaki Lima",
         "video": "https://drive.google.com/file/d/1pMEeGfZYIBFs12R2yF9ipcN4sMtnaUu2/preview"
       }
@@ -117,14 +133,17 @@
     "title": "KERJA BESI",
     "items": [
       {
+        "id": "proses-bengkok-besi-6x18",
         "label": "Proses bengkok besi 6’x18’",
         "video": "https://www.youtube.com/embed/WTh5lRgsS0o?si=W9YpuPAur53KUDkZ"
       },
       {
+        "id": "teknik-lembutkan-besi-secara-manual",
         "label": "Teknik lembutkan besi secara manual",
         "video": "https://www.youtube.com/embed/uI0khaHeUNE"
       },
       {
+        "id": "teknik-design-nak-elakkan-pangkal-besi-karat",
         "label": "Teknik design nak elakkan pangkal besi karat",
         "video": "https://drive.google.com/file/d/1Kh5yLcbi5hcAhiRLzleeWd07tMOf_wcQ/preview"
       }
@@ -134,14 +153,17 @@
     "title": "KERJA ACUAN DAN TUANG KONKRIT TIANG",
     "items": [
       {
+        "id": "teknik-memaku-form-work",
         "label": "Teknik Memaku Form Work",
         "video": "https://www.youtube.com/embed/gjqiggZ6tfE"
       },
       {
+        "id": "tips-elakkan-crack-di-tiang",
         "label": "Tips elakkan crack di tiang",
         "video": "https://www.youtube.com/embed/6RYBfl2SXtI"
       },
       {
+        "id": "teknik-masukkan-besi-dan-konkrit-pada-pagar-tiang-yang-ada-pos-box",
         "label": "Teknik masukkan besi dan konkrit pada pagar tiang yang ada pos box",
         "video": "https://www.youtube.com/embed/7YhNy5JmLJY"
       }
@@ -151,18 +173,22 @@
     "title": "KERJA RASUK (BEAM)",
     "items": [
       {
+        "id": "teknik-membuat-papan-beam-1",
         "label": "Teknik Membuat Papan Beam - 1",
         "video": "https://www.youtube.com/embed/VclEsgM-zqU?si=WMz5YK8m1nQgbzbh"
       },
       {
+        "id": "teknik-membuat-papan-beam-2",
         "label": "Teknik Membuat Papan Beam - 2",
         "video": "https://drive.google.com/file/d/1-RH1coqH5X2ZEDkhYuyLsS6HJ4hTSKX2/preview"
       },
       {
+        "id": "teknik-membuat-papan-beam-3",
         "label": "Teknik Membuat Papan Beam - 3",
         "video": "https://drive.google.com/file/d/1ehQ38kupsdAcQ6L3LKer71dKiN5ADSAA/preview"
       },
       {
+        "id": "teknik-membuat-papan-beam-4",
         "label": "Teknik Membuat Papan Beam - 4",
         "video": "https://drive.google.com/file/d/1vTx9kkQkQoQzRFrU5yMGtuUV7pNhhTaL/preview"
       }
@@ -172,14 +198,17 @@
     "title": "KERJA MEMASANG BATA DINDING",
     "items": [
       {
+        "id": "teknik-nak-elak-crack-di-penjuru-dinding",
         "label": "Teknik Nak Elak Crack di Penjuru dinding",
         "video": "https://www.youtube.com/embed/jgWsSvNsX_g?si=4mj3wJVgVZx2Y7F8"
       },
       {
+        "id": "tips-nak-elakkan-crack-di-dinding-1",
         "label": "Tips nak elakkan crack di dinding - 1",
         "video": "https://www.youtube.com/embed/07pkuk9Bv4A"
       },
       {
+        "id": "teknik-nak-elak-crack-di-dinding-2",
         "label": "Teknik nak elak crack di dinding - 2",
         "video": "https://drive.google.com/file/d/14w-V2gHft_OpdtxDMZNx70V_Nm5FfdRx/preview"
       }
@@ -189,14 +218,17 @@
     "title": "KERJA DINDING PARTITION GYPSUM BOARD",
     "items": [
       {
+        "id": "teknik-memasang-partition-gypsium-board-1",
         "label": "Teknik memasang partition gypsium board - 1",
         "video": "https://drive.google.com/file/d/16NOuLedTqaMMeGdOU-HEv7W1YJicBFjO/preview"
       },
       {
+        "id": "teknik-memasang-partition-gypsium-board-2",
         "label": "Teknik memasang partition gypsium board - 2",
         "video": "https://drive.google.com/file/d/1O_PqbsAZstcIY9hgQH8AwL9KyIvEy1Y6/preview"
       },
       {
+        "id": "teknik-memasang-partition-gypsium-board-3",
         "label": "Teknik memasang partition gypsium board - 3",
         "video": "https://drive.google.com/file/d/1GNQfLb0dxWED-HY6A_YxzweA5SuSSiPV/preview"
       }
@@ -206,6 +238,7 @@
     "title": "KERJA LINTEL DAN BEAM ATAS TINGKAP",
     "items": [
       {
+        "id": "kerja-lintel-dan-beam-atas-tingkap",
         "label": "KERJA LINTEL DAN BEAM ATAS TINGKAP",
         "video": null
       }
@@ -215,6 +248,7 @@
     "title": "KERJA PLASTER DINDING",
     "items": [
       {
+        "id": "kerja-plaster-dinding",
         "label": "KERJA PLASTER DINDING",
         "video": null
       }
@@ -224,6 +258,7 @@
     "title": "KERJA MEMASANG KEKUDA BUMBUNG",
     "items": [
       {
+        "id": "teknik-elakan-nampak-lentok-di-hujung-bila-pasang-bumbung-genting",
         "label": "Teknik elakan nampak lentok di hujung bila pasang bumbung genting",
         "video": "https://www.youtube.com/embed/MQM6zapNQXE?si=At2IVGcnowtaG0Vu"
       }
@@ -233,6 +268,7 @@
     "title": "KERJA MEMASANG ATAP",
     "items": [
       {
+        "id": "kerja-memasang-atap",
         "label": "KERJA MEMASANG ATAP",
         "video": null
       }
@@ -242,6 +278,7 @@
     "title": "KERJA MEMASANG GUTTER DAN FASCIA BOARD",
     "items": [
       {
+        "id": "kerja-memasang-gutter-dan-fascia-board",
         "label": "KERJA MEMASANG GUTTER DAN FASCIA BOARD",
         "video": null
       }
@@ -251,6 +288,7 @@
     "title": "KERJA PEMASANGAN SISTEM PAIP AIR",
     "items": [
       {
+        "id": "kerja-pemasangan-sistem-paip-air",
         "label": "KERJA PEMASANGAN SISTEM PAIP AIR",
         "video": null
       }
@@ -260,6 +298,7 @@
     "title": "KERJA SILING",
     "items": [
       {
+        "id": "teknik-elak-air-menitik-di-siling",
         "label": "Teknik elak air menitik di siling",
         "video": "https://www.youtube.com/embed/zyTY2K9bFtc"
       }
@@ -269,18 +308,22 @@
     "title": "KERJA MEMASANG JUBIN LANTAI",
     "items": [
       {
+        "id": "teknik-memasang-tile",
         "label": "Teknik memasang tile",
         "video": "https://www.youtube.com/embed/N8cY_NWrSWk"
       },
       {
+        "id": "teknik-sebelum-nak-render-lantai-simen-licin",
         "label": "Teknik sebelum nak render lantai simen licin",
         "video": "https://www.youtube.com/embed/q0QffCSdFzo"
       },
       {
+        "id": "teknik-elakkan-lantai-licin-retak",
         "label": "Teknik elakkan lantai licin retak",
         "video": "https://drive.google.com/file/d/1mBL5KyOV0sh6yaYM8vbGrVreonyNzRBD/preview"
       },
       {
+        "id": "teknik-cegah-lantai-retak-di-perimeter-luaran",
         "label": "Teknik cegah lantai retak di perimeter luaran",
         "video": "https://drive.google.com/file/d/1h05TSA_JpFA0_PRHJoXN7aLakKoJJBnb/preview"
       }
@@ -290,14 +333,17 @@
     "title": "KERJA MEMASANG JUBIN DINDING TANDAS",
     "items": [
       {
+        "id": "teknik-buat-rak-sabun-dalam-dinding",
         "label": "Teknik buat rak sabun dalam dinding",
         "video": "https://www.youtube.com/embed/VxyzuBk9LoQ?si=4wx5TVqAlO0YsW00"
       },
       {
+        "id": "teknik-cara-nak-marking-mozek-warna-hitam-dengan-tidak-menggunakan-marker-pen",
         "label": "Teknik cara nak marking mozek warna hitam, dengan tidak menggunakan marker pen.",
         "video": "https://www.youtube.com/embed/gaz9YZnMV8Y?si=zk5tC3AXGvltvBUl"
       },
       {
+        "id": "teknik-sumbat-celah-mozek",
         "label": "Teknik sumbat celah mozek",
         "video": "https://www.youtube.com/embed/Dv9q55i2Z4U?si=Zo2IEUpiWFf1gYyd"
       }
@@ -307,10 +353,12 @@
     "title": "KERJA MEMASANG BINGKAI PINTU",
     "items": [
       {
+        "id": "teknik-order-frame-pintu-besi",
         "label": "Teknik Order Frame Pintu Besi",
         "video": "https://drive.google.com/file/d/1Dpku3J8u6J76HKX4OYsLYd_5ZMDl5xRw/preview"
       },
       {
+        "id": "teknik-bagaimana-cara-nak-order-frame-pintu-besi-kanan-r-atau-kiri-l",
         "label": "Teknik bagaimana cara nak order frame pintu besi Kanan-R atau Kiri - L",
         "video": "https://www.youtube.com/embed/u7fKsssLaXw?si=PEZAlFHyENLWH6Qm"
       }
@@ -320,6 +368,7 @@
     "title": "KERJA MEMASANG TINGKAP",
     "items": [
       {
+        "id": "teknik-memasang-coping",
         "label": "Teknik memasang coping",
         "video": "https://www.youtube.com/embed/ZhM3M5Qdb9M"
       }
@@ -329,10 +378,12 @@
     "title": "KERJA MELEPA",
     "items": [
       {
+        "id": "teknik-melepa-dinding-kemas-dan-cantik",
         "label": "Teknik melepa dinding kemas dan cantik",
         "video": "https://www.youtube.com/embed/oHy4SrpkFsY?si=AvcM6m5tSP1SrdfX"
       },
       {
+        "id": "teknik-melepa-pvc-groove",
         "label": "Teknik Melepa PVC Groove",
         "video": "https://www.youtube.com/embed/SACarUnM7y8"
       }
@@ -342,18 +393,22 @@
     "title": "KERJA SKIM COAT",
     "items": [
       {
+        "id": "fungsi-skim-coat",
         "label": "Fungsi skim coat",
         "video": "https://www.youtube.com/embed/PAotEXBHiFU?si=6ZidAWTRW8Zq1frB"
       },
       {
+        "id": "teknik-skim-coat-cara-otai",
         "label": "Teknik Skim Coat cara Otai",
         "video": "https://www.youtube.com/embed/gUqIlmmqnug?si=1mj-Nm96p5VIxW0d"
       },
       {
+        "id": "teknik-bancuh-skim-coat",
         "label": "Teknik bancuh skim coat",
         "video": "https://www.youtube.com/embed/g57eZFn5_iY"
       },
       {
+        "id": "teknik-plaster-terus-skim",
         "label": "Teknik Plaster Terus Skim",
         "video": "https://www.youtube.com/embed/B_DSDqCuKwY"
       }
@@ -363,22 +418,27 @@
     "title": "KERJA CAT",
     "items": [
       {
+        "id": "teknik-mencari-kedai-cat-yang-sesuai",
         "label": "Teknik mencari kedai cat yang sesuai",
         "video": "https://www.youtube.com/embed/EnuGF6iNNSI?si=Mri5S58-iJWSB7dD"
       },
       {
+        "id": "cara-pilih-cat",
         "label": "Cara pilih Cat",
         "video": "https://www.youtube.com/embed/WpKtQpn0jF0?si=j-Je_5K3-E4B6_pF"
       },
       {
+        "id": "cat-jaminan-5-tahun",
         "label": "Cat Jaminan 5 Tahun",
         "video": "https://drive.google.com/file/d/1kNhdH1XDeZgtGh0NSRgIdZLzBIHCGTd9/preview"
       },
       {
+        "id": "teknik-cat-dinding-baru",
         "label": "Teknik cat dinding baru",
         "video": "https://drive.google.com/file/d/1dRwcKx24zXrI3mztFuHS-Fr6zAyjAihc/preview"
       },
       {
+        "id": "teknik-cepat-sapu-cat",
         "label": "Teknik cepat sapu cat",
         "video": "https://drive.google.com/file/d/1BwFcHCd94Ckvl09hBn3hT4IT_yWL6BIX/preview"
       }
@@ -388,14 +448,17 @@
     "title": "KERJA HIASAN DAN AKSESORI DINDING",
     "items": [
       {
+        "id": "cara-pilih-cat-2",
         "label": "Cara pilih Cat",
         "video": "https://www.youtube.com/embed/WpKtQpn0jF0?si=4f9DqfpXIKl8tVEK"
       },
       {
+        "id": "teknik-memasang-pvc-groove",
         "label": "Teknik Memasang PVC Groove",
         "video": "https://www.youtube.com/embed/dy0U4dSGRv4"
       },
       {
+        "id": "cara-pasang-wording-sign",
         "label": "Cara Pasang ‘Wording’ Sign",
         "video": "https://drive.google.com/file/d/1_aZKo5tZhMhC_gicYneHn_WWI5IrmC5X/preview"
       }
@@ -405,6 +468,7 @@
     "title": "KERJA MEMASANG DAUN PINTU",
     "items": [
       {
+        "id": "teknik-menebuk-lubang-selak-safety-door",
         "label": "Teknik menebuk lubang selak safety door",
         "video": "https://drive.google.com/file/d/1En1iBMb6vewihfgVJeL-vIiHX0M-UFAV/preview"
       }
@@ -414,6 +478,7 @@
     "title": "KERJA MEMASANG SUIS, SOKET DAN LAMPU",
     "items": [
       {
+        "id": "kerja-memasang-suis-soket-dan-lampu",
         "label": "KERJA MEMASANG SUIS, SOKET DAN LAMPU",
         "video": null
       }
@@ -423,6 +488,7 @@
     "title": "KERJA MEMASANG PERALATAN SANITARI",
     "items": [
       {
+        "id": "kerja-memasang-peralatan-sanitari",
         "label": "KERJA MEMASANG PERALATAN SANITARI",
         "video": null
       }
@@ -432,6 +498,7 @@
     "title": "KERJA KABINET DAPUR",
     "items": [
       {
+        "id": "kerja-kabinet-dapur",
         "label": "KERJA KABINET DAPUR",
         "video": null
       }
@@ -441,18 +508,22 @@
     "title": "KERJA PLUMBER",
     "items": [
       {
+        "id": "teknik-floortrap",
         "label": "Teknik FloorTrap",
         "video": "https://www.youtube.com/embed/HaH2HHw6dt0?si=ZWa_80VihUH1m7uf"
       },
       {
+        "id": "teknik-pasang-p-trap-untuk-tandas-cangkung",
         "label": "Teknik Pasang P Trap untuk Tandas Cangkung",
         "video": "https://www.youtube.com/embed/PsMLcUwQmmo"
       },
       {
+        "id": "teknik-buat-manhole-kecil",
         "label": "Teknik buat manhole kecil",
         "video": "https://drive.google.com/file/d/1zZyhMOP-8veqKzTIiKHcej8kkQFEPIKr/preview"
       },
       {
+        "id": "teknik-buat-manhole-singki",
         "label": "Teknik buat manhole singki",
         "video": "https://drive.google.com/file/d/1Vq9jNEsPmhq_U0fE6Th6YlLH747vwaYh/preview"
       }
@@ -462,22 +533,27 @@
     "title": "KERJA BUMBUNG",
     "items": [
       {
+        "id": "pemulaan-kerja-roof-beam",
         "label": "Pemulaan Kerja Roof Beam",
         "video": "https://www.youtube.com/embed/H8irlttr4Gc?si=RK4pOeabp6KAdUrh"
       },
       {
+        "id": "teknik-cara-nak-pasang-zing-di-bumbung-bentuk-a",
         "label": "Teknik cara nak pasang zing di bumbung bentuk A",
         "video": "https://www.youtube.com/embed/I-xxzuNOruI?si=-qbxD1uHhb_kfsHI"
       },
       {
+        "id": "teknik-pasang-zink-jenis-bumbung-a",
         "label": "Teknik pasang zink jenis bumbung A",
         "video": "https://www.youtube.com/embed/UprZmuZOuTA"
       },
       {
+        "id": "teknik-potong-papan-pemanis",
         "label": "Teknik potong papan pemanis",
         "video": "https://www.youtube.com/embed/H1wi7rxwQe4"
       },
       {
+        "id": "teknik-ukur-kaki-lima-bumbung",
         "label": "Teknik ukur kaki lima bumbung",
         "video": "https://www.youtube.com/embed/o041UhBGQYo"
       }
@@ -487,18 +563,22 @@
     "title": "KERJA APRON DAN LONGKANG",
     "items": [
       {
+        "id": "teknik-ukur-level-masa-sambung-kerja-longkang",
         "label": "Teknik ukur level masa sambung kerja longkang",
         "video": "https://www.youtube.com/embed/YCKDsPbr61Y?si=37EGCoqXAhnHLzqE"
       },
       {
+        "id": "teknik-ukur-kaki-lima-rumah-dan-jarak-longkang-dari-dinding-rumah",
         "label": "Teknik ukur kaki lima rumah dan jarak longkang dari dinding rumah",
         "video": "https://drive.google.com/file/d/1dVqE2UMZ1nLkNRPraBbfSFvhovIa2wHc/preview"
       },
       {
+        "id": "teknik-elakkan-kaki-lima-jatuh",
         "label": "Teknik elakkan kaki lima jatuh",
         "video": "https://drive.google.com/file/d/1KM9FBK04E8mxF8mZ5DmBkJQpoUR1z3nW/preview"
       },
       {
+        "id": "cara-kira-level-kaki-lima",
         "label": "Cara kira level kaki lima",
         "video": "https://drive.google.com/file/d/1-f8t7EH0FvrKycXvX00vjK1sA9W67cU0/preview"
       }
@@ -508,6 +588,7 @@
     "title": "KERJA TANGGA DAN PORCH KERETA",
     "items": [
       {
+        "id": "kerja-tangga-dan-porch-kereta",
         "label": "KERJA TANGGA DAN PORCH KERETA",
         "video": null
       }
@@ -517,6 +598,7 @@
     "title": "KERJA PEMBERSIHAN RUMAH",
     "items": [
       {
+        "id": "kerja-pembersihan-rumah",
         "label": "KERJA PEMBERSIHAN RUMAH",
         "video": null
       }
@@ -526,6 +608,7 @@
     "title": "KERJA PEMERIKSAAN DEFECT DAN TOUCH UP",
     "items": [
       {
+        "id": "kerja-pemeriksaan-defect-dan-touch-up",
         "label": "KERJA PEMERIKSAAN DEFECT DAN TOUCH UP",
         "video": null
       }
@@ -535,10 +618,12 @@
     "title": "KERJA SERAHAN KUNCI KEPADA PEMILIK RUMAH",
     "items": [
       {
+        "id": "serahan-kunci-1",
         "label": "Serahan Kunci - 1",
         "video": "https://drive.google.com/file/d/1IWHdgiRZ-ZUixAKGaqOcWA8DOge8dSP0/preview"
       },
       {
+        "id": "serahan-kunci-2",
         "label": "Serahan Kunci - 2",
         "video": "https://drive.google.com/file/d/1KF-MW0gdLZ_aj2jprqdAZyqOTt6wA4kC/preview"
       }
