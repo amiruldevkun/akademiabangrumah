@@ -9,13 +9,15 @@ Feature yang ada setakat ini:
 - [x] Gambar yang releven dengan website
 - [x] Script menjana sidebar yang efektif and mudah
 - [] Lengkapkan video yang diperlukan
-- [] Tag video mengikut content video
+- [x] Tag video mengikut content video
 - [x] About me section
-- [] Pengiklanan
+- [] ~~Pengiklanan~~ Just promote the main ayjo.my site
 - [x] Collapsable Menu Headings
-- [] Link payment page to main home button
+- [x] Link payment page to main home button
 - [x] Make it a PWA
-- [] Make mobile viewport better
+- [x] Make mobile viewport better
 - [] Paywall new trial users
-- [] Make a login system
-- [] Improve SEO
+- [x] Make a login system
+- [] ~~Improve SEO~~ improve ayjo.my seo
+- [] coupon system
+- [] tertiary payment system
