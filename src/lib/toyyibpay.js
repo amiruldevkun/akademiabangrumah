@@ -3,7 +3,6 @@
 // SERVER ONLY — uses your ToyyibPay secret key, which must never reach
 // the browser. Only import from +server.js files.
 //
-
 import {
 	TOYYIBPAY_SECRET_KEY,
 	TOYYIBPAY_CATEGORY_CODE,
@@ -21,6 +20,10 @@ async function parseToyyibPayResponse(res) {
 	} catch {
 		throw new Error(`ToyyibPay returned a non-JSON response: ${raw.trim()}`);
 	}
+}
+
+export function buildPaymentUrl(billCode) {
+	return `${TOYYIBPAY_BASE_URL}/${billCode}`;
 }
 
 export async function createBill({
@@ -72,7 +75,7 @@ export async function createBill({
 
 	return {
 		billCode,
-		paymentUrl: `${TOYYIBPAY_BASE_URL}/${billCode}`
+		paymentUrl: buildPaymentUrl(billCode)
 	};
 }
 
