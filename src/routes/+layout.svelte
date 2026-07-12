@@ -89,7 +89,9 @@
 
 
 <header class="bg-[#4a7425] text-white p-1 flex items-center shadow-md z-50 h-24 pt-[env(safe-area-inset-top)]">
-  <img src="/assets/images/akademilogov2.png" alt="Akademi Abang Rumah Logo" class="p-2 w-22 h-auto">
+  <a href="/about">
+    <img src="/assets/images/akademilogov2.png" alt="Akademi Abang Rumah Logo" class="p-2 w-22 h-auto">
+  </a>
   <span class="text-lg font-bold tracking-wide mx-4">AKADEMI ABANG RUMAH</span>
   <div class="ms-auto">
     <!-- Logged-in user info + logout, only shown once we know who's logged in -->

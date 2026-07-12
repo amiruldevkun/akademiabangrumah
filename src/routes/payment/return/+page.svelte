@@ -45,10 +45,22 @@
 		// the component unmounts.
 		return () => clearInterval(timer);
 	});
+
+	// Tracks data.order.status reactively — including through the polling
+	// above, so the tab title updates live as the order resolves (e.g.
+	// "Mengesahkan..." flips to "Pembayaran Diterima" the moment the
+	// webhook confirms, no reload needed).
+	let pageTitle = $derived.by(() => {
+		const status = data.order?.status;
+		if (!data.order) return 'Pesanan Tidak Dijumpai - Akademi Abang Rumah';
+		if (status === 'paid') return 'Pembayaran Diterima - Akademi Abang Rumah';
+		if (status === 'failed') return 'Pembayaran Tidak Berjaya - Akademi Abang Rumah';
+		return 'Mengesahkan Pembayaran... - Akademi Abang Rumah';
+	});
 </script>
 
 <svelte:head>
-	<title>Status pembayaran</title>
+	<title>{pageTitle}</title>
 </svelte:head>
 
 <main class="bg-gray-50 flex items-center justify-center p-6 py-24">
