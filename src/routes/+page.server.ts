@@ -14,8 +14,8 @@
 // resume concept, only a binary watched flag (see the classroom page's
 // markDriveWatched), so a Drive row is either absent or already watched.
 
-import { getSectionsWithAccess } from '$lib/sections';
-import  { redirect } from '@sveltejs/kit';
+import { getSectionsWithAccess, type AccessibleItem } from '$lib/sections';
+import { redirect } from '@sveltejs/kit';
 
 const YOUTUBE_ID_PATTERN = /embed\/([A-Za-z0-9_-]+)/;
 
@@ -24,11 +24,12 @@ export async function load({ locals, cookies }) {
 		return { continueLesson: null };
 	}
 
+	
 	const { sections } = await getSectionsWithAccess(locals.user.id);
 
 	// Flatten to playable, unlocked items, remembering which section (=
 	// "Modul N") each one belongs to.
-	const accessibleItems = [];
+	const accessibleItems: AccessibleItem[] = [];
 	sections.forEach((section, sectionIndex) => {
 		for (const item of section.items) {
 			if (!item.locked && item.video) {
@@ -76,7 +77,7 @@ export async function load({ locals, cookies }) {
 		? Math.min(100, Math.round((resumeSeconds / durationSeconds) * 100))
 		: 0;
 
-	const youTubeId = continueItem.video.match(YOUTUBE_ID_PATTERN)?.[1] ?? null;
+	const youTubeId = continueItem.video?.match(YOUTUBE_ID_PATTERN)?.[1] ?? null;
 
 	const justPaid = cookies.get('just_paid') === 'true';
     
@@ -102,7 +103,7 @@ export async function load({ locals, cookies }) {
 	};
 }
 
-function formatDuration(totalSeconds) {
+function formatDuration(totalSeconds: number | null | undefined) {
 	if (!totalSeconds) return null;
 	const minutes = Math.floor(totalSeconds / 60);
 	const seconds = Math.floor(totalSeconds % 60);

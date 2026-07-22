@@ -1,21 +1,26 @@
-<script>
+<script lang="ts">
   import '../style.css';
-  import { onMount } from 'svelte';
-  import { pwaInfo } from 'virtual:pwa-info'
+  import { onMount, type Snippet } from 'svelte';
   import { supabase } from '$lib/supabaseClient';
   // import { createClient } from '@supabase/supabase-js'
   import { invalidate } from '$app/navigation';
-  import { page } from '$app/state'; 
-
+  // import { page } from '$app/state'; 
     
-  let { data, children } = $props();
+  type LayoutProps = {
+    data?: {
+      user?: any;
+    };
+    children: Snippet;
+  };
+
+  let { data, children }: LayoutProps = $props();
   let profileOpen = $state(false);
 
   // Browser-side Supabase client — separate from the server one in hooks.server.js.
   // This lets the UI react live to login state (e.g. showing name/avatar)
   // without needing a full page reload.
 
-  let user = $state(data.session?.user ?? null);
+  let user = $state(data?.user ?? null);
 
   onMount(() => {
     // Keep `user` in sync if the session changes in another tab, expires, etc.
@@ -48,7 +53,7 @@
   }
 
   // --- PWA install banner logic (unchanged from before) ---
-  let deferredPrompt = $state(null);
+  let deferredPrompt: any = $state();
   let showBanner = $state(false);
 
   onMount(() => {
@@ -118,7 +123,7 @@
 
 {#if showBanner}
   <div class="bg-[#4a7425] text-white px-4 py-3 shadow-md">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left">
       <div class="flex items-center gap-3">
         <span class="text-2xl">📱</span>
         <p class="font-medium text-base sm:text-lg">

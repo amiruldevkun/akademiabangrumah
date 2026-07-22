@@ -1,5 +1,6 @@
 # AKADEMI ABANG RUMAH
-Ini adalah repositori website 'AKADEMI ABANG RUMAH'. 
+
+Ini adalah repositori website 'AKADEMI ABANG RUMAH'.
 
 Feature yang ada setakat ini:
 
@@ -11,12 +12,12 @@ Feature yang ada setakat ini:
 - [] Lengkapkan video yang diperlukan
 - [x] Tag video mengikut content video
 - [x] About me section
-- [] ~~Pengiklanan~~ Just promote the main ayjo.my site
+- [x] ~~Pengiklanan~~ Just promote the main ayjo.my site
 - [x] Collapsable Menu Headings
 - [x] Link payment page to main home button
 - [x] Make it a PWA
 - [x] Make mobile viewport better
-- [] Paywall new trial users
+- [x] Paywall new trial users
 - [x] Make a login system
 - [] ~~Improve SEO~~ improve ayjo.my seo
 - [] coupon system

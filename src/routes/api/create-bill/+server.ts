@@ -13,7 +13,7 @@ import { randomUUID } from 'crypto';
 import { supabaseAdmin } from '$lib/supabaseAdmin';
 import { createBill } from '$lib/toyyibpay';
 import {product_name, product_description, product_amountRM} from '$lib/productMeta.json';
-// import { PUBLIC_TESTING_NGROK_URL } from '$env/static/public';
+import { PUBLIC_TESTING_NGROK_URL } from '$env/static/public';
 
 
 // TODO: replace with your real product, or look this up from a products
@@ -57,7 +57,7 @@ export async function POST({ request, url, locals }) {
 		throw error(500, 'Could not create order');
 	}
 
-	// const origin = PUBLIC_TESTING_NGROK_URL || url.origin;
+	const origin = PUBLIC_TESTING_NGROK_URL || url.origin;
 
 	// 2. Ask ToyyibPay for a bill for that order.
 	try {
@@ -69,8 +69,8 @@ export async function POST({ request, url, locals }) {
 			customerEmail: email,
 			customerPhone: phone,
 			externalReferenceNo: orderId,
-			returnUrl: `${url.origin}/payment/return`,
-			callbackUrl: `${url.origin}/payment/callback`
+			returnUrl: `${origin}/payment/return`,
+			callbackUrl: `${origin}/payment/callback`
 		});
 
 		await supabaseAdmin
@@ -84,6 +84,4 @@ export async function POST({ request, url, locals }) {
 		await supabaseAdmin.from('orders').update({ status: 'failed' }).eq('id', orderId);
 		throw error(502, 'Could not start payment with ToyyibPay');
 	}
-
-	console.log("[create-bill] callbackUrl is: ", {callbackUrl});
 }

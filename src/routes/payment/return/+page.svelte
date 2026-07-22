@@ -1,5 +1,5 @@
 <!--src/routes/payment/return-->
-<script>
+<script lang="ts">
 	import { invalidateAll, goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
@@ -28,7 +28,7 @@
 
 	$effect(() => {
 		const status = data.order?.status;
-		const destination = status === 'paid' ? '/' : status === 'failed' ? '/pay_landing' : null;
+		const destination = status === 'paid' ? '/thankyou' : status === 'failed' ? '/pay_landing' : null;
 
 		if (!destination) return;
 

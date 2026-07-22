@@ -15,12 +15,12 @@
 //
 //   expected_hash = MD5( userSecretKey + status + order_id + refno + "ok" )
 
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { text } from '@sveltejs/kit';
 import { TOYYIBPAY_SECRET_KEY } from '$env/static/private';
 import { supabaseAdmin } from '$lib/supabaseAdmin';
 
-function md5(str) {
+function md5(str: string) {
 	return createHash('md5').update(str).digest('hex');
 }
 

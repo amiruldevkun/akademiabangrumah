@@ -1,11 +1,13 @@
-<script>
-  /** @type {{ data: { userEmail: string | null, suggestedName: string } }} */
+<script lang='ts'>
+	// pay_landing/+page.svelte
+  	import { supabase } from '$lib/supabaseClient';
 	import {product_name, product_description, product_amountRM} from '$lib/productMeta.json';
 	let { data } = $props();
 
 	let name = $state(data.suggestedName ?? '');
 	let phone = $state('');
 	let submitting = $state(false);
+	let signingIn = $state(false);
 	let errorMsg = $state('');
 
 	const PRODUCT = {
@@ -15,7 +17,34 @@
 		
 	};
 
-	async function submit(e) {
+	// Same pattern as /login's signInWithGoogle — redirectTo goes to
+	// /auth/callback, which already sends unpaid users straight back to
+	// /pay_landing on its own (see the paid ? '/main_menu' : '/pay_landing'
+	// branch there), so no extra next= param is needed here.
+	async function signInWithGoogle() {
+		errorMsg = '';
+		signingIn = true;
+		try {
+			const { error: oauthError } = await supabase.auth.signInWithOAuth({
+				provider: 'google',
+				options: {
+					redirectTo: `${window.location.origin}/auth/callback`,
+					queryParams: {
+						prompt: 'select_account'
+					}
+				}
+			});
+			if (oauthError) throw oauthError;
+			// On success the browser navigates away to Google — nothing more to
+			// do here. signingIn intentionally stays true until that happens.
+		} catch (err) {
+			console.error(err);
+			errorMsg = 'Tidak dapat menyambung ke Google. Sila cuba lagi.';
+			signingIn = false;
+		}
+	}
+
+	async function submit(e: any) {
 		e.preventDefault();
 		errorMsg = '';
 		submitting = true;
@@ -86,7 +115,7 @@
 					TAKUT KENA TIPU KONTRAKTOR PULUHAN RIBU??
 				</h1>
 				<p class="text-lg text-gray-700 leading-relaxed max-w-2xl mx-auto">
-					{PRODUCT.description}
+					{PRODUCT.tagline}
 				</p>
 			</div>
 
@@ -171,35 +200,39 @@
 					<div class="flex items-center gap-2 bg-emerald-50 rounded-lg px-3 py-1 mb-5">
 						<span class="text-sm font-medium text-gray-700 truncate">{data.userEmail}</span>
 					</div>
+
+					<label for="name" class="text-xs font-semibold text-gray-600 mb-1.5"> Nama penuh </label>
+					<input
+						id="name"
+						type="text"
+						bind:value={name}
+						required
+						placeholder="Nama seperti dalam IC"
+						autocomplete="name"
+						class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 mb-4
+						       focus:outline-none focus:ring-2 focus:ring-[#4a7425] focus:border-[#4a7425]"
+					/>
+
+					<label for="phone" class="text-xs font-semibold text-gray-600 mb-1.5"> Nombor telefon </label>
+					<input
+						id="phone"
+						type="tel"
+						bind:value={phone}
+						required
+						placeholder="01X-XXXXXXX"
+						autocomplete="tel"
+						class="w-full rounded-lg border border-[#d1d5dc] px-3 py-2.5 text-sm text-gray-900 mb-5
+						       focus:outline-none focus:ring-2 focus:ring-[#4a7425] focus:border-[#4a7425]"
+					/>
 				{:else}
-					<div class="bg-red-50 rounded-lg px-3 py-2 mb-5">
-						<span class="text-sm text-red-600"> Tidak dapat mengesahkan e-mel — sila log masuk semula. </span>
-					</div>
+					<!-- Anonymous visitor — nothing to attach a payment to yet.
+					     No name/phone fields until there's a real session, since
+					     /api/create-bill requires one (correctly, server-side). -->
+					<p class="text-sm text-gray-600 mb-5 leading-relaxed">
+						Log masuk dengan Google dahulu untuk teruskan pendaftaran. Akaun ini akan digunakan untuk
+						sahkan pembayaran dan beri akses terus ke video selepas bayaran berjaya.
+					</p>
 				{/if}
-
-				<label for="name" class="text-xs font-semibold text-gray-600 mb-1.5"> Nama penuh </label>
-				<input
-					id="name"
-					type="text"
-					bind:value={name}
-					required
-					placeholder="Nama seperti dalam IC"
-					autocomplete="name"
-					class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 mb-4
-					       focus:outline-none focus:ring-2 focus:ring-[#4a7425] focus:border-[#4a7425]"
-				/>
-
-				<label for="phone" class="text-xs font-semibold text-gray-600 mb-1.5"> Nombor telefon </label>
-				<input
-					id="phone"
-					type="tel"
-					bind:value={phone}
-					required
-					placeholder="01X-XXXXXXX"
-					autocomplete="tel"
-					class="w-full rounded-lg border border-[#d1d5dc] px-3 py-2.5 text-sm text-gray-900 mb-5
-					       focus:outline-none focus:ring-2 focus:ring-[#4a7425] focus:border-[#4a7425]"
-				/>
 
 				<div class="flex items-baseline justify-between mb-5">
 					<span class="text-sm text-gray-500">Jumlah perlu dibayar</span>
@@ -210,20 +243,48 @@
 					<p class="text-sm text-red-600 mb-3" role="alert">{errorMsg}</p>
 				{/if}
 
-				<button
-					type="submit"
-					disabled={submitting}
-					class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg
-					       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
-					       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full"
-				>
-					{submitting ? 'Memulakan pembayaran…' : 'Bayar dengan ToyyibPay'}
-				</button>
+				{#if data.userEmail}
+					<button
+						type="submit"
+						disabled={submitting}
+						class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg
+						       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
+						       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full"
+					>
+						{submitting ? 'Memulakan pembayaran…' : 'Bayar dengan ToyyibPay'}
+					</button>
 
-				<p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">
-					Pembayaran selamat dikendalikan oleh ToyyibPay. Anda akan diarahkan untuk
-					melengkapkan pembayaran melalui FPX atau kad.
-				</p>
+					<p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">
+						Pembayaran selamat dikendalikan oleh ToyyibPay. Anda akan diarahkan untuk
+						melengkapkan pembayaran melalui FPX atau kad.
+					</p>
+				{:else}
+					<button
+						type="button"
+						onclick={signInWithGoogle}
+						disabled={signingIn}
+						class="bg-white text-gray-700 border border-gray-300 px-6 py-3.5 rounded-xl font-semibold
+						       hover:bg-gray-50 transition flex items-center justify-center gap-3 w-full
+						       disabled:opacity-60 disabled:cursor-not-allowed"
+					>
+						<svg class="w-5 h-5" viewBox="0 0 48 48">
+							<path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12
+								c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24
+								c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+							<path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039
+								l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+							<path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36
+								c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+							<path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571
+								c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+						</svg>
+						{signingIn ? 'Menyambung ke Google…' : 'Log Masuk dengan Google'}
+					</button>
+
+					<p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">
+						Selepas log masuk, anda akan kembali ke sini secara automatik untuk lengkapkan pembayaran.
+					</p>
+				{/if}
 			</form>
 		</div>
 	</div>

@@ -13,7 +13,7 @@ import {
 // error string like "[CATEGORY-NOT-FOUND]". Parse defensively so a
 // non-JSON response surfaces its actual message instead of a confusing
 // "Unexpected token" JSON.parse crash.
-async function parseToyyibPayResponse(res) {
+async function parseToyyibPayResponse(res: any) {
 	const raw = await res.text();
 	try {
 		return JSON.parse(raw);
@@ -22,7 +22,7 @@ async function parseToyyibPayResponse(res) {
 	}
 }
 
-export function buildPaymentUrl(billCode) {
+export function buildPaymentUrl(billCode: string) {
 	return `${TOYYIBPAY_BASE_URL}/${billCode}`;
 }
 
@@ -36,7 +36,7 @@ export async function createBill({
 	externalReferenceNo,
 	returnUrl,
 	callbackUrl
-}) {
+}: any) {
 	const body = new URLSearchParams({
 		userSecretKey: TOYYIBPAY_SECRET_KEY,
 		categoryCode: TOYYIBPAY_CATEGORY_CODE,
@@ -79,12 +79,12 @@ export async function createBill({
 	};
 }
 
-export async function getBillTransactions(billCode) {
+export async function getBillTransactions(billCode: string) {
 	const body = new URLSearchParams({ billCode });
 
 	const res = await fetch(`${TOYYIBPAY_BASE_URL}/index.php/api/getBillTransactions`, {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+		headers: { 'Content-Type': 'multipart/form-data' },
 		body
 	});
 

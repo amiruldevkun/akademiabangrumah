@@ -1,21 +1,41 @@
-<script>
+<script lang='ts'>
   import { onMount } from 'svelte';
   import { page } from '$app/state';
   import { supabase } from '$lib/supabaseClient';
 
-  /** @type {{ data: { sections: any[], hasPaid: boolean, userId: string | null } }} */
-  let { data } = $props();
+  type LessonItem = {
+    id: string;
+    label: string;
+    video: string | null;
+    locked: boolean;
+    watched?: boolean;
+    resumeSeconds?: number;
+    visible?: boolean;
+  };
 
-  // Reactive state (Svelte 5 runes)
+  type SectionWithItems = {
+    title: string;
+    items: LessonItem[];
+    anySectionItemVisible?: boolean;
+    forceOpen?: boolean;
+  };
+
+  type PageData = {
+    sections: SectionWithItems[];
+    hasPaid: boolean;
+    userId: string | null;
+  };
+
+  let { data }: { data: PageData } = $props();
+
   let sidebarOpen = $state(false);
   let searchQuery = $state('');
   let selectedLesson = $state('Ketik menu ☰ untuk melihat senarai video pembelajaran.');
   let currentVideo = $state('');
-  let selectedItem = $state(null); // full item object — carries id/watched/resumeSeconds
+  let selectedItem = $state<LessonItem | null>(null);
 
-  // Element refs, needed for "click outside sidebar to close"
-  let sidebarEl = $state(null);
-  let menuBtnEl = $state(null);
+  let sidebarEl = $state<HTMLElement | null>(null);
+  let menuBtnEl = $state<HTMLButtonElement | null>(null);
 
   // --- Progress tracking state ---
   // YouTube: driven by the IFrame Player API (postMessage under the hood),
@@ -23,16 +43,31 @@
   // Google Drive's /preview iframe has no equivalent public API (cross-origin,
   // no postMessage contract Google exposes), so Drive items fall back to a
   // manual "mark as watched" button — see markDriveWatched() below.
-  let ytPlayer = null;
+  let ytPlayer: {
+    destroy: () => void;
+    getCurrentTime: () => number;
+    getDuration: () => number;
+    seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+  } | null = null;
   let ytApiReady = $state(false);
-  let progressSaveInterval = null;
+  let progressSaveInterval: ReturnType<typeof setInterval> | null = null;
+
+  function clearProgressSaveInterval() {
+    if (progressSaveInterval !== null) {
+      clearInterval(progressSaveInterval);
+      progressSaveInterval = null;
+    }
+  }
 
   onMount(() => {
-    function handleOutsideClick(e) {
+    function handleOutsideClick(e: MouseEvent) {
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+
       // menuBtnEl now lives inside sidebarEl, so sidebarEl.contains(e.target)
       // already covers clicks on the button too — the explicit check is
       // just a harmless belt-and-suspenders.
-      if (sidebarEl && !sidebarEl.contains(e.target) && e.target !== menuBtnEl) {
+      if (sidebarEl && !sidebarEl.contains(target) && target !== menuBtnEl) {
         sidebarOpen = false;
       }
     }
@@ -69,8 +104,9 @@
 
     return () => {
       document.removeEventListener('click', handleOutsideClick);
-      clearInterval(progressSaveInterval);
+      clearProgressSaveInterval();
       ytPlayer?.destroy?.();
+      ytPlayer = null;
     };
   });
 
@@ -99,16 +135,16 @@
     })
   );
 
-  function isYouTube(url) {
+  function isYouTube(url: string | null | undefined) {
     return !!url && url.includes('youtube.com/embed/');
   }
 
-  function extractYouTubeId(embedUrl) {
+  function extractYouTubeId(embedUrl: string) {
     const match = embedUrl.match(/embed\/([A-Za-z0-9_-]+)/);
     return match ? match[1] : null;
   }
 
-  function selectLesson(item) {
+  function selectLesson(item: LessonItem) {
     if (item.locked) {
       // Send them to the payment landing page instead of doing nothing.
       window.location.href = '/pay_landing';
@@ -120,7 +156,7 @@
     // block around the player container (in the markup) also forces a
     // fresh DOM node per lesson, so there's no leftover element for the
     // old player to be confused about.
-    clearInterval(progressSaveInterval);
+    clearProgressSaveInterval();
     ytPlayer?.destroy?.();
     ytPlayer = null;
 
@@ -148,34 +184,35 @@
     const el = document.getElementById('yt-player-frame');
     if (!el) return;
 
-    const thisItem = selectedItem; // capture for the closures below
+    const thisItem = selectedItem;
+    if (!thisItem) return;
 
-    ytPlayer = new window.YT.Player('yt-player-frame', {
+    ytPlayer = new window.YT!.Player('yt-player-frame', {
       videoId,
       events: {
-        onReady: (e) => {
-          if (thisItem.resumeSeconds > 5) {
-            e.target.seekTo(thisItem.resumeSeconds, true);
+        onReady: (event: { target: { seekTo: (seconds: number, allowSeekAhead: boolean) => void } }) => {
+          if (thisItem.resumeSeconds && thisItem.resumeSeconds > 5) {
+            event.target.seekTo(thisItem.resumeSeconds, true);
           }
         },
-        onStateChange: (e) => {
-          if (e.data === window.YT.PlayerState.PLAYING) {
-            clearInterval(progressSaveInterval);
+        onStateChange: (event: { data: number }) => {
+          if (event.data === window.YT?.PlayerState.PLAYING) {
+            clearProgressSaveInterval();
             progressSaveInterval = setInterval(() => saveYouTubeProgress(thisItem), 10000);
           } else {
-            clearInterval(progressSaveInterval);
-            if (e.data === window.YT.PlayerState.PAUSED) saveYouTubeProgress(thisItem);
-            if (e.data === window.YT.PlayerState.ENDED) saveYouTubeProgress(thisItem, true);
+            clearProgressSaveInterval();
+            if (event.data === window.YT?.PlayerState.PAUSED) saveYouTubeProgress(thisItem);
+            if (event.data === window.YT?.PlayerState.ENDED) saveYouTubeProgress(thisItem, true);
           }
         }
       }
     });
   });
 
-  async function saveYouTubeProgress(item, forceWatched = false) {
+  async function saveYouTubeProgress(item: LessonItem, forceWatched = false) {
     if (!ytPlayer?.getCurrentTime || !data.userId) return;
     const current = ytPlayer.getCurrentTime();
-    const duration = ytPlayer.getDuration?.() ?? 0;
+    const duration = ytPlayer.getDuration() ?? 0;
     const watched = forceWatched || (duration > 0 && current / duration >= 0.9);
     await persistProgress(
       item.id,
@@ -190,14 +227,17 @@
 
   async function markDriveWatched() {
     if (!selectedItem || !data.userId) return;
-    // No duration available for Drive — omit it so an existing value (if
-    // any) isn't clobbered, and the resume concept doesn't apply here.
     await persistProgress(selectedItem.id, 0, true, null);
     selectedItem = { ...selectedItem, watched: true };
   }
 
-  async function persistProgress(itemId, resumeSeconds, watched, durationSeconds = null) {
-    const payload = {
+  async function persistProgress(
+    itemId: string,
+    resumeSeconds: number,
+    watched: boolean,
+    durationSeconds: number | null = null
+  ) {
+    const payload: Record<string, unknown> = {
       user_id: data.userId,
       item_id: itemId,
       resume_seconds: resumeSeconds,
@@ -216,14 +256,14 @@
     if (error) console.error('Failed to save video progress:', error);
   }
 
-  function toggleSidebar(e) {
+  function toggleSidebar(e: MouseEvent) {
     e.stopPropagation();
     sidebarOpen = !sidebarOpen;
   }
 </script>
 
 <svelte:head>
-  <title>Koleksi Modul-Modul - Akademi Abang Rumah</title>
+  <title>{selectedLesson} - Akademi Abang Rumah</title>
 </svelte:head>
 
 <!-- MAIN CONTAINER -->
@@ -286,17 +326,19 @@
                 {#each section.items as item}
                   {#if item.visible}
                     {#if item.locked}
-                      <li
+                      <button
+                        type="button"
                         onclick={() => selectLesson(item)}
-                        class="lesson-item cursor-pointer p-1 rounded flex items-center justify-between text-amber-200 hover:text-white transform transition-all duration-200 hover:translate-y-0.5"
+                        class="w-full text-left lesson-item cursor-pointer p-1 rounded flex items-center justify-between text-amber-200 hover:text-white transform transition-all duration-200 hover:translate-y-0.5"
                       >
                         <span>{item.label}</span>
                         <span class="text-xs shrink-0 ml-2">🔒</span>
-                      </li>
+                      </button>
                     {:else if item.video}
-                      <li
+                      <button
+                        type="button"
                         onclick={() => selectLesson(item)}
-                        class="lesson-item cursor-pointer hover:text-white p-1 rounded flex items-center justify-between transform transition-all duration-200 hover:translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm {selectedLesson ===
+                        class="w-full text-left lesson-item cursor-pointer hover:text-white p-1 rounded flex items-center justify-between transform transition-all duration-200 hover:translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm {selectedLesson ===
                         item.label
                           ? 'bg-blue-800 text-white'
                           : ''}"
@@ -305,13 +347,13 @@
                         {#if item.watched}
                           <span class="text-xs shrink-0 ml-2 text-emerald-300" title="Sudah ditonton">✔</span>
                         {/if}
-                      </li>
+                      </button>
                     {:else}
-                      <li
+                      <div
                         class="lesson-item lesson-item-disabled p-1 rounded text-slate-400 italic cursor-not-allowed select-none"
                       >
                         {item.label} <span class="text-xs">(Akan Datang)</span>
-                      </li>
+                      </div>
                     {/if}
                   {/if}
                 {/each}
@@ -374,19 +416,19 @@
     </div>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2 sm:hidden z-40">
-		<a href="/main_menu" class="flex flex-col items-center text-[#4a7425] text-xs gap-0.5">
+		<a href="/" class="flex flex-col items-center text-[#4a7425] text-xs gap-0.5">
 			<span class="text-lg">🏠</span> Home
 		</a>
 		<a href="/classroom" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
 			<span class="text-lg">📖</span> Belajar
 		</a>
-		<a href="/downloads" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
+		<a href="/akan-datang" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
 			<span class="text-lg">⬇️</span> Downloads
 		</a>
-		<a href="/bantuan" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
+		<a href="/akan-datang" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
 			<span class="text-lg">💬</span> Bantuan
 		</a>
-		<a href="/akaun" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
+		<a href="/akan-datang" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
 			<span class="text-lg">👤</span> Akaun
 		</a>
 	</nav>

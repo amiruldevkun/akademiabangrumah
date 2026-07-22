@@ -21,7 +21,7 @@ export async function load({ url }) {
 		return { order: null };
 	}
 
-	const { order, error } = await reconcileOrder(orderId);
+	const { order, error } = await reconcileOrder({orderId});
 
 	if (error && !order) {
 		console.error('Could not load/reconcile order:', error, { orderId });
@@ -30,3 +30,5 @@ export async function load({ url }) {
 
 	return { order };
 }
+
+// UNCOMMENT THIS AFTER TESTING

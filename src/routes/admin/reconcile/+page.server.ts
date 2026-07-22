@@ -13,7 +13,13 @@ import { error, fail } from '@sveltejs/kit';
 import { ADMIN_EMAILS } from '$env/static/private';
 import { reconcileOrder } from '$lib/reconcileOrder';
 
-function assertIsAdmin(locals) {
+type AdminLocals = {
+	user?: {
+		email?: string | null;
+	} | null;
+};
+
+function assertIsAdmin(locals: AdminLocals) {
 	const allowlist = (ADMIN_EMAILS ?? '').split(',').map((e) => e.trim().toLowerCase());
 	const email = locals.user?.email?.toLowerCase();
 	if (!email || !allowlist.includes(email)) {
@@ -37,7 +43,7 @@ export const actions = {
 			return fail(400, { message: 'Order ID is required' });
 		}
 
-		const { order, checkedToyyibPay, error: reconcileError } = await reconcileOrder(orderId);
+		const { order, checkedToyyibPay, error: reconcileError } = await reconcileOrder({orderId});
 
 		if (!order) {
 			return fail(404, { message: `No order found with ID ${orderId}` });

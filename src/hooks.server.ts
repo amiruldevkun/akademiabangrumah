@@ -1,8 +1,9 @@
-// src/hooks.server.js
+// src/hooks.server.ts
 import { createServer } from '$lib/supabaseServer';
 import { redirect } from '@sveltejs/kit';
+import type { Handle } from '@sveltejs/kit';
 
-export const handle = async ({ event, resolve }) => {
+export const handle : Handle = async ({ event, resolve }) => {
 	event.locals.supabase = createServer(event.cookies);
 
 	// safeGetSession: never let an auth error crash the request. If the
@@ -26,7 +27,8 @@ export const handle = async ({ event, resolve }) => {
 
 			return { session, user };
 		} catch (err) {
-			console.error('Auth session error (treating as logged out):', err?.message ?? err);
+			const message = err instanceof Error ? err.message : String(err);
+			console.error('Auth session error (treating as logged out):', message);
 			return { session: null, user: null };
 		}
 	};
@@ -39,7 +41,8 @@ export const handle = async ({ event, resolve }) => {
 		'/login',
 		'/auth/callback',
 		'/payment/callback',
-		'/payment/return'
+		'/payment/return',
+		'/pay_landing'
 	];
 	const isPublicRoute = publicRoutes.some((r) => event.url.pathname.startsWith(r));
 

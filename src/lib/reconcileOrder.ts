@@ -12,7 +12,12 @@ import { getBillTransactions } from '$lib/toyyibpay';
  * @param {string} orderId
  * @returns {Promise<{ order: any, checkedToyyibPay: boolean, error?: string }>}
  */
-export async function reconcileOrder(orderId) {
+
+export type toyyibpayID = {
+	orderId?: string | null;
+}
+
+export async function reconcileOrder(orderId: toyyibpayID) {
 	const { data: order, error: fetchError } = await supabaseAdmin
 		.from('orders')
 		.select('id, status, toyyibpay_bill_code, user_id, amount, currency, product_name, customer_name, customer_email')
@@ -37,7 +42,7 @@ export async function reconcileOrder(orderId) {
 	let tx;
 	try {
 		tx = await getBillTransactions(order.toyyibpay_bill_code);
-	} catch (err) {
+	} catch (err: any) {
 		console.error('[reconcileOrder] getBillTransactions failed:', err, { orderId });
 		return { order, checkedToyyibPay: true, error: err.message };
 	}

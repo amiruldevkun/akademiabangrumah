@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "category": "Pendawaian",
+    "quote": "Jangan pasang mozek sebelum pemeriksaan pendawaian selesai.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 2,
+    "category": "Renovasi",
+    "quote": "Ukur dua kali, potong sekali. Silap 5 minit boleh jadi kerja sehari.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 3,
+    "category": "Kemasan",
+    "quote": "Cat yang cantik tak mampu sembunyikan dinding yang tak rata.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 4,
+    "category": "Cat",
+    "quote": "Jangan kedekut pada primer kalau nak cat tahan lama.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 5,
+    "category": "Pendawaian",
+    "quote": "Ambil gambar sebelum tutup dinding. Esok senang cari paip dan wayar.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 6,
+    "category": "Lantai",
+    "quote": "Lantai siap dulu bukan bermaksud kerja dah habis. Lindungi permukaannya sepanjang renovasi.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 7,
+    "category": "Pencahayaan",
+    "quote": "Jangan pilih lampu hanya sebab cantik. Cahaya yang betul buat rumah lebih selesa.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 8,
+    "category": "Perancangan",
+    "quote": "Buat ikut turutan kerja. Baiki siling selepas pasang kabinet cuma tambah kos.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 9,
+    "category": "Kos",
+    "quote": "Murah masa beli belum tentu murah bila dah kena baiki.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 10,
+    "category": "Penyelenggaraan",
+    "quote": "Simpan lebihan jubin dan cat. Beberapa tahun lagi, warna yang sama belum tentu ada.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 11,
+    "category": "Perancangan",
+    "quote": "Rumah yang kemas bermula dengan perancangan, bukan hiasan.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 12,
+    "category": "Bumbung",
+    "quote": "Baiki kebocoran kecil hari ini sebelum jadi kerosakan besar esok.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 13,
+    "category": "Plumbing",
+    "quote": "Paip yang menitis bukan sekadar bunyi, tetapi duit yang mengalir.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 14,
+    "category": "Keselamatan",
+    "quote": "Matikan bekalan elektrik sebelum menyentuh sebarang pendawaian.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 15,
+    "category": "DIY",
+    "quote": "Kalau tak pasti, bertanya lebih murah daripada membaiki.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 16,
+    "category": "Perancangan",
+    "quote": "Beli ikut ukuran, bukan ikut rasa agak-agak.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 17,
+    "category": "Kabinet",
+    "quote": "Kabinet yang cantik bermula dengan dinding yang lurus.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 18,
+    "category": "Jubin",
+    "quote": "Semak corak jubin sebelum gam mengeras.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 19,
+    "category": "Renovasi",
+    "quote": "Kerja yang tergesa-gesa selalunya mengambil masa lebih lama untuk dibaiki.",
+    "author": "Abang Rumah"
+  },
+  {
+    "id": 20,
+    "category": "Rumah",
+    "quote": "Rumah yang baik dibina dengan ilmu, bukan sekadar bajet.",
+    "author": "Abang Rumah"
+  }
+]
