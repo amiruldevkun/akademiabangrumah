@@ -1,4 +1,4 @@
-import adapter from "@sveltejs/adapter-netlify"; // FIXED: Moved your Netlify adapter import here
+import adapter from "@sveltejs/adapter-cloudflare"; // FIXED: Moved your Netlify adapter import here
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
