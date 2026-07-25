@@ -6,7 +6,7 @@
   "scripts": {
     "cf-typegen": "wrangler types",
     "dev": "vite",
-    "build": "wrangler types && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "host": "vite --host",
