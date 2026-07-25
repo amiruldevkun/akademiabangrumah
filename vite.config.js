@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import { SvelteKitPWA } from "@vite-pwa/sveltekit";
 import { sveltekit } from "@sveltejs/kit/vite";
-import { svelteSitemap } from "svelte-sitemap/vite";
 
 export default defineConfig({
   preview: {
