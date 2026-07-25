@@ -4,8 +4,9 @@
   "description": "",
   "type": "module",
   "scripts": {
+    "cf-typegen": "wrangler types",
     "dev": "vite",
-    "build": "vite build",
+    "build": "wrangler types && vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "host": "vite --host",
