@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /landing
+Disallow: /login
+Disallow: /sign_up
+Allow: /pay_landing
+Allow: /about
+Disallow: /admin
+Disallow: /auth
+Disallow: /payment
+Disallow: /api/
+Disallow: /classroom
+
+Sitemap: https://akademi.ayjo.my/sitemap.xml
