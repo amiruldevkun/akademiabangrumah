@@ -11,6 +11,7 @@
     watched?: boolean;
     resumeSeconds?: number;
     visible?: boolean;
+    isNew?: boolean;
   };
 
   type SectionWithItems = {
@@ -332,7 +333,12 @@
                         class="w-full text-left lesson-item cursor-pointer p-1 rounded flex items-center justify-between text-amber-200 hover:text-white transform transition-all duration-200 hover:translate-y-0.5"
                       >
                         <span>{item.label}</span>
-                        <span class="text-xs shrink-0 ml-2">🔒</span>
+                        <span class="flex items-center gap-1 shrink-0 ml-2">
+                          {#if item.isNew}
+                            <span class="text-[10px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded-full">BARU</span>
+                          {/if}
+                          <span class="text-xs">🔒</span>
+                        </span>
                       </button>
                     {:else if item.video}
                       <button
@@ -344,15 +350,23 @@
                           : ''}"
                       >
                         <span>{item.label}</span>
-                        {#if item.watched}
-                          <span class="text-xs shrink-0 ml-2 text-emerald-300" title="Sudah ditonton">✔</span>
-                        {/if}
+                        <span class="flex items-center gap-1 shrink-0 ml-2">
+                          {#if item.isNew}
+                            <span class="text-[10px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded-full">BARU</span>
+                          {/if}
+                          {#if item.watched}
+                            <span class="text-xs text-emerald-300" title="Sudah ditonton">✔</span>
+                          {/if}
+                        </span>
                       </button>
                     {:else}
                       <div
-                        class="lesson-item lesson-item-disabled p-1 rounded text-slate-400 italic cursor-not-allowed select-none"
+                        class="lesson-item lesson-item-disabled p-1 rounded text-slate-400 italic cursor-not-allowed select-none flex items-center justify-between"
                       >
-                        {item.label} <span class="text-xs">(Akan Datang)</span>
+                        <span>{item.label} <span class="text-xs">(Akan Datang)</span></span>
+                        {#if item.isNew}
+                          <span class="text-[10px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded-full not-italic shrink-0 ml-2">BARU</span>
+                        {/if}
                       </div>
                     {/if}
                   {/if}
