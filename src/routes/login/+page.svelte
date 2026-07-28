@@ -1,8 +1,46 @@
 <script lang='ts'>
   import { supabase } from '$lib/supabaseClient';
   import { page } from '$app/state';
+  import { redirect } from '@sveltejs/kit';
 
   let errorMessage = $derived(page.url.searchParams.get('error'));
+  let emailInput = $state('');
+  let emailPass = $state('');
+  let signUpStatus = $state(false);
+  let passError = $state('');
+  let emailError = $state('');
+
+  async function signInWithEmail() {
+    passError = '';
+    emailError = '';
+    signUpStatus = true;
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: emailInput,
+      password: emailPass,
+      options: {
+        
+      }
+    })
+    console.log(error, data);
+    if (error?.message.includes("Password")) {
+      passError = "Kata laluan mestilah sepanjang 6 huruf atau/dan memerlukan 1 huruf besar, 1 huruf kecil, 1 simbol(!,@,$) dan 1 nombor";
+    }
+    else if (error?.message.includes("invalid format")){
+      emailError = "Email bukan format yang diingini. Perbetulkan email.";
+    }
+    else if (error?.message.includes("requires")) {
+      passError = "Letakkan kata laluan"
+    }
+    else if (error?.message.includes("Anonymous")) {
+      let message = "Email dan kata laluan kosong"
+      passError = message;
+      emailError = message;
+    }
+    else {
+      window.location.href="/"
+    }
+    signUpStatus = false;
+  };
 
   async function signInWithGoogle() {
     await supabase.auth.signInWithOAuth({
@@ -16,10 +54,15 @@
       }
     });
   };
+
+  async function signUpRedirect() {
+    throw redirect(303, "/sign_up")
+  }
 </script>
 
 <svelte:head>
   <title>Login - Akademi Abang Rumah</title>
+  <meta name="description" content="Log masuk ke Akademi Abang Rumah untuk mengakses video oleh Abang Rumah!">
 </svelte:head>
 
 <div class="max-h-screen flex items-center justify-center bg-gray-50">
@@ -34,10 +77,33 @@
       <p class="text-red-600 text-sm mb-4">{errorMessage}</p>
     {/if}
 
-    <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-2">
+      <label class="gap-2">
+        Masukkan email anda
+        <input type="email" id="mail" bind:value={emailInput} placeholder="studentabangrumah@gmail.com" class="w-full mt-2 rounded-lg border px-3 py-2.5 text-sm text-gray-900 mb-1 focus:outline-none focus:ring-2 
+        {emailError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#4a7425]'}">
+      </label>
+      <label class="gap-2">
+        Masukkan password yang kuat
+        <input type="password" id="pass" bind:value={emailPass} placeholder="Student@2026" class="w-full mt-2 rounded-lg border px-3 py-2.5 text-sm text-gray-900 mb-1 focus:outline-none focus:ring-2 
+        {passError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#4a7425]'}">
+      </label>
+
+      {#if (emailError != null || passError != null)}
+        <p class="text-sm">{passError}</p>
+        <p class="text-sm">{emailError}</p>
+      {/if}
+                                                                    <!-- vvv loading anim-->
+      <button type="submit" onclick={signInWithEmail} class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl pointer-events-auto shadow-lg
+						       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
+						       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full pointer-events-auto"> 
+        {signUpStatus ? 'Signing in' : 'Sign in'}
+      </button>
+      <hr class="opacity-10">
+      <!-- <p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">ATAU</p> -->
       <button
         onclick={signInWithGoogle}
-        class="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-3"
+        class="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center pointer-events-auto gap-3"
       >
         <svg class="w-5 h-5" viewBox="0 0 48 48">
           <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12
@@ -53,6 +119,9 @@
         Sign In Using Google
       </button>
     </div>
+    <p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">
+      Tiada google? Boleh gunakan email. <a href="/sign_up" class="font-bold">Klik saya untuk buat akaun</a>
+		</p>
 
   </div>
 </div>
