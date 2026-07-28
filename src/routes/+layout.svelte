@@ -1,10 +1,11 @@
 <script lang="ts">
   import '../style.css';
-  import { onMount, type Snippet } from 'svelte';
+  import { onMount,type Snippet } from 'svelte';
   import { supabase } from '$lib/supabaseClient';
   // import { createClient } from '@supabase/supabase-js'
   import { invalidate } from '$app/navigation';
-  // import { page } from '$app/state'; 
+  import { page } from '$app/state'; 
+  import { onNavigate } from '$app/navigation';
     
   type LayoutProps = {
     data?: {
@@ -22,6 +23,17 @@
 
   let user = $state(data?.user ?? null);
 
+  onNavigate((navigation) => {
+    if (!document.startViewTransition) return;
+
+    return new Promise((resolve) => {
+      document.startViewTransition(async () => {
+        resolve();
+        await navigation.complete;
+      });
+    });
+  });
+  
   onMount(() => {
     // Keep `user` in sync if the session changes in another tab, expires, etc.
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -105,11 +117,11 @@
         {#if user.user_metadata?.avatar_url}
           <img
             src={user.user_metadata.avatar_url}
-            alt={user.user_metadata?.full_name ?? 'User avatar'}
+            alt={user.user_metadata?.name ?? 'User avatar'}
             class="w-8 h-8 rounded-full border-2 border-white"
           />
         {/if}
-        <span class="text-sm hidden sm:inline">{user.user_metadata?.full_name ?? user.email}</span>
+        <span class="text-sm hidden sm:inline">{user.user_metadata?.name ?? user.email}</span>
         <button type="button"
           onclick={signOut}
           class="text-xs cursor-pointer bg-white text-[#4a7425] font-semibold px-3 py-1.5 rounded hover:bg-gray-100 transition"
@@ -121,7 +133,7 @@
   </div>
 </header>
 
-{#if showBanner}
+{#if showBanner && !["/landing", "/login", "/sign_up"].some(p => page.url.pathname.startsWith(p))}
   <div class="bg-[#4a7425] text-white px-4 py-3 shadow-md">
     <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left">
       <div class="flex items-center gap-3">
