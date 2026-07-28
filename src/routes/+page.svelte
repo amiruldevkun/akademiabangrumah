@@ -5,7 +5,6 @@
 
 
 	import quotes from '$lib/quotes.json';
-  	import { onMount } from 'svelte';
 
 
 	$effect(() => {
@@ -16,17 +15,17 @@
 		return() => clearInterval(timer);
 	});
 	let current = $derived(quotes[index]);
-	const continueLesson = data.continueLesson;
+	let warningState = $state(true);
 
 	const menuTiles = [
-		{ label: 'Modul Video', sub: 'Belajar ikut modul', href: '/classroom', icon: 'play' },
-		{ label: 'Nota & PDF', sub: 'Muat turun nota', href: '/akan-datang', icon: 'doc' },
-		{ label: 'Checklist Tapak', sub: 'Senarai semak kerja', href: '/akan-datang', icon: 'clipboard' },
-		{ label: 'Kalkulator', sub: 'Kira anggaran kos', href: '/akan-datang', icon: 'calculator' },
-		{ label: 'SOP Kerja', sub: 'Panduan kerja tapak', href: '/akan-datang', icon: 'hardhat' },
-		{ label: 'Tanya Abang Rumah', sub: 'Soalan & jawapan', href: '/akan-datang', icon: 'chat' },
-		{ label: 'Group VVIP', sub: 'WhatsApp eksklusif', href: '/akan-datang', icon: 'users' },
-		{ label: 'Bonus & Template', sub: 'Template & bonus', href: '/akan-datang', icon: 'gift' }
+		{ label: 'Modul Video', sub: 'Belajar ikut modul', href: '/classroom', icon: 'play', disabled: false },
+		{ label: 'Nota & PDF', sub: 'Muat turun nota', href: '/akan-datang', icon: 'doc' , disabled: true},
+		{ label: 'Checklist Tapak', sub: 'Senarai semak kerja', href: '/akan-datang', icon: 'clipboard', disabled: true },
+		{ label: 'Kalkulator', sub: 'Kira anggaran kos', href: '/akan-datang', icon: 'calculator' , disabled: true},
+		{ label: 'SOP Kerja', sub: 'Panduan kerja tapak', href: '/akan-datang', icon: 'hardhat' , disabled: true},
+		{ label: 'Tanya Abang Rumah', sub: 'Soalan & jawapan', href: '/akan-datang', icon: 'chat' , disabled: true},
+		{ label: 'Group VVIP', sub: 'WhatsApp eksklusif', href: '/akan-datang', icon: 'users' , disabled: true},
+		{ label: 'Bonus & Template', sub: 'Template & bonus', href: '/akan-datang', icon: 'gift' ,disabled: true}
 	];
 
 	const announcements = [
@@ -34,16 +33,26 @@
 		{ text: 'Live bersama Abang Rumah hari', bold: 'Jumaat (8.30 malam)' },
 		{ text: 'Bonus PDF:', bold: 'Senarai harga bahan bina terkini' }
 	];
+
+	export function closeWarning() {
+		warningState = false;
+	}
 </script>
 
 <svelte:head>
 	<title>Menu Utama - Akademi Abang Rumah</title>
+	<meta name="description" content="Menu Utama untuk platform Akademi Abang Rumah">
 </svelte:head>
 
 <main class="bg-gray-50 pb-24">
-    <!-- <div class="bg-[#9bd964] text-center justify-center flex text-red-600 px-3 py-3">
-        <h1> PAGE INI BELUM SIAP! HANYA BUTANG MODUL VIDEO SAHAJA MENJADI!!!</h1>
-    </div> -->
+	{#if warningState === true}
+		<div class="bg-[#9bd964] text-center justify-center flex text-red-600 px-3 py-3">
+			<h1 class="ml-auto"> Ada beberapa video tidak dapat ditrack. Harap maaf atas kesulitan ini. Kami akan baikinya dalam masa terdekat ini</h1>
+			<button onclick={closeWarning} class="ml-auto">
+			x
+			</button>
+		</div>
+	{/if}
 	<div class="max-w-5xl mx-auto px-4 py-6 space-y-6">
 		{#if data.showElement}
 			<!-- Welcome / registration banner -->
@@ -59,62 +68,92 @@
 		{/if}
 
 		<!-- Sambung Belajar -->
-		{#if continueLesson}
-			<a
-				href="/classroom?item={continueLesson.id}"
-				class="block bg-emerald-50 rounded-xl p-4 sm:p-5 hover:shadow-md transition"
-			>
+		{#await data.continueLesson}
+			<!-- Skeleton mirrors the resolved card's layout so there's no
+			     layout shift when the real data streams in. -->
+			<div class="bg-emerald-50 rounded-xl p-4 sm:p-5 animate-pulse">
 				<div class="flex items-center justify-between mb-3">
-					<div class="flex items-center gap-2 text-[#4a7425] font-bold text-sm">
-						<span class="text-lg">▶</span> SAMBUNG BELAJAR
-					</div>
-					<span class="text-sm text-gray-500">Lihat Semua ›</span>
+					<div class="h-4 w-32 bg-emerald-200/60 rounded"></div>
+					<div class="h-4 w-16 bg-emerald-200/60 rounded"></div>
 				</div>
 				<div class="flex flex-col sm:flex-row items-center gap-4">
-					<div class="relative w-full sm:w-40 shrink-0">
-						{#if continueLesson.thumbnail}
-							<img
-								src={continueLesson.thumbnail}
-								alt={continueLesson.title}
-								class="w-full h-24 object-cover rounded-lg"
-							/>
-						{:else}
-							<!-- No thumbnail source for Google Drive lessons — generic
-							     placeholder instead of a broken/missing image. -->
-							<div class="w-full h-24 rounded-lg bg-[#4a7425]/10 flex items-center justify-center text-3xl">
-								🎬
-							</div>
-						{/if}
-						{#if continueLesson.durationLabel}
-							<span class="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
-								{continueLesson.durationLabel}
-							</span>
-						{/if}
-						<span class="absolute inset-0 flex items-center justify-center">
-							<span class="w-9 h-9 rounded-full bg-white/90 flex items-center justify-center text-[#4a7425]">▶</span>
-						</span>
+					<div class="w-full sm:w-40 h-24 rounded-lg bg-emerald-200/60 shrink-0"></div>
+					<div class="flex-1 w-full space-y-3">
+						<div class="h-3 w-16 bg-emerald-200/60 rounded"></div>
+						<div class="h-4 w-3/4 bg-emerald-200/60 rounded"></div>
+						<div class="h-2 w-full bg-emerald-200/60 rounded-full"></div>
 					</div>
-					<div class="flex-1 w-full">
-						<p class="text-xs font-semibold text-[#4a7425] mb-0.5">Modul {continueLesson.moduleNumber}</p>
-						<p class="font-bold text-gray-900 mb-2">{continueLesson.title}</p>
-						<div class="w-full bg-gray-200 rounded-full h-2">
-							<div
-								class="bg-[#4a7425] h-2 rounded-full"
-								style="width: {continueLesson.progressPercent}%"
-							></div>
-						</div>
-						<p class="text-xs text-gray-500 mt-1">{continueLesson.progressPercent}%</p>
-					</div>
-					<button
-						class="bg-[#4a7425] text-white font-semibold px-5 py-3 rounded-lg shrink-0 hover:bg-[#3d5f1f] transition w-full sm:w-auto"
-					>
-						Sambung Belajar ▶
-					</button>
+					<div class="h-12 w-full sm:w-32 bg-emerald-200/60 rounded-lg shrink-0"></div>
 				</div>
-			</a>
-		{:else}
-			<!-- No progress yet (new user, or nothing accessible) — a starting
-			     prompt instead of fabricated placeholder progress. -->
+			</div>
+		{:then continueLesson}
+			{#if continueLesson}
+				<a
+					href="/classroom?item={continueLesson.id}"
+					class="block bg-emerald-50 rounded-xl p-4 sm:p-5 hover:shadow-md transition"
+				>
+					<div class="flex items-center justify-between mb-3">
+						<div class="flex items-center gap-2 text-[#4a7425] font-bold text-sm">
+							<span class="text-lg">▶</span> SAMBUNG BELAJAR
+						</div>
+						<span class="text-sm text-gray-500">Lihat Semua ›</span>
+					</div>
+					<div class="flex flex-col sm:flex-row items-center gap-4">
+						<div class="relative w-full sm:w-40 shrink-0">
+							{#if continueLesson.thumbnail}
+								<img
+									src={continueLesson.thumbnail}
+									alt={continueLesson.title}
+									class="w-full h-24 object-cover rounded-lg"
+								/>
+							{:else}
+								<!-- No thumbnail source for Google Drive lessons — generic
+								     placeholder instead of a broken/missing image. -->
+								<div class="w-full h-24 rounded-lg bg-[#4a7425]/10 flex items-center justify-center text-3xl">
+									🎬
+								</div>
+							{/if}
+							{#if continueLesson.durationLabel}
+								<span class="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
+									{continueLesson.durationLabel}
+								</span>
+							{/if}
+							<span class="absolute inset-0 flex items-center justify-center">
+								<span class="w-9 h-9 rounded-full bg-white/90 flex items-center justify-center text-[#4a7425]">▶</span>
+							</span>
+						</div>
+						<div class="flex-1 w-full">
+							<p class="text-xs font-semibold text-[#4a7425] mb-0.5">Modul {continueLesson.moduleNumber}</p>
+							<p class="font-bold text-gray-900 mb-2">{continueLesson.title}</p>
+							<div class="w-full bg-gray-200 rounded-full h-2">
+								<div
+									class="bg-[#4a7425] h-2 rounded-full"
+									style="width: {continueLesson.progressPercent}%"
+								></div>
+							</div>
+							<p class="text-xs text-gray-500 mt-1">{continueLesson.progressPercent}%</p>
+						</div>
+						<button
+							class="bg-[#4a7425] text-white font-semibold px-5 py-3 rounded-lg shrink-0 hover:bg-[#3d5f1f] transition w-full sm:w-auto"
+						>
+							Sambung Belajar ▶
+						</button>
+					</div>
+				</a>
+			{:else}
+				<!-- No progress yet (new user, or nothing accessible) — a starting
+				     prompt instead of fabricated placeholder progress. -->
+				<a
+					href="/classroom"
+					class="block bg-emerald-50 rounded-xl p-5 hover:shadow-md transition text-center"
+				>
+					<p class="font-bold text-[#4a7425] mb-1">▶ Mula Belajar Sekarang</p>
+					<p class="text-sm text-gray-600">Belum ada video ditonton lagi — jom mula modul pertama anda.</p>
+				</a>
+			{/if}
+		{:catch}
+			<!-- Rare: only fires if loadContinueLesson() throws server-side —
+			     same fallback as the "nothing accessible" empty state. -->
 			<a
 				href="/classroom"
 				class="block bg-emerald-50 rounded-xl p-5 hover:shadow-md transition text-center"
@@ -122,21 +161,30 @@
 				<p class="font-bold text-[#4a7425] mb-1">▶ Mula Belajar Sekarang</p>
 				<p class="text-sm text-gray-600">Belum ada video ditonton lagi — jom mula modul pertama anda.</p>
 			</a>
-		{/if}
+		{/await}
 
 		<!-- Menu grid -->
 		<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
 			{#each menuTiles as tile}
-				<a
-					href={tile.href}
-					class="bg-white rounded-xl shadow p-4 flex flex-col items-center text-center gap-2 hover:shadow-md hover:-translate-y-0.5 transition"
+				<svelte:element
+					this={tile.disabled ? 'div' : 'a'}
+					href={tile.disabled ? undefined : tile.href}
+					class="bg-white rounded-xl shadow p-4 flex flex-col items-center text-center gap-2 transition relative
+						{tile.disabled
+							? 'opacity-50 pointer-events-none select-none'
+							: 'hover:shadow-md hover:-translate-y-0.5'}"
 				>
+					{#if tile.disabled}
+						<span class="absolute top-1.5 right-1.5 text-[9px] font-semibold bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full">
+							Akan Datang
+						</span>
+					{/if}
 					<span class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-[#4a7425] text-xl">
 						{#if tile.icon === 'play'}▶{:else if tile.icon === 'doc'}📄{:else if tile.icon === 'clipboard'}📋{:else if tile.icon === 'calculator'}🧮{:else if tile.icon === 'hardhat'}👷{:else if tile.icon === 'chat'}💬{:else if tile.icon === 'users'}👥{:else if tile.icon === 'gift'}🎁{/if}
 					</span>
-					<span class="font-semibold text-sm text-gray-900">{tile.label}</span>
+					<span class="font-semibold text-sm {tile.disabled ? 'text-gray-500' : 'text-gray-900'}">{tile.label}</span>
 					<span class="text-xs text-gray-500">{tile.sub}</span>
-				</a>
+				</svelte:element>
 			{/each}
 		</div>
 

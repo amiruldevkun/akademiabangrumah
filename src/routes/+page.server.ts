@@ -13,99 +13,108 @@
 // Google Drive lessons never appear as "in progress" here — Drive has no
 // resume concept, only a binary watched flag (see the classroom page's
 // markDriveWatched), so a Drive row is either absent or already watched.
+//
+// continueLesson is returned WITHOUT awaiting — SvelteKit streams it in
+// once it resolves, so the rest of the page (menu tiles, tips, etc.)
+// doesn't wait on this DB round-trip. See +page.svelte's {#await} block.
 
-import { getSectionsWithAccess, type AccessibleItem } from '$lib/sections';
-import { redirect } from '@sveltejs/kit';
+import { getSectionsWithAccess, type AccessibleItem } from "$lib/sections";
+import type { PageServerLoad } from "./$types";
 
 const YOUTUBE_ID_PATTERN = /embed\/([A-Za-z0-9_-]+)/;
 
-export async function load({ locals, cookies }) {
-	if (!locals.user) {
-		return { continueLesson: null };
-	}
+export const load: PageServerLoad = async ({ locals, cookies }) => {
+  const justPaid = cookies.get("just_paid") === "true";
 
-	
-	const { sections } = await getSectionsWithAccess(locals.user.id);
+  if (justPaid) {
+    // Delete it right away so a page refresh clears the element
+    cookies.delete("just_paid", { path: "/" });
+  }
 
-	// Flatten to playable, unlocked items, remembering which section (=
-	// "Modul N") each one belongs to.
-	const accessibleItems: AccessibleItem[] = [];
-	sections.forEach((section, sectionIndex) => {
-		for (const item of section.items) {
-			if (!item.locked && item.video) {
-				accessibleItems.push({ ...item, moduleNumber: sectionIndex + 1 });
-			}
-		}
-	});
+  return {
+    showElement: justPaid,
+    continueLesson: loadContinueLesson(locals),
+  };
+};
 
-	if (accessibleItems.length === 0) {
-		return { continueLesson: null };
-	}
+async function loadContinueLesson(locals: App.Locals) {
+  if (!locals.user) {
+    return null;
+  }
 
-	const { data: rows, error } = await locals.supabase
-		.from('video_progress')
-		.select('item_id, resume_seconds, duration_seconds, updated_at')
-		.eq('user_id', locals.user.id)
-		.eq('watched', false)
-		.order('updated_at', { ascending: false })
-		.limit(1);
+  const { sections } = await getSectionsWithAccess(locals.user.id);
 
-	if (error) {
-		console.error('Failed to load continue-learning progress:', error);
-	}
-
-	let continueItem = null;
-	let progress = null;
-
-	const inProgressRow = rows?.[0];
-	if (inProgressRow) {
-		// The most recent in-progress row might point at an item that's since
-		// been relocked (paid status changed) or removed from the doc — if so,
-		// fall through to the "start here" default below instead of showing
-		// a dead lesson.
-		continueItem = accessibleItems.find((item) => item.id === inProgressRow.item_id) ?? null;
-		if (continueItem) progress = inProgressRow;
-	}
-
-	if (!continueItem) {
-		continueItem = accessibleItems[0];
-	}
-
-	const durationSeconds = progress?.duration_seconds ?? null;
-	const resumeSeconds = progress?.resume_seconds ?? 0;
-	const progressPercent = durationSeconds
-		? Math.min(100, Math.round((resumeSeconds / durationSeconds) * 100))
-		: 0;
-
-	const youTubeId = continueItem.video?.match(YOUTUBE_ID_PATTERN)?.[1] ?? null;
-
-	const justPaid = cookies.get('just_paid') === 'true';
-    
-    if (justPaid) {
-        // Delete it right away so a page refresh clears the element
-        cookies.delete('just_paid', { path: '/' });
+  // Flatten to playable, unlocked items, remembering which section (=
+  // "Modul N") each one belongs to.
+  const accessibleItems: AccessibleItem[] = [];
+  sections.forEach((section, sectionIndex) => {
+    for (const item of section.items) {
+      if (!item.locked && item.video) {
+        accessibleItems.push({ ...item, moduleNumber: sectionIndex + 1 });
+      }
     }
+  });
 
+  if (accessibleItems.length === 0) {
+    return null;
+  }
 
-	return {
-		showElement: justPaid,
-		continueLesson: {
-			id: continueItem.id,
-			moduleNumber: continueItem.moduleNumber,
-			title: continueItem.label,
-			progressPercent,
-			durationLabel: formatDuration(durationSeconds),
-			// No thumbnail API exists for Drive's /preview iframe (same
-			// limitation as duration/resume) — the component falls back to a
-			// generic icon when this is null.
-			thumbnail: youTubeId ? `https://img.youtube.com/vi/${youTubeId}/hqdefault.jpg` : null
-		}
-	};
+  const { data: rows, error } = await locals.supabase
+    .from("video_progress")
+    .select("item_id, resume_seconds, duration_seconds, updated_at")
+    .eq("user_id", locals.user.id)
+    .eq("watched", false)
+    .order("updated_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error("Failed to load continue-learning progress:", error);
+  }
+
+  let continueItem = null;
+  let progress = null;
+
+  const inProgressRow = rows?.[0];
+  if (inProgressRow) {
+    // The most recent in-progress row might point at an item that's since
+    // been relocked (paid status changed) or removed from the doc — if so,
+    // fall through to the "start here" default below instead of showing
+    // a dead lesson.
+    continueItem =
+      accessibleItems.find((item) => item.id === inProgressRow.item_id) ?? null;
+    if (continueItem) progress = inProgressRow;
+  }
+
+  if (!continueItem) {
+    continueItem = accessibleItems[0];
+  }
+
+  const durationSeconds = progress?.duration_seconds ?? null;
+  const resumeSeconds = progress?.resume_seconds ?? 0;
+  const progressPercent = durationSeconds
+    ? Math.min(100, Math.round((resumeSeconds / durationSeconds) * 100))
+    : 0;
+
+  const youTubeId = continueItem.video?.match(YOUTUBE_ID_PATTERN)?.[1] ?? null;
+
+  return {
+    id: continueItem.id,
+    moduleNumber: continueItem.moduleNumber,
+    title: continueItem.label,
+    progressPercent,
+    durationLabel: formatDuration(durationSeconds),
+    // No thumbnail API exists for Drive's /preview iframe (same
+    // limitation as duration/resume) — the component falls back to a
+    // generic icon when this is null.
+    thumbnail: youTubeId
+      ? `https://img.youtube.com/vi/${youTubeId}/hqdefault.jpg`
+      : null,
+  };
 }
 
 function formatDuration(totalSeconds: number | null | undefined) {
-	if (!totalSeconds) return null;
-	const minutes = Math.floor(totalSeconds / 60);
-	const seconds = Math.floor(totalSeconds % 60);
-	return `${minutes}:${String(seconds).padStart(2, '0')}`;
+  if (!totalSeconds) return null;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
