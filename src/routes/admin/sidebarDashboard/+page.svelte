@@ -23,6 +23,10 @@
 	let sectionsJson = $derived(parsedSections ? JSON.stringify(parsedSections) : '');
 </script>
 
+
+<svelte:head>
+	<title>Sidebar Dashboard - Admin AAR</title>
+</svelte:head>
 <div class="mx-auto max-w-3xl p-6 space-y-6">
 	<div>
 		<h1 class="text-xl font-semibold">Sidebar Content Admin</h1>
