@@ -10,51 +10,62 @@
 // instead of a bundled sidebar-data.json. Everything below the fetch is
 // untouched — same locking logic, same shape in, same shape out.
 
-import { hasPaidAccess } from '$lib/access';
-import { FREE_VIDEO_LIMIT } from '$lib/config';
-import { getSidebarContent, type RawSection } from '$lib/sidebarContent';
+import { hasPaidAccess } from "$lib/access";
+import { FREE_VIDEO_LIMIT } from "$lib/config";
+import { getSidebarContent, type RawSection } from "$lib/sidebarContent";
+import { getRecentlyAddedItemIds } from "$lib/newItems";
 
 export type CourseItem = {
-	id: string;
-	label: string;
-	video: string | null;
-	locked: boolean;
+  id: string;
+  label: string;
+  video: string | null;
+  locked: boolean;
+  isNew: boolean;
 };
 
 export type CourseSection = {
-	title: string;
-	items: CourseItem[];
+  title: string;
+  items: CourseItem[];
 };
 
 export type AccessibleItem = CourseItem & {
-	moduleNumber: number;
+  moduleNumber: number;
 };
 
 export async function getSectionsWithAccess(
-	userId: string | null | undefined
+  userId: string | null | undefined,
 ): Promise<{ sections: CourseSection[]; paid: boolean }> {
-	const paid = userId ? await hasPaidAccess(userId) : false;
-	let freeVideosLeft = FREE_VIDEO_LIMIT;
+  const paid = userId ? await hasPaidAccess(userId) : false;
+  let freeVideosLeft = FREE_VIDEO_LIMIT;
 
-	const rawSections = await getSidebarContent();
+  const rawSections = await getSidebarContent();
+  const newIds = await getRecentlyAddedItemIds();
 
-	const sections: CourseSection[] = rawSections.map((section: RawSection) => ({
-		title: section.title,
-		items: section.items.map((item): CourseItem => {
-			// "Coming soon" — not paywalled, just not released yet.
-			if (!item.video) {
-				return { ...item, locked: false };
-			}
+  const sections: CourseSection[] = rawSections.map((section: RawSection) => ({
+    title: section.title,
+    items: section.items.map((item): CourseItem => {
+      const isNew = newIds.has(item.id);
 
-			if (paid || freeVideosLeft > 0) {
-				if (!paid) freeVideosLeft -= 1;
-				return { ...item, locked: false };
-			}
+      // "Coming soon" — not paywalled, just not released yet.
+      if (!item.video) {
+        return { ...item, locked: false, isNew };
+      }
 
-			// Locked — strip the real video URL entirely. Only label + id survive.
-			return { id: item.id, label: item.label, video: null, locked: true };
-		})
-	}));
+      if (paid || freeVideosLeft > 0) {
+        if (!paid) freeVideosLeft -= 1;
+        return { ...item, locked: false, isNew };
+      }
 
-	return { sections, paid };
+      // Locked — strip the real video URL entirely. Only label + id survive.
+      return {
+        id: item.id,
+        label: item.label,
+        video: null,
+        locked: true,
+        isNew,
+      };
+    }),
+  }));
+
+  return { sections, paid };
 }
