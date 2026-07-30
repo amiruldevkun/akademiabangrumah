@@ -3,6 +3,19 @@ import { createServer } from "$lib/supabaseServer";
 import { redirect } from "@sveltejs/kit";
 import type { Handle } from "@sveltejs/kit";
 
+function isRecoverySession(accessToken: string): boolean {
+  try {
+    const payload = JSON.parse(
+      Buffer.from(accessToken.split(".")[1], "base64").toString(),
+    );
+    return (
+      payload.amr?.some((entry: any) => entry.method === "recovery") ?? false
+    );
+  } catch {
+    return false;
+  }
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
   event.locals.supabase = createServer(event.cookies);
 
@@ -26,8 +39,8 @@ export const handle: Handle = async ({ event, resolve }) => {
       } = await event.locals.supabase.auth.getSession();
 
       return { session, user };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       console.error("Auth session error (treating as logged out):", message);
       return { session: null, user: null };
     }
@@ -49,6 +62,8 @@ export const handle: Handle = async ({ event, resolve }) => {
     "/about",
     "/sitemap.xml",
     "/sign_up",
+    "/forgot_password",
+    "/auth/reset_password",
   ];
   const isPublicRoute = publicRoutes.some((r) =>
     event.url.pathname.startsWith(r),
@@ -56,6 +71,21 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   if (!user && !isPublicRoute) {
     throw redirect(303, "/landing");
+  }
+
+  // Recovery-session gate: no matter what route they try to hit, if this
+  // is a password-recovery session, force them to finish resetting first.
+  const recoveryAllowedRoutes = [
+    "/auth/reset_password",
+    "/auth/callback",
+    "/auth/error",
+  ];
+  if (
+    session &&
+    isRecoverySession(session.access_token) &&
+    !recoveryAllowedRoutes.some((r) => event.url.pathname.startsWith(r))
+  ) {
+    throw redirect(303, "/auth/reset_password");
   }
 
   return resolve(event);
