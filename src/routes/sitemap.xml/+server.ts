@@ -16,6 +16,9 @@ export async function GET() {
             <url>
                 <loc>https://akademi.ayjo.my/pay_landing</loc>
             </url>
+            <url>
+                <loc>https://akademi.ayjo.my/about</loc> 
+            </url>
 		</urlset>`.trim(),
     {
       headers: {
