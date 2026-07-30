@@ -1,5 +1,42 @@
-## [v1.3.0] - 2026-07-14
+## [v2.0] - 2026-07-30
+
 ### Added
+
+- code: server side parsing service to enable new tags and button elements (51f0d37)
+- uxui: added button elements for watched button (200d093)
+- uxui: new landing page for people coming from natural seo and links. added login function in pay_landing if user is not logged in (b00daf6)
+- code: added a sign up feature via email and login via email. (9722fa2)
+- code: added a first_seen feature where it adds a "BARU" tag to newly added videos. and title for tab (a5ab7eb)
+- code: added lazy loading and disabling buttons that are not in use (19c55d9)
+- code: added meta description, new public routes and robots.txt for bot scraping (dcf2d23)
+- ui: deleted unused css and adding a phone app preview (5c95505)
+- web: added wrangler.json (8529ed4)
+- qol: added google search console meta tag for SEO purposes (6246f76)
+- code: added reminder to comment local dev url (4b4ba3a)
+- code: changes to config files to accomodate new way to update video entries (e6160f7)
+
+### Changed
+
+- web: sitemap for better seo and simple prettier (ae17ddc)
+- code: smoothing out the transitions between pages (e2a5305)
+- code: routine css (97622d0)
+- web: changed to cloudflare pages for edge deployment and free bandwidth :) (27acb37)
+- Update wrangler.json configuration (7f3c51d)
+- Remove pages_build_output_dir from wrangler.json (07379e4)
+- Rename project from 'akademi-abang-rumah' to 'akademiabangrumah' (38efaa3)
+- web: changed build script to remove 'wrangler types' (9d4809e)
+- web: forgot we needed this :skull: (e79e598)
+- web: removed unused dep called sveltesitemap (3e89ea5)
+- web: changed adapter from netlify to cloudflare to migrate to cloudflare pages (8974880)
+- qol: changed google search console from personal to work acc (edbee7c)
+- code: atp imma just commit everything. bad practice but too tired anyway (4822ed1)
+
+---
+
+## [v1.3.0] - 2026-07-14
+
+### Added
+
 - Merge branch 'feature/mainmenu' (ca5039a)
 - code: added title changes for payment/return, added a bottom nav bar for mobile (d769716)
 - code: added title (1e6aaa9)
@@ -27,6 +64,7 @@
 - docs: init npm, added gitignore and restructuring (8f4a90b)
 
 ### Fixed
+
 - code: fixed ui to make it nicer (bdf8cb5)
 - code: fixed rerouting from thank you page to mainmenu instead of video page (91d143d)
 - code: finally fixed the rerouting changes (27e4467)
@@ -40,6 +78,7 @@
 - code: fixed up css and init tailwind (a0e2089)
 
 ### Changed
+
 - code: major oversight in navigation (91f094a)
 - code: routine css (13a516b)
 - code: changed cat gif for akan datang (f3377ec)
