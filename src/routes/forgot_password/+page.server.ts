@@ -6,7 +6,7 @@ export const actions = {
 
     const { data, error } = await locals.supabase.auth.resetPasswordForEmail(
       email,
-      { redirectTo: `${url.origin}/auth/reset_password` },
+      { redirectTo: `${url.origin}auth/reset_password` },
     );
 
     signupStatus = false;
