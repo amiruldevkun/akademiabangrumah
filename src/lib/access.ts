@@ -5,26 +5,43 @@
 // callback flips — this is what makes access persist across re-logins
 // and devices, since it's stored in Supabase, not client-side.
 
-import { supabaseAdmin } from '$lib/supabaseAdmin';
+import { supabaseAdmin } from "$lib/supabaseAdmin";
 
 /**
  * @param {string} userId
  * @returns {Promise<boolean>}
  */
 
-export async function hasPaidAccess(userId:string): Promise<boolean> {
-	if (!userId) return false;
+export async function hasPaidAccess(userId: string): Promise<boolean> {
+  if (!userId) return false;
 
-	const { data, error } = await supabaseAdmin
-		.from('profiles')
-		.select('has_paid')
-		.eq('id', userId)
-		.single();
+  const { data, error } = await supabaseAdmin
+    .from("profiles")
+    .select("has_paid")
+    .eq("id", userId)
+    .single();
 
-	if (error) {
-		console.error('hasPaidAccess lookup failed:', error);
-		return false; // fail closed
-	}
+  if (error) {
+    console.error("hasPaidAccess lookup failed:", error);
+    return false; // fail closed
+  }
 
-	return data?.has_paid === true;
+  return data?.has_paid === true;
+}
+
+export async function hasAdminAccess(userId: string): Promise<boolean> {
+  if (!userId) return false;
+
+  const { data, error } = await supabaseAdmin
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", userId)
+    .single();
+
+  if (error) {
+    console.error("hasAdminAccess lookup failed:", error);
+    return false; // fail closed
+  }
+
+  return data?.is_admin === true;
 }
