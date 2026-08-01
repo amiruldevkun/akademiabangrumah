@@ -124,9 +124,9 @@
       <button
         type="submit"
         onclick={signInWithEmail}
-        class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg
+        class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg pointer-events-auto
 						       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
-						       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full pointer-events-auto"
+						       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full"
       >
         {signUpStatus ? "Melog Masuk..." : "Log Masuk"}
       </button>
