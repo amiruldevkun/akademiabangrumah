@@ -1,4 +1,4 @@
-// src/routes/payment/return/+page.server.js
+// src/routes/payment/return/+page.server.ts
 //
 // This is the customer-facing return URL (billReturnUrl). ToyyibPay
 // redirects the browser here with query params (status_id, order_id, etc.)
@@ -12,23 +12,23 @@
 // 6 times) means this effectively retries the live check automatically
 // for ~12 seconds without any extra work.
 
-import { reconcileOrder } from '$lib/reconcileOrder';
+import { reconcileOrder } from "$lib/reconcileOrder";
 
 export async function load({ url }) {
-	const orderId = url.searchParams.get('order_id');
+  const orderId = url.searchParams.get("order_id");
 
-	if (!orderId) {
-		return { order: null };
-	}
+  if (!orderId) {
+    return { order: null };
+  }
 
-	const { order, error } = await reconcileOrder({orderId});
+  const { order, error } = await reconcileOrder({ orderId });
 
-	if (error && !order) {
-		console.error('Could not load/reconcile order:', error, { orderId });
-		return { order: null };
-	}
+  if (error && !order) {
+    console.error("Could not load/reconcile order:", error, { orderId });
+    return { order: null };
+  }
 
-	return { order };
+  return { order };
 }
 
 // UNCOMMENT THIS AFTER TESTING
