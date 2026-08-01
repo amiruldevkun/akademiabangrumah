@@ -26,9 +26,17 @@
       passError = "Kata laluan sama seperti sebelumnya. Tukar kata laluan.";
       message = "Password must be different than the previous";
       return console.error(() => message);
+    } else if (error?.message.includes("Password")) {
+      return fail(400, {
+        passError:
+          "Kata laluan mestilah sepanjang 6 huruf atau/dan memerlukan 1 huruf besar, 1 huruf kecil, 1 simbol(!,@,$) dan 1 nombor",
+      });
+    } else if (error?.message.includes("requires")) {
+      return fail(400, { passError: "Letakkan kata laluan" });
     } else {
       console.warn("Password for " + data.user + " has been changed!");
     }
+
     await supabase.auth.signOut();
     return (success = true);
   }
@@ -135,7 +143,9 @@
               </div>
             </label>
           {/if}
-
+          {#if passError != null}
+            <p class="text-sm">{passError}</p>
+          {/if}
           <button
             type="button"
             onclick={updateCreds}

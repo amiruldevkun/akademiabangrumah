@@ -69,7 +69,10 @@
                 bind:value={emailInput}
                 required
                 placeholder="studentabangrumah@gmail.com"
-                class="w-full mt-2 rounded-lg border px-3 py-2.5 text-sm text-gray-900 mb-2 focus:outline-none focus:ring-2"
+                class="w-full mt-2 rounded-lg border px-3 py-2.5 text-sm text-gray-900 mb-2 focus:outline-none focus:ring-2
+                {form?.emailError
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-gray-300 focus:ring-[#4a7425]'}"
               />
             </div>
           </label>
@@ -85,6 +88,9 @@
             {signUpStatus ? "Menghantar permintaan" : "Mohon penukaran"}
           </button>
         </form>
+      {/if}
+      {#if form?.emailError != null}
+        <p class="text-sm">{form?.emailError}</p>
       {/if}
     </div>
     <p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">
