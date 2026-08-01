@@ -61,7 +61,7 @@ export async function POST({ request, url, locals }) {
   }
 
   // COMMENT THIS WHEN PUSHING TO PROD STUPID
-  const origin = PUBLIC_TESTING_NGROK_URL || url.origin;
+  // const origin = PUBLIC_TESTING_NGROK_URL || url.origin;
 
   // 2. Ask ToyyibPay for a bill for that order.
   try {

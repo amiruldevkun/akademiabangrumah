@@ -1,3 +1,57 @@
+## [v2.1] - 2026-08-01
+
+### Added
+
+- feat: added new stuff on the landing page! (e104f09)
+- code: added more verbose error messages for user and dev (ee0c026)
+- feat: missed one more page server (4a05644)
+- feat: announcements now show newly added videos (0286d87)
+- feat: new notes reader! for extra text docs or pdfs that en ayub wants (9599456)
+- code: added new location in sitemap for bot crawl and removed prerender option in pay_landing as it was failing the payment thing (2247bbd)
+- code: added recovery session function where we log out users when finishing up their password resets (5bc7fec)
+- logs: Changelog for newest deploy is here (d1ca738)
+- code: server side parsing service to enable new tags and button elements (51f0d37)
+- uxui: added button elements for watched button (200d093)
+- uxui: new landing page for people coming from natural seo and links. added login function in pay_landing if user is not logged in (b00daf6)
+- code: added a sign up feature via email and login via email. (9722fa2)
+- code: added a first_seen feature where it adds a "BARU" tag to newly added videos. and title for tab (a5ab7eb)
+- code: added lazy loading and disabling buttons that are not in use (19c55d9)
+- code: added meta description, new public routes and robots.txt for bot scraping (dcf2d23)
+- ui: deleted unused css and adding a phone app preview (5c95505)
+- web: added wrangler.json (8529ed4)
+- qol: added google search console meta tag for SEO purposes (6246f76)
+- code: added reminder to comment local dev url (4b4ba3a)
+- code: changes to config files to accomodate new way to update video entries (e6160f7)
+
+### Fixed
+
+- code: IMPORTANT FIX! failure in toyyibpay reconcilation because of typescript (669f3a8)
+- code: fixed reset password flow via email. improved cta and buttons for old people (af1f16b)
+
+### Changed
+
+- code: pointer events still not working. oh well (e097658)
+- code: routine css and cleanup (e141c31)
+- code: removed trailing slash because of some weird quirk that it has a trailing slash as the site url? (d13db5e)
+- code: reenabled 2 buttons for qna and telegram group invite. (06bfb0f)
+- deps: routine stuff (9427466)
+- chore: cleanup on isle 6! removing irrelevant files (a901478)
+- web: sitemap for better seo and simple prettier (ae17ddc)
+- code: smoothing out the transitions between pages (e2a5305)
+- code: routine css (97622d0)
+- web: changed to cloudflare pages for edge deployment and free bandwidth :) (27acb37)
+- Update wrangler.json configuration (7f3c51d)
+- Remove pages_build_output_dir from wrangler.json (07379e4)
+- Rename project from 'akademi-abang-rumah' to 'akademiabangrumah' (38efaa3)
+- web: changed build script to remove 'wrangler types' (9d4809e)
+- web: forgot we needed this :skull: (e79e598)
+- web: removed unused dep called sveltesitemap (3e89ea5)
+- web: changed adapter from netlify to cloudflare to migrate to cloudflare pages (8974880)
+- qol: changed google search console from personal to work acc (edbee7c)
+- code: atp imma just commit everything. bad practice but too tired anyway (4822ed1)
+
+---
+
 ## [v2.0] - 2026-07-30
 
 ### Added
