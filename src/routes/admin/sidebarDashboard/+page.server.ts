@@ -13,6 +13,25 @@ import type { Actions, PageServerLoad } from "./$types";
 import { parseSidebarText } from "$lib/sidebarParser";
 import { supabaseAdmin } from "$lib/supabaseAdmin";
 
+// Section titles come out of the parser UPPERCASE (e.g. "KERJA ATAP &
+// BUMBUNG") — prettify for display in the homepage announcement feed.
+function toTitleCase(str: string): string {
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
+type Announcement = {
+  id: string;
+  text: string;
+  bold: string;
+  created_at: string;
+};
+
+const MAX_ANNOUNCEMENTS = 5;
+
 export const load: PageServerLoad = async ({ locals }) => {
   // locals.user is already populated by hooks.server.ts, and hooks.server.ts
   // has already redirected to /login if it's null — but we re-check safely
@@ -106,7 +125,7 @@ export const actions: Actions = {
     // 1. Read current row so we can back it up before overwriting.
     const { data: existing, error: readErr } = await supabaseAdmin
       .from("sidebar_content")
-      .select("content, version")
+      .select("content, version, announcements")
       .eq("id", "v1")
       .single();
 
@@ -123,6 +142,7 @@ export const actions: Actions = {
       .insert({
         content: existing.content,
         version: existing.version,
+        announcements: existing.announcements ?? [],
         created_by: user.id,
       });
 
@@ -162,6 +182,63 @@ export const actions: Actions = {
       }
     }
 
+    // 2c. Turn the newIds diff into human-readable announcements for the
+    // homepage "PENGUMUMAN" box. Grouped by section so "5 new videos in
+    // one module" becomes one line, not five. A section title that didn't
+    // exist before -> "new module" wording; one that did -> "new videos
+    // added to <module>" wording.
+    let mergedAnnouncements: Announcement[] =
+      (existing.announcements as Announcement[] | null) ?? [];
+
+    if (newIds.length > 0) {
+      const oldTitles = new Set<string>(
+        (existing.content as { title: string }[]).map((s) => s.title),
+      );
+
+      const idToSectionTitle = new Map<string, string>();
+      for (const s of sections as {
+        title: string;
+        items: { id: string }[];
+      }[]) {
+        for (const item of s.items) {
+          idToSectionTitle.set(item.id, s.title);
+        }
+      }
+
+      const newCountByTitle = new Map<string, number>();
+      for (const id of newIds) {
+        const title = idToSectionTitle.get(id);
+        if (!title) continue;
+        newCountByTitle.set(title, (newCountByTitle.get(title) ?? 0) + 1);
+      }
+
+      const now = new Date().toISOString();
+      const generated: Announcement[] = [];
+
+      for (const [title, count] of newCountByTitle) {
+        generated.push(
+          oldTitles.has(title)
+            ? {
+                id: crypto.randomUUID(),
+                text: `${count} video baru ditambah dalam modul`,
+                bold: toTitleCase(title),
+                created_at: now,
+              }
+            : {
+                id: crypto.randomUUID(),
+                text: "Modul baru telah ditambah:",
+                bold: toTitleCase(title),
+                created_at: now,
+              },
+        );
+      }
+
+      mergedAnnouncements = [...generated, ...mergedAnnouncements].slice(
+        0,
+        MAX_ANNOUNCEMENTS,
+      );
+    }
+
     // 3. Upsert the new content, bumping the version.
     const { error: upsertErr } = await supabaseAdmin
       .from("sidebar_content")
@@ -169,6 +246,7 @@ export const actions: Actions = {
         content: sections,
         version: existing.version + 1,
         updated_at: new Date().toISOString(),
+        announcements: mergedAnnouncements,
       })
       .eq("id", "v1");
 

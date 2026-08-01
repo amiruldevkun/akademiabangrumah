@@ -1,4 +1,4 @@
-// src/routes/+page.server.js
+// src/routes/+page.server.ts
 //
 // Drives the "Sambung Belajar" card. Picks, in order:
 //   1. The most recently updated video_progress row that's unlocked for
@@ -17,6 +17,11 @@
 // continueLesson is returned WITHOUT awaiting — SvelteKit streams it in
 // once it resolves, so the rest of the page (menu tiles, tips, etc.)
 // doesn't wait on this DB round-trip. See +page.svelte's {#await} block.
+//
+// announcements is fetched (and awaited) here, not streamed — it's a
+// single small select against sidebar_content, generated server-side by
+// the admin push action in /admin/sidebar whenever new content goes
+// live. No reason to show a skeleton for it.
 
 import { getSectionsWithAccess, type AccessibleItem } from "$lib/sections";
 import type { PageServerLoad } from "./$types";
@@ -31,9 +36,16 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
     cookies.delete("just_paid", { path: "/" });
   }
 
+  const { data: sidebarRow } = await locals.supabase
+    .from("sidebar_content")
+    .select("announcements")
+    .eq("id", "v1")
+    .single();
+
   return {
     showElement: justPaid,
     continueLesson: loadContinueLesson(locals),
+    announcements: sidebarRow?.announcements ?? [],
   };
 };
 

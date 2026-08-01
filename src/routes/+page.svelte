@@ -1,7 +1,7 @@
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
   import { page } from "$app/state";
-  /** @type {{ data: { user: any, continueLesson: any | null } }} */
+  /** @type {{ data: { user: any, continueLesson: any | null, announcements: { id: string, text: string, bold: string, created_at: string }[] } }} */
   let { data } = $props();
   let index = $state(0);
 
@@ -31,10 +31,10 @@
     },
     {
       label: "Nota & PDF",
-      sub: "Muat turun nota",
-      href: "/akan-datang",
+      sub: "Nota daripada Abang Rumah",
+      href: "/notes",
       icon: "doc",
-      disabled: true,
+      disabled: false,
     },
     {
       label: "Checklist Tapak",
@@ -78,12 +78,6 @@
       icon: "gift",
       disabled: true,
     },
-  ];
-
-  const announcements = [
-    { text: "Modul baru telah ditambah:", bold: "Kerja Atap & Bumbung" },
-    { text: "Live bersama Abang Rumah hari", bold: "Jumaat (8.30 malam)" },
-    { text: "Bonus PDF:", bold: "Senarai harga bahan bina terkini" },
   ];
 
   export function closeWarning() {
@@ -225,7 +219,7 @@
         </a>
       {:else}
         <!-- No progress yet (new user, or nothing accessible) — a starting
-				     prompt instead of fabricated placeholder progress. -->
+			     prompt instead of fabricated placeholder progress. -->
         <a
           href="/classroom"
           class="block bg-emerald-50 rounded-xl p-5 hover:shadow-md transition text-center"
@@ -238,7 +232,7 @@
       {/if}
     {:catch}
       <!-- Rare: only fires if loadContinueLesson() throws server-side —
-			     same fallback as the "nothing accessible" empty state. -->
+		     same fallback as the "nothing accessible" empty state. -->
       <a
         href="/classroom"
         class="block bg-emerald-50 rounded-xl p-5 hover:shadow-md transition text-center"
@@ -257,7 +251,7 @@
           this={tile.disabled ? "div" : "a"}
           href={tile.disabled ? undefined : tile.href}
           class="bg-white rounded-xl shadow p-4 flex flex-col items-center text-center gap-2 transition relative pointer-events-auto
-						{tile.disabled
+					{tile.disabled
             ? 'opacity-50 pointer-events-none select-none'
             : 'hover:shadow-md hover:-translate-y-0.5'}"
         >
@@ -284,10 +278,10 @@
     </div>
 
     <!-- Progress + Latest videos — both disabled for now. Neither has a
-		     real data source yet: the donut needs a defined "total modules"
-		     count to be meaningful, and "latest videos" needs publish dates,
-		     which sidebar-data.json doesn't carry. Showing them grayed out
-		     with "Akan Datang" beats showing fabricated numbers. -->
+	     real data source yet: the donut needs a defined "total modules"
+	     count to be meaningful, and "latest videos" needs publish dates,
+	     which sidebar-data.json doesn't carry. Showing them grayed out
+	     with "Akan Datang" beats showing fabricated numbers. -->
     <div class="grid sm:grid-cols-2 gap-4">
       <!-- Progress donut (disabled) -->
       <div
@@ -325,12 +319,12 @@
 
       <!-- Latest videos (disabled) -->
       <!-- <div class="bg-white rounded-xl shadow p-5 opacity-50 pointer-events-none select-none relative">
-				<span class="absolute top-3 right-3 text-[10px] font-semibold bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
-					Akan Datang
-				</span>
-				<p class="font-bold text-gray-900 mb-3 flex items-center gap-2">▶ VIDEO TERBARU</p>
-				<p class="text-sm text-gray-400">Ciri ini akan datang tidak lama lagi.</p>
-			</div> -->
+			<span class="absolute top-3 right-3 text-[10px] font-semibold bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
+				Akan Datang
+			</span>
+			<p class="font-bold text-gray-900 mb-3 flex items-center gap-2">▶ VIDEO TERBARU</p>
+			<p class="text-sm text-gray-400">Ciri ini akan datang tidak lama lagi.</p>
+		</div> -->
     </div>
 
     <!-- Tip + Pengumuman -->
@@ -361,16 +355,19 @@
           <p class="font-bold text-gray-900 flex items-center gap-2">
             📢 PENGUMUMAN
           </p>
-          <span class="text-sm text-gray-500">Lihat Semua ›</span>
         </div>
         <ul class="space-y-2">
-          {#each announcements as item}
+          {#each data.announcements as item (item.id)}
             <li class="text-sm text-gray-700 flex gap-2">
               <span class="text-[#4a7425]">•</span>
               <span
                 >{item.text}
                 <span class="font-semibold">{item.bold}</span></span
               >
+            </li>
+          {:else}
+            <li class="text-sm text-gray-400">
+              Tiada pengumuman buat masa ini.
             </li>
           {/each}
         </ul>
@@ -395,10 +392,10 @@
       <span class="text-lg">📖</span> Belajar
     </a>
     <a
-      href="/akan-datang"
+      href="/notes"
       class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
     >
-      <span class="text-lg">⬇️</span> Downloads
+      <span class="text-lg">📝</span> Nota
     </a>
     <a
       href={waLink}
