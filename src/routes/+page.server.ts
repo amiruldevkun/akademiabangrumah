@@ -20,8 +20,17 @@
 //
 // announcements is fetched (and awaited) here, not streamed — it's a
 // single small select against sidebar_content, generated server-side by
-// the admin push action in /admin/sidebar whenever new content goes
-// live. No reason to show a skeleton for it.
+// the admin push action in /admin/sidebarDashboard whenever new content
+// goes live.
+//
+// Two SEPARATE sources get combined here:
+//   - manual_announcements: curated directly via /admin/announcementsDashboard,
+//     never touched by a sidebar push.
+//   - announcements: auto-generated as a side effect of a sidebar content
+//     push (see admin/sidebarDashboard/+page.server.ts).
+// Manual entries are shown first (pinned), auto-generated ones after —
+// so a deliberate manual announcement never gets silently evicted by
+// routine push activity.
 
 import { getSectionsWithAccess, type AccessibleItem } from "$lib/sections";
 import type { PageServerLoad } from "./$types";
@@ -38,14 +47,19 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
 
   const { data: sidebarRow } = await locals.supabase
     .from("sidebar_content")
-    .select("announcements")
+    .select("announcements, manual_announcements")
     .eq("id", "v1")
     .single();
+
+  const announcements = [
+    ...(sidebarRow?.manual_announcements ?? []),
+    ...(sidebarRow?.announcements ?? []),
+  ];
 
   return {
     showElement: justPaid,
     continueLesson: loadContinueLesson(locals),
-    announcements: sidebarRow?.announcements ?? [],
+    announcements,
   };
 };
 

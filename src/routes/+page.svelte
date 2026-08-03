@@ -1,7 +1,6 @@
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
-  import { page } from "$app/state";
-  /** @type {{ data: { user: any, continueLesson: any | null, announcements: { id: string, text: string, bold: string, created_at: string }[] } }} */
+  /** @type {{ data: { user: any, admin: boolean, continueLesson: any | null, announcements: { id: string, text: string, created_at: string }[] } }} */
   let { data } = $props();
   let index = $state(0);
 
@@ -10,6 +9,7 @@
   const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   const teleLink = "https://t.me/+3EReJANa7eszNjJl";
   import quotes from "$lib/quotes.json";
+  import { renderAnnouncementMarkdown } from "$lib/markdown";
 
   $effect(() => {
     const timer = setInterval(() => {
@@ -36,27 +36,27 @@
       icon: "doc",
       disabled: false,
     },
-    {
-      label: "Checklist Tapak",
-      sub: "Senarai semak kerja",
-      href: "/akan-datang",
-      icon: "clipboard",
-      disabled: true,
-    },
-    {
-      label: "Kalkulator",
-      sub: "Kira anggaran kos",
-      href: "/akan-datang",
-      icon: "calculator",
-      disabled: true,
-    },
-    {
-      label: "SOP Kerja",
-      sub: "Panduan kerja tapak",
-      href: "/akan-datang",
-      icon: "hardhat",
-      disabled: true,
-    },
+    // {
+    //   label: "Checklist Tapak",
+    //   sub: "Senarai semak kerja",
+    //   href: "/akan-datang",
+    //   icon: "clipboard",
+    //   disabled: true,
+    // },
+    // {
+    //   label: "Kalkulator",
+    //   sub: "Kira anggaran kos",
+    //   href: "/akan-datang",
+    //   icon: "calculator",
+    //   disabled: true,
+    // },
+    // {
+    //   label: "SOP Kerja",
+    //   sub: "Panduan kerja tapak",
+    //   href: "/akan-datang",
+    //   icon: "hardhat",
+    //   disabled: true,
+    // },
     {
       label: "Tanya Abang Rumah",
       sub: "Soalan & jawapan",
@@ -71,13 +71,13 @@
       icon: "users",
       disabled: false,
     },
-    {
-      label: "Bonus & Template",
-      sub: "Template & bonus",
-      href: "/akan-datang",
-      icon: "gift",
-      disabled: true,
-    },
+    // {
+    //   label: "Bonus & Template",
+    //   sub: "Template & bonus",
+    //   href: "/akan-datang",
+    //   icon: "gift",
+    //   disabled: true,
+    // },
   ];
 
   export function closeWarning() {
@@ -102,7 +102,7 @@
         Ada beberapa video tidak dapat ditrack. Harap maaf atas kesulitan ini.
         Kami akan baikinya dalam masa terdekat ini
       </h1>
-      <button onclick={closeWarning} class="ml-auto"> x </button>
+      <button onclick={closeWarning} class="ml-auto"> ⤫</button>
     </div>
   {/if}
   <div class="max-w-5xl mx-auto px-4 py-6 space-y-6">
@@ -211,7 +211,7 @@
               </p>
             </div>
             <button
-              class="bg-[#4a7425] text-white font-semibold px-5 py-3 rounded-lg shrink-0 hover:bg-[#3d5f1f] transition w-full sm:w-auto"
+              class="bg-[#4a7425] cursor-pointer text-white font-semibold px-5 py-3 rounded-lg shrink-0 hover:bg-[#3d5f1f] transition w-full sm:w-auto"
             >
               Sambung Belajar ▶
             </button>
@@ -360,10 +360,7 @@
           {#each data.announcements as item (item.id)}
             <li class="text-sm text-gray-700 flex gap-2">
               <span class="text-[#4a7425]">•</span>
-              <span
-                >{item.text}
-                <span class="font-semibold">{item.bold}</span></span
-              >
+              <span>{@html renderAnnouncementMarkdown(item.text)}</span>
             </li>
           {:else}
             <li class="text-sm text-gray-400">
@@ -404,7 +401,7 @@
       <span class="text-lg">💬</span> Bantuan
     </a>
     <a
-      href="/akan-datang"
+      href={data.admin ? "/admin" : "/"}
       class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
     >
       <span class="text-lg">👤</span> Akaun
