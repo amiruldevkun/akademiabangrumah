@@ -1,7 +1,7 @@
-<script lang='ts'>
-  import { onMount } from 'svelte';
-  import { page } from '$app/state';
-  import { supabase } from '$lib/supabaseClient';
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { page } from "$app/state";
+  import { supabase } from "$lib/supabaseClient";
 
   type LessonItem = {
     id: string;
@@ -30,9 +30,11 @@
   let { data }: { data: PageData } = $props();
 
   let sidebarOpen = $state(false);
-  let searchQuery = $state('');
-  let selectedLesson = $state('Ketik menu ☰ untuk melihat senarai video pembelajaran.');
-  let currentVideo = $state('');
+  let searchQuery = $state("");
+  let selectedLesson = $state(
+    "Ketik menu ☰ untuk melihat senarai video pembelajaran.",
+  );
+  let currentVideo = $state("");
   let selectedItem = $state<LessonItem | null>(null);
 
   let sidebarEl = $state<HTMLElement | null>(null);
@@ -72,17 +74,19 @@
         sidebarOpen = false;
       }
     }
-    document.addEventListener('click', handleOutsideClick);
+    document.addEventListener("click", handleOutsideClick);
 
     // Deep link from the home page's "Sambung Belajar" card — resume the
     // exact lesson instead of just landing on the classroom listing.
     // Only auto-selects items the server already deemed unlocked/playable;
     // a stale or tampered ?item= for a locked/missing lesson is a silent no-op.
-    const requestedItemId = page.url.searchParams.get('item');
+    const requestedItemId = page.url.searchParams.get("item");
     if (requestedItemId) {
       const requestedItem = data.sections
         .flatMap((section) => section.items)
-        .find((item) => item.id === requestedItemId && item.video && !item.locked);
+        .find(
+          (item) => item.id === requestedItemId && item.video && !item.locked,
+        );
       if (requestedItem) selectLesson(requestedItem);
     }
 
@@ -95,16 +99,16 @@
         previousCallback?.();
         ytApiReady = true;
       };
-      if (!document.getElementById('youtube-iframe-api')) {
-        const tag = document.createElement('script');
-        tag.id = 'youtube-iframe-api';
-        tag.src = 'https://www.youtube.com/iframe_api';
+      if (!document.getElementById("youtube-iframe-api")) {
+        const tag = document.createElement("script");
+        tag.id = "youtube-iframe-api";
+        tag.src = "https://www.youtube.com/iframe_api";
         document.head.appendChild(tag);
       }
     }
 
     return () => {
-      document.removeEventListener('click', handleOutsideClick);
+      document.removeEventListener("click", handleOutsideClick);
       clearProgressSaveInterval();
       ytPlayer?.destroy?.();
       ytPlayer = null;
@@ -122,7 +126,7 @@
 
       const items = section.items.map((item) => ({
         ...item,
-        visible: titleMatches || item.label.toLowerCase().includes(filterText)
+        visible: titleMatches || item.label.toLowerCase().includes(filterText),
       }));
 
       const anySectionItemVisible = items.some((i) => i.visible);
@@ -131,13 +135,13 @@
         ...section,
         items,
         anySectionItemVisible,
-        forceOpen: anySectionItemVisible && filterText.length > 0
+        forceOpen: anySectionItemVisible && filterText.length > 0,
       };
-    })
+    }),
   );
 
   function isYouTube(url: string | null | undefined) {
-    return !!url && url.includes('youtube.com/embed/');
+    return !!url && url.includes("youtube.com/embed/");
   }
 
   function extractYouTubeId(embedUrl: string) {
@@ -148,7 +152,7 @@
   function selectLesson(item: LessonItem) {
     if (item.locked) {
       // Send them to the payment landing page instead of doing nothing.
-      window.location.href = '/pay_landing';
+      window.location.href = "/pay_landing";
       return;
     }
     if (!item.video) return; // "Akan Datang" items aren't clickable
@@ -182,16 +186,20 @@
     const videoId = extractYouTubeId(currentVideo);
     if (!videoId) return;
 
-    const el = document.getElementById('yt-player-frame');
+    const el = document.getElementById("yt-player-frame");
     if (!el) return;
 
     const thisItem = selectedItem;
     if (!thisItem) return;
 
-    ytPlayer = new window.YT!.Player('yt-player-frame', {
+    ytPlayer = new window.YT!.Player("yt-player-frame", {
       videoId,
       events: {
-        onReady: (event: { target: { seekTo: (seconds: number, allowSeekAhead: boolean) => void } }) => {
+        onReady: (event: {
+          target: {
+            seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+          };
+        }) => {
           if (thisItem.resumeSeconds && thisItem.resumeSeconds > 5) {
             event.target.seekTo(thisItem.resumeSeconds, true);
           }
@@ -199,14 +207,19 @@
         onStateChange: (event: { data: number }) => {
           if (event.data === window.YT?.PlayerState.PLAYING) {
             clearProgressSaveInterval();
-            progressSaveInterval = setInterval(() => saveYouTubeProgress(thisItem), 10000);
+            progressSaveInterval = setInterval(
+              () => saveYouTubeProgress(thisItem),
+              10000,
+            );
           } else {
             clearProgressSaveInterval();
-            if (event.data === window.YT?.PlayerState.PAUSED) saveYouTubeProgress(thisItem);
-            if (event.data === window.YT?.PlayerState.ENDED) saveYouTubeProgress(thisItem, true);
+            if (event.data === window.YT?.PlayerState.PAUSED)
+              saveYouTubeProgress(thisItem);
+            if (event.data === window.YT?.PlayerState.ENDED)
+              saveYouTubeProgress(thisItem, true);
           }
-        }
-      }
+        },
+      },
     });
   });
 
@@ -219,7 +232,7 @@
       item.id,
       Math.floor(current),
       watched,
-      duration > 0 ? Math.floor(duration) : null
+      duration > 0 ? Math.floor(duration) : null,
     );
     if (watched && selectedItem?.id === item.id) {
       selectedItem = { ...selectedItem, watched: true };
@@ -236,7 +249,7 @@
     itemId: string,
     resumeSeconds: number,
     watched: boolean,
-    durationSeconds: number | null = null
+    durationSeconds: number | null = null,
   ) {
     const payload: Record<string, unknown> = {
       user_id: data.userId,
@@ -244,7 +257,7 @@
       resume_seconds: resumeSeconds,
       watched,
       watched_at: watched ? new Date().toISOString() : null,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
     // Only include duration_seconds when we actually know it, so an upsert
     // from a source that doesn't know duration (e.g. the Drive fallback)
@@ -252,9 +265,9 @@
     if (durationSeconds !== null) payload.duration_seconds = durationSeconds;
 
     const { error } = await supabase
-      .from('video_progress')
-      .upsert(payload, { onConflict: 'user_id,item_id' });
-    if (error) console.error('Failed to save video progress:', error);
+      .from("video_progress")
+      .upsert(payload, { onConflict: "user_id,item_id" });
+    if (error) console.error("Failed to save video progress:", error);
   }
 
   function toggleSidebar(e: MouseEvent) {
@@ -286,7 +299,7 @@
     <button
       bind:this={menuBtnEl}
       onclick={toggleSidebar}
-      class="absolute top-24 right-0 bottom-10 translate-x-full w-9 h-11 bg-[#4a7425] rounded-r-full shadow-md flex items-center justify-center focus:outline-none"
+      class="absolute cursor-pointer top-24 right-0 bottom-10 translate-x-full w-9 h-11 bg-[#4a7425] rounded-r-full shadow-md flex items-center justify-center focus:outline-none"
       aria-label="Toggle menu"
     >
       <span class="text-white text-lg leading-none">☰</span>
@@ -317,7 +330,10 @@
       <div class="space-y-6">
         {#each filteredSections as section}
           {#if section.anySectionItemVisible}
-            <details class="lesson-section space-y-2 group" open={section.forceOpen}>
+            <details
+              class="lesson-section space-y-2 group"
+              open={section.forceOpen}
+            >
               <summary
                 class="lesson-section-title bg-white text-black font-semibold px-3 py-1.5 rounded text-center shadow-sm cursor-pointer list-none select-none outline-none"
               >
@@ -335,7 +351,10 @@
                         <span>{item.label}</span>
                         <span class="flex items-center gap-1 shrink-0 ml-2">
                           {#if item.isNew}
-                            <span class="text-[10px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded-full">BARU</span>
+                            <span
+                              class="text-[10px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded-full"
+                              >BARU</span
+                            >
                           {/if}
                           <span class="text-xs">🔒</span>
                         </span>
@@ -352,10 +371,16 @@
                         <span>{item.label}</span>
                         <span class="flex items-center gap-1 shrink-0 ml-2">
                           {#if item.isNew}
-                            <span class="text-[10px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded-full">BARU</span>
+                            <span
+                              class="text-[10px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded-full"
+                              >BARU</span
+                            >
                           {/if}
                           {#if item.watched}
-                            <span class="text-xs text-emerald-300" title="Sudah ditonton">✔</span>
+                            <span
+                              class="text-xs text-emerald-300"
+                              title="Sudah ditonton">✔</span
+                            >
                           {/if}
                         </span>
                       </button>
@@ -363,9 +388,15 @@
                       <div
                         class="lesson-item lesson-item-disabled p-1 rounded text-slate-400 italic cursor-not-allowed select-none flex items-center justify-between"
                       >
-                        <span>{item.label} <span class="text-xs">(Akan Datang)</span></span>
+                        <span
+                          >{item.label}
+                          <span class="text-xs">(Akan Datang)</span></span
+                        >
                         {#if item.isNew}
-                          <span class="text-[10px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded-full not-italic shrink-0 ml-2">BARU</span>
+                          <span
+                            class="text-[10px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded-full not-italic shrink-0 ml-2"
+                            >BARU</span
+                          >
                         {/if}
                       </div>
                     {/if}
@@ -383,12 +414,16 @@
   <main class="flex-1 p-4 lg:p-8 bg-gray-50 transition-all duration-300">
     <div class="max-w-4xl mx-auto">
       <!-- Active Lesson Title -->
-      <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center lg:text-left">
+      <h1
+        class="text-3xl font-bold text-gray-800 mb-6 text-center lg:text-left"
+      >
         {selectedLesson}
       </h1>
 
       <!-- Responsive Video Container Player Using HTML iframe -->
-      <div class="aspect-video w-full bg-black rounded-lg shadow-inner overflow-hidden">
+      <div
+        class="aspect-video w-full bg-black rounded-lg shadow-inner overflow-hidden"
+      >
         {#key selectedItem?.id}
           {#if isYouTube(currentVideo)}
             <!-- YT.Player owns this div entirely — never give it a node
@@ -412,7 +447,9 @@
       {#if selectedItem?.video && !isYouTube(selectedItem.video) && data.userId}
         <div class="mt-3 text-center">
           {#if selectedItem.watched}
-            <span class="text-emerald-600 text-sm font-medium">✔ Selesai ditonton</span>
+            <span class="text-emerald-600 text-sm font-medium"
+              >✔ Selesai ditonton</span
+            >
           {:else}
             <button
               onclick={markDriveWatched}
@@ -424,27 +461,47 @@
         </div>
       {/if}
 
-      <p class="lg:hidden block sm:hidden text-center text-sm text-gray-500 mb-2 pt-10">
-        Tip: Putarkan peranti secara melintang untuk melihat video dengan lebih baik.
+      <p
+        class="lg:hidden block sm:hidden text-center text-sm text-gray-500 mb-2 pt-10"
+      >
+        Tip: Putarkan peranti secara melintang untuk melihat video dengan lebih
+        baik.
       </p>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2 sm:hidden z-40">
-		<a href="/" class="flex flex-col items-center text-[#4a7425] text-xs gap-0.5">
-			<span class="text-lg">🏠</span> Home
-		</a>
-		<a href="/classroom" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
-			<span class="text-lg">📖</span> Belajar
-		</a>
-		<a href="/akan-datang" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
-			<span class="text-lg">⬇️</span> Downloads
-		</a>
-		<a href="/akan-datang" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
-			<span class="text-lg">💬</span> Bantuan
-		</a>
-		<a href="/akan-datang" class="flex flex-col items-center text-gray-500 text-xs gap-0.5">
-			<span class="text-lg">👤</span> Akaun
-		</a>
-	</nav>
+    <nav
+      class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2 sm:hidden z-40"
+    >
+      <a
+        href="/"
+        class="flex flex-col items-center text-[#4a7425] text-xs gap-0.5"
+      >
+        <span class="text-lg">🏠</span> Home
+      </a>
+      <a
+        href="/classroom"
+        class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
+      >
+        <span class="text-lg">📖</span> Belajar
+      </a>
+      <a
+        href="/akan-datang"
+        class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
+      >
+        <span class="text-lg">⬇️</span> Downloads
+      </a>
+      <a
+        href="/akan-datang"
+        class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
+      >
+        <span class="text-lg">💬</span> Bantuan
+      </a>
+      <a
+        href="/akan-datang"
+        class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
+      >
+        <span class="text-lg">👤</span> Akaun
+      </a>
+    </nav>
   </main>
 </div>

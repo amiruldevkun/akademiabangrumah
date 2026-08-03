@@ -1,12 +1,18 @@
-// src/routes/admin/sidebar/+page.server.ts
+// src/routes/admin/(management)/sidebarDashboard/+page.server.ts
 //
 // Matches your actual hooks.server.ts (locals.safeGetSession() / locals.supabase)
 // and supabaseAdmin.ts (service-role client using the new secret-key format).
 //
 // One thing worth knowing: hooks.server.ts already redirects any logged-out
-// visitor to /login for every route not in `publicRoutes` — so `/admin/sidebar`
+// visitor to /login for every route not in `publicRoutes` — so this route
 // is already login-gated for free. This load function only needs to add the
 // is_admin check on top of that, not re-implement the login redirect.
+//
+// Announcement format: `text` holds inline markdown (**bold**, *italic*,
+// [text](url)) — rendered safely via $lib/markdown.ts wherever it's shown.
+// This matches the format used by the manual announcement editor at
+// admin/(management)/announcementsDashboard, so both sources render
+// identically on the homepage regardless of which one produced them.
 
 import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
@@ -26,7 +32,6 @@ function toTitleCase(str: string): string {
 type Announcement = {
   id: string;
   text: string;
-  bold: string;
   created_at: string;
 };
 
@@ -186,7 +191,8 @@ export const actions: Actions = {
     // homepage "PENGUMUMAN" box. Grouped by section so "5 new videos in
     // one module" becomes one line, not five. A section title that didn't
     // exist before -> "new module" wording; one that did -> "new videos
-    // added to <module>" wording.
+    // added to <module>" wording. The module name is wrapped in **...**
+    // so it renders bold, matching the manual announcement editor's format.
     let mergedAnnouncements: Announcement[] =
       (existing.announcements as Announcement[] | null) ?? [];
 
@@ -216,21 +222,14 @@ export const actions: Actions = {
       const generated: Announcement[] = [];
 
       for (const [title, count] of newCountByTitle) {
-        generated.push(
-          oldTitles.has(title)
-            ? {
-                id: crypto.randomUUID(),
-                text: `${count} video baru ditambah dalam modul`,
-                bold: toTitleCase(title),
-                created_at: now,
-              }
-            : {
-                id: crypto.randomUUID(),
-                text: "Modul baru telah ditambah:",
-                bold: toTitleCase(title),
-                created_at: now,
-              },
-        );
+        const prettyTitle = toTitleCase(title);
+        generated.push({
+          id: crypto.randomUUID(),
+          text: oldTitles.has(title)
+            ? `${count} video baru ditambah dalam modul **${prettyTitle}**`
+            : `Modul baru telah ditambah: **${prettyTitle}**`,
+          created_at: now,
+        });
       }
 
       mergedAnnouncements = [...generated, ...mergedAnnouncements].slice(

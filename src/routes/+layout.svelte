@@ -7,10 +7,12 @@
   import { invalidate } from "$app/navigation";
   import { page } from "$app/state";
   import { onNavigate } from "$app/navigation";
+  import { goto } from "$app/navigation";
 
   type LayoutProps = {
     data?: {
       user?: any;
+      admin?: any;
     };
     children: Snippet;
   };
@@ -24,6 +26,7 @@
 
   let user = $state(data?.user ?? null);
 
+  // smoothens transistions
   onNavigate((navigation) => {
     if (!document.startViewTransition) return;
 
@@ -34,6 +37,18 @@
       });
     });
   });
+
+  //  a button for admin button IF user is_admin = true
+  function adminDashboard() {
+    if (data?.admin === true) {
+      console.log(data?.admin);
+      console.log("redirecting user to adminDashboard");
+      return goto("/admin");
+    } else {
+      console.log("user is not admin. not doing anything");
+      return 0;
+    }
+  }
 
   onMount(() => {
     // Keep `user` in sync if the session changes in another tab, expires, etc.
@@ -121,7 +136,18 @@
   <div class="ms-auto">
     <!-- Logged-in user info + logout, only shown once we know who's logged in -->
     {#if user}
-      <div class="flex items-center gap-2 mx-4">
+      <div class="flex flex-row items-center gap-2 mx-4">
+        {#if data?.admin}
+          <!-- if user is_admin = true, enable this button-->
+          <div class="hidden md:block">
+            <button
+              onclick={adminDashboard}
+              class="text-xs cursor-pointer bg-white text-[#4a7425] font-semibold px-3 py-1.5 rounded hover:bg-gray-100 transition"
+            >
+              Admin
+            </button>
+          </div>
+        {/if}
         {#if user.user_metadata?.avatar_url}
           <img
             src={user.user_metadata.avatar_url}

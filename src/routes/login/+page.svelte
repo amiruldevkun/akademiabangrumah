@@ -124,7 +124,7 @@
       <button
         type="submit"
         onclick={signInWithEmail}
-        class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg pointer-events-auto
+        class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg cursor-pointer
 						       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
 						       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full"
       >
@@ -149,7 +149,7 @@
       <!-- <p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">ATAU</p> -->
       <button
         onclick={signInWithGoogle}
-        class="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center pointer-events-auto gap-3"
+        class="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center cursor-pointer gap-3"
       >
         <svg class="w-5 h-5" viewBox="0 0 48 48">
           <path
