@@ -147,7 +147,7 @@
                 <button
                   type="button"
                   onclick={() => (showPassword = !showPassword)}
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"
                 >
                   {#if showPassword === false}
                     <Eye />
@@ -169,7 +169,7 @@
             value="Submit"
             class="bg-[#4a7425] text-white mt-3 font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg
                       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
-                      disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full pointer-events-auto"
+                      disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full cursor-pointer"
           >
             {signUpStatus ? "Signing up" : "Sign Up"}
           </button>
