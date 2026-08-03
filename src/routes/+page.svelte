@@ -349,7 +349,12 @@
           class="w-16 h-16 rounded-full object-cover shrink-0"
         />
       </div>
-
+      <pre
+        style="font-size: 10px; background: #eee; padding: 8px;">{JSON.stringify(
+          data.announcements,
+          null,
+          2,
+        )}</pre>
       <div class="bg-blue-50 rounded-xl p-5">
         <div class="flex items-center justify-between mb-3">
           <p class="font-bold text-gray-900 flex items-center gap-2">
