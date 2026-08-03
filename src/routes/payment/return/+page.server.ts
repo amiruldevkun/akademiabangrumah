@@ -14,7 +14,7 @@
 
 import { reconcileOrder } from "$lib/reconcileOrder";
 
-export async function load({ url }) {
+export async function load({ url, cookies }) {
   const orderId = url.searchParams.get("order_id");
 
   if (!orderId) {
@@ -26,6 +26,18 @@ export async function load({ url }) {
   if (error && !order) {
     console.error("Could not load/reconcile order:", error, { orderId });
     return { order: null };
+  }
+
+  if (order?.status === "paid") {
+    // Drives the one-time "Tahniah! DAFTAR" welcome banner on the homepage.
+    // Deliberately short-lived: the homepage reads it once and deletes it
+    // immediately (see src/routes/+page.server.ts), so this maxAge only
+    // matters as a safety net in case the user closes the tab here and
+    // never actually makes it to the homepage.
+    cookies.set("just_paid", "true", {
+      path: "/",
+      maxAge: 60 * 60, // 1 hour
+    });
   }
 
   return { order };
