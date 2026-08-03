@@ -45,11 +45,18 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
     cookies.delete("just_paid", { path: "/" });
   }
 
-  const { data: sidebarRow } = await locals.supabase
+  const { data: sidebarRow, error: sidebarErr } = await locals.supabase
     .from("sidebar_content")
     .select("announcements, manual_announcements")
     .eq("id", "v1")
     .single();
+
+  if (sidebarErr) {
+    // Previously silent -- a failed read here (bad RLS policy, wrong
+    // project, etc.) used to look identical to "no announcements exist",
+    // making it impossible to tell apart from the logs.
+    console.error("Failed to load sidebar_content announcements:", sidebarErr);
+  }
 
   const announcements = [
     ...(sidebarRow?.manual_announcements ?? []),
