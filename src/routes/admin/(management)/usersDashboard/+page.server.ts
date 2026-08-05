@@ -1,69 +1,100 @@
-// src/routes/admin/(management)/usersDashboard/+page.server.ts
-//
-// Manual override for is_admin / has_paid on profiles -- for cases outside
-// the normal ToyyibPay flow (bank transfer, comped access, promoting or
-// demoting an admin). Search-first: does NOT list all users by default,
-// since that'd be an unbounded query as the user base grows.
-
-import { error, fail } from "@sveltejs/kit";
+import { error, fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { supabaseAdmin } from "$lib/supabaseAdmin";
+import { goto } from "$app/navigation";
 
-async function requireAdmin(locals: App.Locals) {
-  const { user } = await locals.safeGetSession();
-  if (!user) error(401, "Not authenticated");
-
-  const { data: profile } = await locals.supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.is_admin) error(403, "Not authorized");
-
-  return user;
-}
+const VALID_STATUSES = ["paid", "pending", "failed"] as const;
+type OrderStatus = (typeof VALID_STATUSES)[number];
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-  const currentUser = await requireAdmin(locals);
+  const currentUser = locals.user;
+  const statusFilter = url.searchParams.get("status");
+  const rawSearch = url.searchParams.get("q")?.trim() ?? "";
+  const search = rawSearch.replace(/[,()%]/g, "");
 
-  const search = (url.searchParams.get("q")?.trim() ?? "").replace(
-    /[,()%]/g,
-    "",
-  );
+  const { data: profile, error: profileErr } = await locals.supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", currentUser?.id)
+    .single();
 
-  if (!search) {
-    return { profiles: [], search: "", currentUserId: currentUser.id };
+  if (profileErr || !profile?.is_admin) {
+    error(403, "Not authorized");
+  }
+  // If there's no search query and no status filter, don't run heavy queries
+  if (!search && !statusFilter) {
+    return {
+      profiles: [],
+      orders: [],
+      search: "",
+      statusFilter: null,
+      currentUserId: currentUser?.id,
+    };
   }
 
-  const { data: profiles, error: fetchErr } = await supabaseAdmin
+  // --- 1. Construct Orders Query ---
+  let ordersQuery = supabaseAdmin
+    .from("orders")
+    .select(
+      "id, created_at, customer_name, customer_email, customer_phone, product_name, amount, currency, status, toyyibpay_bill_code, toyyibpay_ref_no, paid_at",
+    )
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  if (statusFilter && VALID_STATUSES.includes(statusFilter as OrderStatus)) {
+    ordersQuery = ordersQuery.eq("status", statusFilter);
+  }
+
+  if (search) {
+    // Search orders by ref no, bill code, or customer email
+    ordersQuery = ordersQuery.or(
+      `toyyibpay_bill_code.ilike.%${search}%,toyyibpay_ref_no.ilike.%${search}%,customer_email.ilike.%${search}%`,
+    );
+  }
+
+  // --- 2. Construct Profiles Query ---
+  let profilesQuery = supabaseAdmin
     .from("profiles")
     .select("id, email, full_name, has_paid, paid_at, is_admin, created_at")
-    .ilike("email", `%${search}%`)
     .limit(20);
 
-  if (fetchErr) {
-    console.error("Failed to search profiles:", fetchErr);
-    return { profiles: [], search, currentUserId: currentUser.id };
+  if (search) {
+    profilesQuery = profilesQuery.ilike("email", `%${search}%`);
+  } else {
+    // Don't fetch profiles if only filtering orders by status without a search term
+    profilesQuery = profilesQuery.eq(
+      "id",
+      "00000000-0000-0000-0000-000000000000",
+    );
   }
 
-  return { profiles: profiles ?? [], search, currentUserId: currentUser.id };
+  // --- 3. Execute concurrently ---
+  const [profilesRes, ordersRes] = await Promise.all([
+    profilesQuery,
+    ordersQuery,
+  ]);
+
+  if (profilesRes.error) console.error("Profiles error:", profilesRes.error);
+  if (ordersRes.error) console.error("Orders error:", ordersRes.error);
+
+  return {
+    profiles: profilesRes.data ?? [],
+    orders: ordersRes.data ?? [],
+    search: rawSearch,
+    statusFilter,
+    currentUserId: currentUser?.id,
+  };
 };
 
 export const actions: Actions = {
   toggleAdmin: async ({ request, locals }) => {
-    const currentUser = await requireAdmin(locals);
-
+    const currentUser = locals.user;
     const formData = await request.formData();
     const id = formData.get("id");
     if (typeof id !== "string")
       return fail(400, { message: "Missing user id." });
 
-    // Block an admin from removing their own is_admin flag through this UI
-    // -- easy way to accidentally lock yourself out of /admin with no one
-    // left to flip it back through the UI. Still possible via direct SQL
-    // if that's genuinely what you want.
-    if (id === currentUser.id) {
+    if (id === currentUser?.id) {
       return fail(400, {
         message: "You can't change your own admin status here.",
       });
@@ -75,26 +106,20 @@ export const actions: Actions = {
       .eq("id", id)
       .single();
 
-    if (readErr || !target) {
-      return fail(404, { message: "User not found." });
-    }
+    if (readErr || !target) return fail(404, { message: "User not found." });
 
     const { error: updateErr } = await supabaseAdmin
       .from("profiles")
       .update({ is_admin: !target.is_admin })
       .eq("id", id);
 
-    if (updateErr) {
-      console.error("Failed to toggle is_admin:", updateErr);
-      return fail(500, { message: "Could not update — check logs." });
-    }
+    if (updateErr)
+      return fail(500, { message: "Could not update profile — check logs." });
 
     return { toggled: "admin", id };
   },
 
   toggleHasPaid: async ({ request, locals }) => {
-    await requireAdmin(locals);
-
     const formData = await request.formData();
     const id = formData.get("id");
     if (typeof id !== "string")
@@ -106,29 +131,48 @@ export const actions: Actions = {
       .eq("id", id)
       .single();
 
-    if (readErr || !target) {
-      return fail(404, { message: "User not found." });
-    }
+    if (readErr || !target) return fail(404, { message: "User not found." });
 
     const nextHasPaid = !target.has_paid;
     const updatePayload: Record<string, unknown> = { has_paid: nextHasPaid };
-    // Same pattern as the orders override: only stamp paid_at when turning
-    // ON, never clear it when turning off, so the original paid date isn't
-    // lost if access is revoked and re-granted later.
-    if (nextHasPaid) {
-      updatePayload.paid_at = new Date().toISOString();
-    }
+    if (nextHasPaid) updatePayload.paid_at = new Date().toISOString();
 
     const { error: updateErr } = await supabaseAdmin
       .from("profiles")
       .update(updatePayload)
       .eq("id", id);
 
-    if (updateErr) {
-      console.error("Failed to toggle has_paid:", updateErr);
-      return fail(500, { message: "Could not update — check logs." });
-    }
+    if (updateErr)
+      return fail(500, { message: "Could not update payment access." });
 
     return { toggled: "paid", id };
+  },
+
+  updateStatus: async ({ request }) => {
+    const formData = await request.formData();
+    const id = formData.get("id");
+    const status = formData.get("status");
+
+    if (typeof id !== "string")
+      return fail(400, { message: "Missing order id." });
+    if (
+      typeof status !== "string" ||
+      !VALID_STATUSES.includes(status as OrderStatus)
+    ) {
+      return fail(400, { message: "Invalid status value." });
+    }
+
+    const updatePayload: Record<string, unknown> = { status };
+    if (status === "paid") updatePayload.paid_at = new Date().toISOString();
+
+    const { error: updateErr } = await supabaseAdmin
+      .from("orders")
+      .update(updatePayload)
+      .eq("id", id);
+
+    if (updateErr)
+      return fail(500, { message: "Could not update status — check logs." });
+
+    return { updated: true, id, status };
   },
 };

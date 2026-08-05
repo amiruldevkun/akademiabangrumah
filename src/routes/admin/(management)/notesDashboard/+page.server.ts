@@ -28,6 +28,17 @@ async function requireAdmin(locals: App.Locals) {
 export const load: PageServerLoad = async ({ locals }) => {
   await requireAdmin(locals);
 
+  // const { user } = await locals.safeGetSession();
+  // const { data: profile, error: profileErr } = await locals.supabase
+  //   .from("profiles")
+  //   .select("is_admin")
+  //   .eq("id", user.id)
+  //   .single();
+
+  // if (profileErr || !profile?.is_admin) {
+  //   error(403, "Not authorized");
+  // }
+
   const { data: documents } = await supabaseAdmin
     .from("documents")
     .select("id, title, drive_url, position")
@@ -38,8 +49,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
   add: async ({ request, locals }) => {
-    await requireAdmin(locals);
-
     const formData = await request.formData();
     const title = formData.get("title");
     const driveUrl = formData.get("driveUrl");
@@ -83,8 +92,6 @@ export const actions: Actions = {
   },
 
   remove: async ({ request, locals }) => {
-    await requireAdmin(locals);
-
     const formData = await request.formData();
     const id = formData.get("id");
     if (typeof id !== "string") {

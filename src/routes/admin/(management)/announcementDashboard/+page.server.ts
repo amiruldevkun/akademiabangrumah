@@ -64,8 +64,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
   add: async ({ request, locals }) => {
-    await requireAdmin(locals);
-
     const formData = await request.formData();
     const text = formData.get("text");
 
@@ -97,8 +95,6 @@ export const actions: Actions = {
   },
 
   update: async ({ request, locals }) => {
-    await requireAdmin(locals);
-
     const formData = await request.formData();
     const id = formData.get("id");
     const text = formData.get("text");
@@ -127,8 +123,6 @@ export const actions: Actions = {
   },
 
   remove: async ({ request, locals }) => {
-    await requireAdmin(locals);
-
     const formData = await request.formData();
     const id = formData.get("id");
     if (typeof id !== "string") return fail(400, { message: "Missing id." });
