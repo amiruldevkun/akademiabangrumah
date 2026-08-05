@@ -274,6 +274,20 @@
     e.stopPropagation();
     sidebarOpen = !sidebarOpen;
   }
+
+  function goBack() {
+    window.history.back();
+
+    onMount(() => {
+      // Scroll to the top of the page when the component is mounted
+      window.scrollTo(0, 0);
+      document.addEventListener("click", goBack);
+
+      return () => {
+        document.removeEventListener("click", goBack);
+      };
+    });
+  }
 </script>
 
 <svelte:head>
@@ -283,6 +297,14 @@
 <!-- MAIN CONTAINER -->
 <div class="flex flex-1 relative">
   <!-- SYLLABUS SIDEBAR (Hidden everywhere by default) -->
+  <a
+    href="#"
+    onclick={goBack}
+    id="back"
+    class="hidden md:block absolute top-4 right-4 z-70 bg-[#4a7425] text-white font-semibold text-sm px-4 py-2 mt-2 rounded-lg shadow-lg hover:bg-[#4a7425] active:bg-[#6bb52a] transition-all transform hover:-translate-y-1 active:translate-y-0 border-solid"
+  >
+    &larrhk; Kembali
+  </a>
   <aside
     bind:this={sidebarEl}
     class="fixed top-0 left-0 w-64 h-full bg-[#4a7425] text-white z-40 transform transition-all duration-300 ease-in-out shadow-2xl {sidebarOpen

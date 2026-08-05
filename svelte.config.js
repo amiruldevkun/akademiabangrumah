@@ -28,6 +28,10 @@ const config = {
     //     "form-action": ["self"],
     //   },
     // },
+    // Prevents waterfall chained imports in older or specific browser targets
+    output: {
+      preloadStrategy: "modulepreload", // Default & recommended for modern browsers
+    },
   },
 };
 

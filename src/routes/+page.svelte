@@ -36,27 +36,27 @@
       icon: "doc",
       disabled: false,
     },
-    // {
-    //   label: "Checklist Tapak",
-    //   sub: "Senarai semak kerja",
-    //   href: "/akan-datang",
-    //   icon: "clipboard",
-    //   disabled: true,
-    // },
-    // {
-    //   label: "Kalkulator",
-    //   sub: "Kira anggaran kos",
-    //   href: "/akan-datang",
-    //   icon: "calculator",
-    //   disabled: true,
-    // },
-    // {
-    //   label: "SOP Kerja",
-    //   sub: "Panduan kerja tapak",
-    //   href: "/akan-datang",
-    //   icon: "hardhat",
-    //   disabled: true,
-    // },
+    {
+      label: "Checklist Tapak",
+      sub: "Senarai semak kerja",
+      href: "/akan-datang",
+      icon: "clipboard",
+      disabled: true,
+    },
+    {
+      label: "Kalkulator",
+      sub: "Kira anggaran kos",
+      href: "/akan-datang",
+      icon: "calculator",
+      disabled: true,
+    },
+    {
+      label: "SOP Kerja",
+      sub: "Panduan kerja tapak",
+      href: "/akan-datang",
+      icon: "hardhat",
+      disabled: true,
+    },
     {
       label: "Tanya Abang Rumah",
       sub: "Soalan & jawapan",
@@ -71,13 +71,13 @@
       icon: "users",
       disabled: false,
     },
-    // {
-    //   label: "Bonus & Template",
-    //   sub: "Template & bonus",
-    //   href: "/akan-datang",
-    //   icon: "gift",
-    //   disabled: true,
-    // },
+    {
+      label: "Bonus & Template",
+      sub: "Template & bonus",
+      href: "/akan-datang",
+      icon: "gift",
+      disabled: true,
+    },
   ];
 
   export function closeWarning() {
@@ -344,7 +344,7 @@
           {/key}
         </div>
         <img
-          src="/assets/images/enayub cta poster.jpg"
+          src="/assets/images/enayub cta poster.webp"
           alt="Abang Rumah"
           class="w-16 h-16 rounded-full object-cover shrink-0"
         />
@@ -400,7 +400,7 @@
       <span class="text-lg">💬</span> Bantuan
     </a>
     <a
-      href={data.admin ? "/admin" : "/"}
+      href={data.admin ? "/admin" : "/profile"}
       class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
     >
       <span class="text-lg">👤</span> Akaun

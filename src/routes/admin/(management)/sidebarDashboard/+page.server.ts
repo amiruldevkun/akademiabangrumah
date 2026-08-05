@@ -18,6 +18,7 @@ import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { parseSidebarText } from "$lib/sidebarParser";
 import { supabaseAdmin } from "$lib/supabaseAdmin";
+import { hasAdminAccess } from "$lib/access";
 
 // Section titles come out of the parser UPPERCASE (e.g. "KERJA ATAP &
 // BUMBUNG") — prettify for display in the homepage announcement feed.
@@ -42,11 +43,15 @@ export const load: PageServerLoad = async ({ locals }) => {
   // has already redirected to /login if it's null — but we re-check safely
   // in case this route ever gets added to publicRoutes by accident.
   const { user } = await locals.safeGetSession();
+  // const admin = user ? hasAdminAccess(user.id) : false;
 
   if (!user) {
     error(401, "Not authenticated");
   }
 
+  // if (admin === false) {
+  //   error(403, "Not authorized");
+  // }
   const { data: profile, error: profileErr } = await locals.supabase
     .from("profiles")
     .select("is_admin")
@@ -96,18 +101,18 @@ export const actions: Actions = {
   // don't re-parse and risk a different result than what was previewed)
   // and pushes it to Supabase, backing up the previous version first.
   push: async ({ request, locals }) => {
-    const { user } = await locals.safeGetSession();
-    if (!user) return fail(401, { message: "Not authenticated" });
+    // const { user } = await locals.safeGetSession();
+    // if (!user) return fail(401, { message: "Not authenticated" });
 
-    const { data: profile } = await locals.supabase
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", user.id)
-      .single();
+    // const { data: profile } = await locals.supabase
+    //   .from("profiles")
+    //   .select("is_admin")
+    //   .eq("id", user.id)
+    //   .single();
 
-    if (!profile?.is_admin) {
-      return fail(403, { message: "Not authorized" });
-    }
+    // if (!profile?.is_admin) {
+    //   return fail(403, { message: "Not authorized" });
+    // }
 
     const formData = await request.formData();
     const sectionsJson = formData.get("sectionsJson");
@@ -148,7 +153,7 @@ export const actions: Actions = {
         content: existing.content,
         version: existing.version,
         announcements: existing.announcements ?? [],
-        created_by: user.id,
+        created_by: locals.user?.id,
       });
 
     if (historyErr) {
