@@ -127,7 +127,7 @@
 >
   <a href="/about">
     <img
-      src="/assets/images/akademilogov2.png"
+      src="/assets/images/akademilogov2.webp"
       alt="Akademi Abang Rumah Logo"
       class="p-2 w-22 h-auto"
     />

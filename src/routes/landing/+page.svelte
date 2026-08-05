@@ -118,8 +118,9 @@
               Make sure to place your screenshot in the 'static' folder of your SvelteKit project.
             -->
             <img
-              src="/assets/images/image.png"
+              src="/assets/images/image.webp"
               alt="Akademi Abang Rumah App Screenshot"
+              fetchpriority="high"
               class="w-full h-full object-cover"
               style="background-color: #f3f4f6;"
             />
@@ -145,7 +146,7 @@
           in:fly={{ x: -40, duration: 700 }}
         >
           <img
-            src="/assets/images/en ayub self portrait.jpg"
+            src="/assets/images/en ayub self portrait.webp"
             alt="En Ayub - Abang Rumah"
             class="w-full max-w-sm rounded-2xl shadow-xl object-cover"
           />
