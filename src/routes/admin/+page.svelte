@@ -68,17 +68,6 @@
       </a>
 
       <a
-        href="/admin/ordersDashboard"
-        data-sveltekit-preload-data="hover"
-        class="bg-white border border-gray-200 rounded-lg p-6 text-left hover:shadow-md hover:border-amber-300 transition"
-      >
-        <h2 class="text-lg font-medium text-gray-900">Manage Orders</h2>
-        <p class="text-sm text-gray-500 mt-1">
-          View and reconcile payment status
-        </p>
-      </a>
-
-      <a
         href="/admin/announcementDashboard"
         data-sveltekit-preload-data="hover"
         class="bg-white border border-gray-200 rounded-lg p-6 text-left hover:shadow-md hover:border-sky-300 transition"
