@@ -9,6 +9,26 @@
   import { onNavigate } from "$app/navigation";
   import { goto } from "$app/navigation";
 
+  const userRoutes = ["/classroom", "/notes", "/"];
+
+  const phone = "60103163654";
+  const waLink = `https://wa.me/${phone}`;
+
+  const hideRoutes = $derived(
+    [
+      "/admin",
+      "/profile",
+      "/landing",
+      "/login",
+      "/sign_up",
+      "/about",
+      "/forgot_password",
+      "/reset_password",
+    ].some((p) => page.url.pathname.startsWith(p)),
+  );
+
+  let navVisible = $state(true);
+
   type LayoutProps = {
     data?: {
       user?: any;
@@ -18,13 +38,13 @@
   };
 
   let { data, children }: LayoutProps = $props();
-  let profileOpen = $state(false);
-
-  // Browser-side Supabase client — separate from the server one in hooks.server.js.
-  // This lets the UI react live to login state (e.g. showing name/avatar)
-  // without needing a full page reload.
 
   let user = $state(data?.user ?? null);
+
+  // to periodically refreshes user's session and auth status
+  $effect(() => {
+    user = data?.user ?? null;
+  });
 
   // smoothens transistions
   onNavigate((navigation) => {
@@ -61,6 +81,12 @@
 
     return () => authListener.subscription.unsubscribe();
   });
+
+  // goto profile page
+  function profile() {
+    // console.log("redirecting user to profile");
+    return goto("/profile");
+  }
 
   // onMount(() => {
   //   const handlePageShow = (event) => {
@@ -120,53 +146,87 @@
     deferredPrompt = null;
     showBanner = false;
   }
+
+  // Bottom Nav for Mobile view
+  const navItems = $derived([
+    { href: "/", label: "Home", icon: "🏠" },
+    { href: "/classroom", label: "Belajar", icon: "📖" },
+    { href: "/notes", label: "Nota", icon: "📝" },
+    { href: waLink, label: "Bantuan", icon: "💬" },
+    // { href: data?.admin ? "/admin" : "/profile", label: "Akaun", icon: "👤" },
+  ]);
+
+  function isActive(href: string) {
+    if (href.startsWith("http")) return false; // external links (WhatsApp) never "active"
+    if (href === "/") return page.url.pathname === "/";
+    return page.url.pathname.startsWith(href);
+  }
 </script>
 
 <header
   class="bg-[#4a7425] text-white p-1 flex items-center shadow-md z-50 h-24 pt-[env(safe-area-inset-top)]"
 >
-  <a href="/about">
-    <img
-      src="/assets/images/akademilogov2.webp"
-      alt="Akademi Abang Rumah Logo"
-      class="p-2 w-22 h-auto"
-    />
-  </a>
-  <span class="text-lg font-bold tracking-wide mx-4">AKADEMI ABANG RUMAH</span>
-  <div class="ms-auto">
-    <!-- Logged-in user info + logout, only shown once we know who's logged in -->
-    {#if user}
-      <div class="flex flex-row items-center gap-2 mx-4">
-        {#if data?.admin}
-          <!-- if user is_admin = true, enable this button-->
-          <div class="hidden md:block">
-            <button
-              onclick={adminDashboard}
-              class="text-xs cursor-pointer bg-white text-[#4a7425] font-semibold px-3 py-1.5 rounded hover:bg-gray-100 transition"
-            >
-              Admin
-            </button>
+  <div class="navbar bg-[#4a7425] text-white shadow-md z-50 min-h-24">
+    <div class="navbar-start">
+      <a href="/about" class="btn btn-ghost hover:bg-white/10 px-0.5">
+        <img
+          src="/assets/images/akademilogov2.webp"
+          alt="Akademi Abang Rumah Logo"
+          class="w-16 h-auto"
+        />
+      </a>
+      <span class="text-lg font-bold tracking-wider mx-2"
+        >AKADEMI ABANG RUMAH</span
+      >
+    </div>
+
+    <div class="navbar-end">
+      {#if user}
+        <div class="dropdown dropdown-end">
+          <div
+            tabindex="0"
+            role="button"
+            class="btn btn-ghost btn-circle avatar hover:bg-white/10"
+          >
+            {#if user.user_metadata?.avatar_url}
+              <div class="w-10 rounded-full ring ring-white/50">
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt={user.user_metadata?.name ?? "User avatar"}
+                />
+              </div>
+            {:else}
+              <div
+                class="w-10 rounded-full bg-white/20 flex items-center justify-center font-semibold"
+              >
+                {(user.user_metadata?.name ?? user.email ?? "?")
+                  .charAt(0)
+                  .toUpperCase()}
+              </div>
+            {/if}
           </div>
-        {/if}
-        {#if user.user_metadata?.avatar_url}
-          <img
-            src={user.user_metadata.avatar_url}
-            alt={user.user_metadata?.name ?? "User avatar"}
-            class="w-8 h-8 rounded-full border-2 border-white"
-          />
-        {/if}
-        <span class="text-sm hidden sm:inline"
-          >{user.user_metadata?.name ?? user.email}</span
-        >
-        <button
-          type="button"
-          onclick={signOut}
-          class="text-xs cursor-pointer bg-white text-[#4a7425] font-semibold px-3 py-1.5 rounded hover:bg-gray-100 transition"
-        >
-          Log Keluar
-        </button>
-      </div>
-    {/if}
+          <ul
+            tabindex="0"
+            class="menu menu-md dropdown-content bg-base-100 text-gray-800 rounded-box z-50 mt-3 w-56 p-2 shadow-lg"
+          >
+            <li class="menu-title text-xs">
+              {user.user_metadata?.name ?? user.email}
+            </li>
+            <li>
+              <button
+                class="disabled:cursor-not-allowed"
+                disabled
+                onclick={profile}>Profil (Akan Datang)</button
+              >
+            </li>
+            {#if data?.admin}
+              <li><button onclick={adminDashboard}>Admin Dashboard</button></li>
+            {/if}
+            <li><button onclick={signOut}>Log Keluar</button></li>
+          </ul>
+        </div>
+      {/if}
+    </div>
   </div>
 </header>
 
@@ -198,11 +258,31 @@
     </div>
   </div>
 {/if}
+<div class={hideRoutes ? "" : "pb-8 sm:pb-20"}>
+  {@render children()}
+</div>
+{#if !hideRoutes || !userRoutes}
+  <div
+    class="dock bottom-0 left-0 right-0 bg-white border-t flex justify-around sm:hidden z-40"
+  >
+    {#each navItems as item}
+      <a
+        href={item.href}
+        class="flex flex-col items-center text-xs gap-0.5 {isActive(item.href)
+          ? 'text-[#4a7425]'
+          : 'text-gray-500'}"
+      >
+        <span class="text-lg">{item.icon}</span>
+        {item.label}
+      </a>
+    {/each}
+  </div>
+{/if}
 
-{@render children()}
-
-<footer
-  class="relative z-10 bg-gray-100 text-gray-500 text-sm p-4 text-center border-t"
->
-  &copy; 2026 Akademi Abang Rumah. Hak Cipta Terpelihara.
-</footer>
+{#if ["/", "/classroom", "/notes"].some((p) => page.url.pathname.startsWith(p))}
+  <footer
+    class="relative z-10 bg-gray-100 text-gray-500 text-sm p-4 text-center border-t"
+  >
+    &copy; 2026 Akademi Abang Rumah. Hak Cipta Terpelihara.
+  </footer>
+{/if}
