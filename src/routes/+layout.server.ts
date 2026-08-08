@@ -4,9 +4,10 @@ import { hasPaidAccess, hasAdminAccess } from "$lib/access";
 import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
-  const PUBLICROUTE = ["/pay_landing", "/auth/reset_password"];
+  const PUBLICROUTE = ["/pay_landing"];
   const lockedRoute = ["/landing", "/login"];
   const adminRoute = ["/admin"];
+
   if (!locals.user) {
     return { session: null, user: null, admin: null };
   }
@@ -29,6 +30,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
   if (locals.session && lockedRoute.includes(url.pathname)) {
     redirect(303, "/");
   }
+
   return {
     session: locals.session,
     user: locals.user,

@@ -63,7 +63,6 @@ export const handle: Handle = async ({ event, resolve }) => {
     "/sitemap.xml",
     "/sign_up",
     "/forgot_password",
-    "/auth/reset_password",
   ];
   const isPublicRoute = publicRoutes.some((r) =>
     event.url.pathname.startsWith(r),

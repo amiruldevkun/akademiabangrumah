@@ -58,7 +58,7 @@
         <input
           type="file"
           accept=".txt,text/plain"
-          class="mt-1 text-sm border-solid border-2 rounded-md p-2 pointer-events-auto"
+          class="mt-1 file-input file-input-sm pointer-events-auto"
           onchange={async (e) => {
             const file = (e.currentTarget as HTMLInputElement).files?.[0];
             if (!file) return;

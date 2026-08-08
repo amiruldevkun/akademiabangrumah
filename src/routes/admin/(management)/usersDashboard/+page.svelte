@@ -5,6 +5,7 @@
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
   let activeId = $state<string | null>(null);
+  let searchState = $state(false);
 
   const statusStyles: Record<string, string> = {
     paid: "bg-green-100 text-green-800",
@@ -41,7 +42,17 @@
 
 <div class="space-y-6 max-w-5xl mx-auto p-4">
   <!-- Search Input -->
-  <form method="GET" class="flex gap-2">
+  <form
+    method="GET"
+    class="flex gap-2"
+    use:enhance={() => {
+      searchState = true;
+      return async ({ update, result }) => {
+        await update();
+        searchState = false;
+      };
+    }}
+  >
     {#if data.statusFilter}
       <input type="hidden" name="status" value={data.statusFilter} />
     {/if}
@@ -56,7 +67,12 @@
       type="submit"
       class="rounded bg-gray-800 px-4 py-2 text-white text-sm font-medium"
     >
-      Search
+      {#if searchState === true}
+        <span class="loading loading-spinner loading-md"></span>
+        Loading...
+      {:else}
+        Search
+      {/if}
     </button>
     {#if data.search || data.statusFilter}
       <a
