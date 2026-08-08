@@ -40,6 +40,8 @@
   let sidebarEl = $state<HTMLElement | null>(null);
   let menuBtnEl = $state<HTMLButtonElement | null>(null);
 
+  let warningState = $state(true);
+
   // --- Progress tracking state ---
   // YouTube: driven by the IFrame Player API (postMessage under the hood),
   // which exposes currentTime/duration — real resume + watched detection.
@@ -194,6 +196,8 @@
 
     ytPlayer = new window.YT!.Player("yt-player-frame", {
       videoId,
+      width: "100%",
+      height: "100%",
       events: {
         onReady: (event: {
           target: {
@@ -288,6 +292,9 @@
       };
     });
   }
+  export function closeWarning() {
+    warningState = false;
+  }
 </script>
 
 <svelte:head>
@@ -295,33 +302,41 @@
 </svelte:head>
 
 <!-- MAIN CONTAINER -->
-<div class="flex flex-1 relative">
+<div class="flex flex-1 relative flex-col">
+  {#if warningState === true}
+    <div
+      class="bg-[#9bd964] text-center justify-center flex text-red-600 px-3 py-3"
+    >
+      <h1 class="ml-auto">
+        Video yang menggunakan Google Drive mempunyai UI yang tak menyenangkan.
+        Maaf atas kesulitan ini. Kami akan berusaha untuk memindahkan semua
+        video ke Youtube secepat mungkin.
+      </h1>
+      <button onclick={closeWarning} class="ml-auto"> ⤫</button>
+    </div>
+  {/if}
   <!-- SYLLABUS SIDEBAR (Hidden everywhere by default) -->
   <a
     href="#"
     onclick={goBack}
     id="back"
-    class="hidden md:block absolute top-4 right-4 z-70 bg-[#4a7425] text-white font-semibold text-sm px-4 py-2 mt-2 rounded-lg shadow-lg hover:bg-[#4a7425] active:bg-[#6bb52a] transition-all transform hover:-translate-y-1 active:translate-y-0 border-solid"
+    class="bg-[#4a7425] hidden md:block right-4 mt-4 pt-2 absolute btn btn-soft text-white {warningState
+      ? 'top-16'
+      : 'top-4'}"
   >
     &larrhk; Kembali
   </a>
   <aside
     bind:this={sidebarEl}
-    class="fixed top-0 left-0 w-64 h-full bg-[#4a7425] text-white z-40 transform transition-all duration-300 ease-in-out shadow-2xl {sidebarOpen
+    class="absolute top-0 left-0 w-64 h-full bg-[#4a7425] text-white z-40 transform transition-all duration-300 ease-in-out shadow-2xl {sidebarOpen
       ? ''
-      : '-translate-x-full'}"
+      : '-translate-x-full'} {warningState ? 'top-18' : 'top-0'}"
   >
-    <!-- Toggle tab — lives INSIDE the sidebar and sticks out past its right
-         edge, so it slides together with the sidebar instead of staying
-         pinned in a fixed spot. Sits directly on <aside>, NOT inside the
-         scrollable wrapper below — overflow-y-auto on a container clips
-         overflow-x too (per the CSS overflow computation rule), so
-         anything positioned to stick out past the edge needs to live
-         outside that scroll container, not inside it. -->
+    <!-- Toggle tab  -->
     <button
       bind:this={menuBtnEl}
       onclick={toggleSidebar}
-      class="absolute cursor-pointer top-24 right-0 bottom-10 translate-x-full w-9 h-11 bg-[#4a7425] rounded-r-full shadow-md flex items-center justify-center focus:outline-none"
+      class="absolute cursor-pointer top-0 right-0 bottom-10 translate-x-full w-9 h-11 bg-[#4a7425] rounded-r-full shadow-md flex items-center justify-center focus:outline-none"
       aria-label="Toggle menu"
     >
       <span class="text-white text-lg leading-none">☰</span>
@@ -329,7 +344,7 @@
 
     <!-- Scrollable content wrapper — overflow-y-auto lives here instead of
          on <aside> itself. -->
-    <div class="h-full overflow-y-auto p-4 pt-28">
+    <div class="h-full overflow-y-auto p-4 pt-6">
       {#if !data.hasPaid}
         <a
           href="/pay_landing"
@@ -433,8 +448,10 @@
   </aside>
 
   <!-- MAIN CANVAS -->
-  <main class="flex-1 p-4 lg:p-8 bg-gray-50 transition-all duration-300">
-    <div class="max-w-4xl mx-auto">
+  <main
+    class="flex-1 p-4 lg:p-8 bg-gray-50 transition-all duration-300 items-center flex-col"
+  >
+    <div class="max-w-4xl mx-auto flex flex-col items-center">
       <!-- Active Lesson Title -->
       <h1
         class="text-3xl font-bold text-gray-800 mb-6 text-center lg:text-left"
@@ -444,21 +461,23 @@
 
       <!-- Responsive Video Container Player Using HTML iframe -->
       <div
-        class="aspect-video w-full bg-black rounded-lg shadow-inner overflow-hidden"
+        class="aspect-[9/16] max-w-[450px] w-full bg-black rounded-lg shadow-inner overflow-hidden relative"
       >
         {#key selectedItem?.id}
           {#if isYouTube(currentVideo)}
             <!-- YT.Player owns this div entirely — never give it a node
                  Svelte also patches reactively (see the $effect above). -->
-            <div id="yt-player-frame" class="w-full h-full"></div>
+            <div
+              id="yt-player-frame"
+              class="flex flex-col items-center inset-0"
+            ></div>
           {:else}
             <iframe
               class="w-full h-full"
               src={currentVideo}
               title={selectedLesson}
               frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen;"
             ></iframe>
           {/if}
         {/key}
@@ -490,40 +509,19 @@
         baik.
       </p>
     </div>
-
-    <nav
-      class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2 sm:hidden z-40"
-    >
-      <a
-        href="/"
-        class="flex flex-col items-center text-[#4a7425] text-xs gap-0.5"
-      >
-        <span class="text-lg">🏠</span> Home
-      </a>
-      <a
-        href="/classroom"
-        class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
-      >
-        <span class="text-lg">📖</span> Belajar
-      </a>
-      <a
-        href="/akan-datang"
-        class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
-      >
-        <span class="text-lg">⬇️</span> Downloads
-      </a>
-      <a
-        href="/akan-datang"
-        class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
-      >
-        <span class="text-lg">💬</span> Bantuan
-      </a>
-      <a
-        href="/akan-datang"
-        class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
-      >
-        <span class="text-lg">👤</span> Akaun
-      </a>
-    </nav>
   </main>
 </div>
+
+<style>
+  /* YT.Player destroys #yt-player-frame and replaces it with a bare
+     <iframe> that keeps the same id but NOT the Tailwind classes above —
+     without this, it falls back to YouTube's default 640x390 box instead
+     of filling the aspect-[9/16] wrapper, which is what caused the black
+     bar. */
+  :global(#yt-player-frame) {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+</style>
