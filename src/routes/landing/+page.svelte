@@ -71,7 +71,7 @@
 
       <!-- Content Container -->
       <div
-        class="max-w-7xl mx-auto w-full px-6 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16 min-h-[calc(100vh-80px)]"
+        class="max-w-7xl mx-auto w-full px-6 pt-6 pb-6 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16 min-h-[calc(100vh-80px)]"
       >
         <!-- Left Column: Typography & CTA -->
         <div class="w-full lg:w-3/5 flex flex-col justify-center pt-8 lg:pt-0">
@@ -106,29 +106,23 @@
 
         <!-- Right Column: Mobile App Screenshot -->
         <div
-          class="w-full lg:w-2/5 flex justify-center lg:justify-end"
+          class="w-full lg:w-2/5 flex justify-center top-3 lg:justify-end"
           in:fly={{ x: 50, duration: 800, delay: 800 }}
         >
           <!-- Sleek CSS Device Frame -->
-          <div
-            class="relative w-[320px] h-170 bg-white rounded-[3rem] border-10 border-[#1f2937] shadow-2xl overflow-hidden ring-4 ring-gray-100 shrink-0"
-          >
-            <!-- 
-              TODO: Replace 'app-screenshot.png' with the actual path to your screenshot 
-              Make sure to place your screenshot in the 'static' folder of your SvelteKit project.
-            -->
-            <img
-              src="/assets/images/image.webp"
-              alt="Akademi Abang Rumah App Screenshot"
-              fetchpriority="high"
-              class="w-full h-full object-cover"
-              style="background-color: #f3f4f6;"
-            />
-
-            <!-- Optional: Simulated iPhone Notch -->
+          <div class="relative bg-black mockup-phone border-[#A9B689]">
+            <div class="mockup-phone-camera"></div>
+            <div class="mockup-phone-display">
+              <img
+                src="/assets/images/image.webp"
+                alt="Akademi Abang Rumah App Screenshot"
+                fetchpriority="high"
+              />
+              <!-- Optional: Simulated iPhone Notch
             <div
               class="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-[#1f2937] rounded-b-2xl z-10"
-            ></div>
+            ></div> -->
+            </div>
           </div>
         </div>
       </div>
