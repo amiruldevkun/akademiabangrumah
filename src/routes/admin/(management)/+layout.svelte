@@ -8,8 +8,8 @@
   const titles: Record<string, string> = {
     "/admin/sidebarDashboard": "Sidebar Management",
     "/admin/notesDashboard": "Notes Management",
-    "/admin/ordersDashboard": "Orders Management",
-    "/admin/announcementsDashboard": "Announcements",
+
+    "/admin/announcementDashboard": "Announcements",
     "/admin/usersDashboard": "User Management",
   };
 </script>
