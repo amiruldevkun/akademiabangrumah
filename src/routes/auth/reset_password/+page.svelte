@@ -8,11 +8,15 @@
   let emailPass = $state("");
   let showPassword = $state(false);
   let passError = $state("");
-  let success = $state(false);
+  let finished = $state(false);
   let confirmPass = $state("");
 
   export async function updateCreds() {
     let message = $state("");
+
+    if (!emailPass) {
+      passError = "input it in sonion";
+    }
     if (emailPass !== confirmPass) {
       passError = "Kata laluan tidak sama. Perbetulkan";
       return console.error(() => "Password is not the same");
@@ -37,8 +41,9 @@
       console.warn("Password for " + data.user + " has been changed!");
     }
 
-    await supabase.auth.signOut();
-    return (success = true);
+    const finished = await supabase.auth.signOut();
+
+    return finished;
   }
 
   export function redirectAfterSignup() {
@@ -54,7 +59,7 @@
   }
 
   $effect(() => {
-    if (success) {
+    if (finished) {
       const timer = redirectAfterSignup();
       return () => clearInterval(timer);
     }
@@ -77,7 +82,7 @@
     </div>
 
     <div class="flex flex-col">
-      {#if success}
+      {#if finished}
         <p class="text-green-700 text-sm">
           Kata laluan anda telah ditukar! <br />
           Anda akan dialihkan ke page login dalam {redirectSeconds} dan gunakan kata
