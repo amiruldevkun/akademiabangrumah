@@ -1,12 +1,15 @@
 <!-- src/routes/forgot_password -->
 
 <script lang="ts">
+  import TurnstileWidget from "$lib/turnstileWidget.svelte";
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
   let redirectSeconds = $state(0);
+  let turnstile: TurnstileWidget | undefined = $state();
   let { form } = $props();
   let signUpStatus = $state(false);
   let emailInput = $state("");
+  let turnstileToken = $state("");
 
   export function redirectAfterSignup() {
     redirectSeconds = 5;
@@ -54,8 +57,11 @@
           method="POST"
           use:enhance={() => {
             signUpStatus = true;
-            return async ({ update }) => {
+            return async ({ update, result }) => {
               signUpStatus = false;
+              if (result.type === "failure") {
+                turnstile?.reset();
+              }
               await update();
             };
           }}
@@ -77,6 +83,8 @@
             </div>
           </label>
           <br />
+          <!-- Cloudflare Turnstile Implementation for extra bot mitigation on top of cloudflare's cdn -->
+          <TurnstileWidget onVerify={(token) => (turnstileToken = token)} />
 
           <button
             type="submit"

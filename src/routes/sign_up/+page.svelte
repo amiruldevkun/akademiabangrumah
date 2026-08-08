@@ -4,6 +4,9 @@
   import { goto } from "$app/navigation";
   import { Eye } from "@lucide/svelte";
   import { EyeOff } from "@lucide/svelte";
+  import TurnstileWidget from "$lib/turnstileWidget.svelte";
+  let turnstileToken = $state("");
+  let turnstile: TurnstileWidget | undefined = $state();
 
   let errorMessage = $derived(page.url.searchParams.get("error"));
   let emailName = $state("");
@@ -42,6 +45,8 @@
   />
 </svelte:head>
 
+<link rel="preconnect" href="https://challenges.cloudflare.com" />
+
 <div class="max-h-screen flex items-center justify-center bg-gray-50">
   <div class="bg-white p-8 rounded-lg shadow-md text-center">
     <!-- Title + logo side by side -->
@@ -64,8 +69,11 @@
           method="POST"
           use:enhance={() => {
             signUpStatus = true;
-            return async ({ update }) => {
+            return async ({ update, result }) => {
               signUpStatus = false;
+              if (result.type === "failure") {
+                turnstile?.reset();
+              }
               await update();
             };
           }}
@@ -163,6 +171,9 @@
             <p class="text-sm">{form?.passError}</p>
             <p class="text-sm">{form?.emailError}</p>
           {/if}
+          <!-- Cloudflare Turnstile Implementation for extra bot mitigation on top of cloudflare's cdn -->
+          <TurnstileWidget onVerify={(token) => (turnstileToken = token)} />
+
           <!-- vvv loading anim-->
           <button
             type="submit"

@@ -1,8 +1,12 @@
 <script lang="ts">
   import { supabase } from "$lib/supabaseClient";
+  import { enhance } from "$app/forms";
   import { page } from "$app/state";
   import { Eye, EyeOff } from "@lucide/svelte";
+  import TurnstileWidget from "$lib/turnstileWidget.svelte";
 
+  let turnstile: TurnstileWidget | undefined = $state();
+  let turnstileToken = $state("");
   let errorMessage = $derived(page.url.searchParams.get("error"));
   let emailInput = $state("");
   let emailPass = $state("");
@@ -10,36 +14,6 @@
   let passError = $state("");
   let emailError = $state("");
   let showPassword = $state(false);
-
-  async function signInWithEmail() {
-    passError = "";
-    emailError = "";
-    signUpStatus = true;
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: emailInput,
-      password: emailPass,
-      options: {},
-    });
-    console.log(error, data);
-    if (error?.message.includes("Password")) {
-      passError =
-        "Kata laluan mestilah sepanjang 6 huruf atau/dan memerlukan 1 huruf besar, 1 huruf kecil, 1 simbol(!,@,$) dan 1 nombor";
-    } else if (error?.message.includes("invalid format")) {
-      emailError = "Email bukan format yang diingini. Perbetulkan email.";
-    } else if (error?.message.includes("requires")) {
-      passError = "Letakkan kata laluan";
-    } else if (error?.message.includes("Anonymous")) {
-      let message = "Email dan kata laluan kosong";
-      passError = message;
-      emailError = message;
-    } else if (error) {
-      passError = "Email atau kata laluan salah";
-    } else {
-      window.location.href = "/";
-    }
-
-    signUpStatus = false;
-  }
 
   async function signInWithGoogle() {
     await supabase.auth.signInWithOAuth({
@@ -75,61 +49,87 @@
     {/if}
 
     <div class="flex flex-col gap-2">
-      <label class="gap-2">
-        Masukkan email anda
-        <input
-          type="email"
-          id="mail"
-          bind:value={emailInput}
-          placeholder="studentabangrumah@gmail.com"
-          class="w-full mt-2 rounded-lg border px-3 py-2.5 text-sm text-gray-900 mb-2 focus:outline-none focus:ring-2
-        {emailError
-            ? 'border-red-500 focus:ring-red-500'
-            : 'border-gray-300 focus:ring-[#4a7425]'}"
-        />
-      </label>
-      <label class="flex flex-col">
-        Masukkan password yang kuat
-        <div class="relative gap-2">
+      <form
+        method="POST"
+        use:enhance={() => {
+          signUpStatus = true;
+          return async ({ update, result }) => {
+            if (result.type === "failure") {
+              turnstile?.reset();
+            }
+            await update();
+            signUpStatus = false;
+          };
+        }}
+      >
+        <label class="gap-2 text-black">
+          Masukkan email anda
           <input
-            type={showPassword ? "text" : "password"}
-            id="pass"
-            bind:value={emailPass}
-            placeholder="Student@2026"
-            class="w-full mt-2 rounded-lg border px-3 py-2.5 text-sm text-gray-900 mb-2 focus:outline-none focus:ring-2
-        {passError
+            type="email"
+            id="email"
+            name="email"
+            bind:value={emailInput}
+            placeholder="studentabangrumah@gmail.com"
+            class="w-full mt-2 rounded-lg border px-3 py-2.5 text-sm text-black mb-2 focus:outline-none focus:ring-2
+        {emailError
               ? 'border-red-500 focus:ring-red-500'
               : 'border-gray-300 focus:ring-[#4a7425]'}"
           />
-          <button
-            type="button"
-            onclick={() => (showPassword = !showPassword)}
-            hidden={!emailPass}
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-          >
-            {#if showPassword === false}
-              <Eye />
-            {:else}
-              <EyeOff />
-            {/if}
-          </button>
-        </div></label
-      >
+        </label>
+        <label class="flex flex-col text-black">
+          Masukkan password yang kuat
+          <div class="relative gap-2">
+            <input
+              type={showPassword ? "text" : "password"}
+              id="pass"
+              name="pass"
+              bind:value={emailPass}
+              placeholder="Student@2026"
+              class="w-full mt-2 rounded-lg border px-3 py-2.5 text-sm text-gray-900 mb-2 focus:outline-none focus:ring-2
+        {passError
+                ? 'border-red-500 focus:ring-red-500'
+                : 'border-gray-300 focus:ring-[#4a7425]'}"
+            />
+            <button
+              type="button"
+              onclick={() => (showPassword = !showPassword)}
+              hidden={!emailPass}
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              {#if showPassword === false}
+                <Eye />
+              {:else}
+                <EyeOff />
+              {/if}
+            </button>
+          </div></label
+        >
 
-      {#if emailError != null || passError != null}
-        <p class="text-sm">{passError}</p>
-        <p class="text-sm">{emailError}</p>
-      {/if}
-      <!-- vvv loading anim-->
-      <button
-        type="submit"
-        onclick={signInWithEmail}
-        class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg cursor-pointer
+        {#if emailError != null || passError != null}
+          <p class="text-sm">{passError}</p>
+          <p class="text-sm">{emailError}</p>
+        {/if}
+
+        <!-- Cloudflare Turnstile Implementation for extra bot mitigation on top of cloudflare's cdn -->
+        <TurnstileWidget onVerify={(token) => (turnstileToken = token)} />
+
+        <!-- vvv loading anim-->
+        <button
+          type="submit"
+          value="Submit"
+          class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg cursor-pointer
 						       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
-						       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full"
-      >
-        {signUpStatus ? "Melog Masuk..." : "Log Masuk"}
-      </button>
+						       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full
+                  "
+        >
+          {#if signUpStatus === true}
+            <span class="loading loading-spinner loading-sm"></span>
+            Melog masuk...
+          {:else}
+            Log Masuk
+          {/if}
+        </button>
+      </form>
       <a href="/forgot_password" class="text-xs text-gray-500 hover:underline">
         Lupa kata laluan? Tekan saya untuk tukar kata laluan.
       </a>
