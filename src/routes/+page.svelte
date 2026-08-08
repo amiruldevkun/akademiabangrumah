@@ -4,12 +4,11 @@
   let { data } = $props();
   let index = $state(0);
 
-  const phone = "60103163654";
-  const message = `Assalamualaikum, Saya ada pertanyaan pasal Akademi Abang Rumah`;
-  const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   const teleLink = "https://t.me/+3EReJANa7eszNjJl";
   import quotes from "$lib/quotes.json";
   import { renderAnnouncementMarkdown } from "$lib/markdown";
+  const phone = "60103163654";
+  const waLink = `https://wa.me/${phone}`;
 
   $effect(() => {
     const timer = setInterval(() => {
@@ -131,7 +130,7 @@
     {#await data.continueLesson}
       <!-- Skeleton mirrors the resolved card's layout so there's no
 			     layout shift when the real data streams in. -->
-      <div class="bg-emerald-50 rounded-xl p-4 sm:p-5 animate-pulse">
+      <div class="bg-emerald-50 rounded-xl p-4 sm:p-5 animate-pulse glass">
         <div class="flex items-center justify-between mb-3">
           <div class="h-4 w-32 bg-emerald-200/60 rounded"></div>
           <div class="h-4 w-16 bg-emerald-200/60 rounded"></div>
@@ -171,6 +170,7 @@
                   src={continueLesson.thumbnail}
                   alt={continueLesson.title}
                   class="w-full h-24 object-cover rounded-lg"
+                  fetchpriority="high"
                 />
               {:else}
                 <!-- No thumbnail source for Google Drive lessons — generic
@@ -211,7 +211,8 @@
               </p>
             </div>
             <button
-              class="bg-[#4a7425] cursor-pointer text-white font-semibold px-5 py-3 rounded-lg shrink-0 hover:bg-[#3d5f1f] transition w-full sm:w-auto"
+              class="btn bg-[#4a7425] outline-emerald-200/60 text-white
+            "
             >
               Sambung Belajar ▶
             </button>
@@ -370,40 +371,4 @@
       </div>
     </div>
   </div>
-
-  <!-- Bottom nav (mobile) -->
-  <nav
-    class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2 sm:hidden z-40"
-  >
-    <a
-      href="/"
-      class="flex flex-col items-center text-[#4a7425] text-xs gap-0.5"
-    >
-      <span class="text-lg">🏠</span> Home
-    </a>
-    <a
-      href="/classroom"
-      class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
-    >
-      <span class="text-lg">📖</span> Belajar
-    </a>
-    <a
-      href="/notes"
-      class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
-    >
-      <span class="text-lg">📝</span> Nota
-    </a>
-    <a
-      href={waLink}
-      class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
-    >
-      <span class="text-lg">💬</span> Bantuan
-    </a>
-    <a
-      href={data.admin ? "/admin" : "/profile"}
-      class="flex flex-col items-center text-gray-500 text-xs gap-0.5"
-    >
-      <span class="text-lg">👤</span> Akaun
-    </a>
-  </nav>
 </main>
