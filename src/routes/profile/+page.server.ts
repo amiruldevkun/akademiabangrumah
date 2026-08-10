@@ -1,5 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
+import { supabaseAdmin } from "$lib/supabaseAdmin";
 
 export const load: PageServerLoad = async ({ locals }) => {
   const { session } = await locals.safeGetSession();
@@ -15,12 +16,41 @@ export const load: PageServerLoad = async ({ locals }) => {
     console.error("Failed to load profile:", error);
   }
 
+  // Reconcile avatar_url against the latest OAuth provider metadata (e.g. Google).
+  // Google's avatar always wins here since manual upload isn't implemented yet —
+  // once it is, gate this behind an avatar_source column so a synced Google
+  // avatar doesn't overwrite a user's own upload.
+  const providerAvatarUrl = session.user.user_metadata?.avatar_url as
+    | string
+    | undefined;
+
+  let resolvedProfile = profile;
+
+  if (
+    providerAvatarUrl &&
+    profile &&
+    profile.avatar_url !== providerAvatarUrl
+  ) {
+    const { data: updated, error: reconcileError } = await supabaseAdmin
+      .from("profiles")
+      .update({ avatar_url: providerAvatarUrl })
+      .eq("id", session.user.id)
+      .select("id, full_name, email, avatar_url, is_admin")
+      .single();
+
+    if (reconcileError) {
+      console.error("Failed to reconcile avatar_url:", reconcileError);
+    } else {
+      resolvedProfile = updated;
+    }
+  }
+
   return {
-    profile: profile ?? {
+    profile: resolvedProfile ?? {
       id: session.user.id,
       full_name: session.user.user_metadata?.full_name ?? "",
       email: session.user.email ?? "",
-      avatar_url: session.user.user_metadata?.avatar_url ?? "",
+      avatar_url: providerAvatarUrl ?? "",
       is_admin: session.user.user_metadata?.is_admin ?? false,
     },
   };
@@ -55,6 +85,17 @@ export const actions: Actions = {
         full_name,
         email,
       });
+    }
+
+    // reload user profile after sending the updated info
+    const { data: profile, error: profError } = await locals.supabase
+      .from("profiles")
+      .select("id, full_name, email, avatar_url, is_admin")
+      .eq("id", session.user.id)
+      .single();
+
+    if (profError) {
+      console.error("Failed to load profile:", error);
     }
 
     return { success: true };

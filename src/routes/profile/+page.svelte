@@ -1,20 +1,46 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
+  import { supabase } from "$lib/supabaseClient";
   import type { PageData, ActionData } from "./$types";
   import { onMount } from "svelte";
+  import type { UserIdentity } from "@supabase/supabase-js";
+  // import { linkUserIdentViaGoogle } from "$lib/identLink";
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
+  let identities = $state<UserIdentity[]>([]);
+  let googleError = $state<string | null>(null);
+
+  let googleIdentity = $derived(
+    identities.find((identity) => identity.provider === "google"),
+  );
+  let hasGoogleLinked = $derived(!!googleIdentity);
+  let canUnlink = $derived(identities.length > 1);
+
   let submitting = $state(false);
   let linkingGoogle = $state(false);
+
+  let sendingReset = $state(false);
+  let resetEmailSent = $state(false);
+  let resetError = $state<string | null>(null);
 
   function goBack(e: MouseEvent) {
     e.preventDefault();
     window.history.back();
   }
 
+  async function refreshIdentities() {
+    const { data: identData, error } = await supabase.auth.getUserIdentities();
+    if (error) {
+      googleError = error.message;
+      return;
+    }
+    identities = identData.identities;
+  }
+
   onMount(() => {
     window.scrollTo(0, 0);
+    refreshIdentities();
   });
 
   // Dynamic Initials for DaisyUI Avatar Placeholder
@@ -27,22 +53,57 @@
       .toUpperCase() || "AU",
   );
 
-  // Identity Badges (Fallback Defaults)
-  let userRole = $state("Pelajar");
-
   // User Status Badge (if is_admin true or nah)
-  let userStatus = $derived(
-    data.profile?.is_admin ? "Admin" : (data.profile?.id ?? "Tidak Diketahui"),
-  );
+  let userStatus = $derived(data.profile?.is_admin ? "Admin" : "Pelajar");
 
-  // Google OAuth Link Trigger (Supabase)
   async function linkGoogleAccount() {
     linkingGoogle = true;
-    // Call Supabase OAuth provider setup
-    // await supabase.auth.signInWithOAuth({ provider: 'google' });
-    setTimeout(() => {
-      linkingGoogle = false;
-    }, 1200);
+    googleError = null;
+    const { error } = await supabase.auth.linkIdentity({ provider: "google" });
+    // On success the browser auto-redirects to Google's consent screen.
+    // We only get here (without navigating away) if it failed.
+    if (error) googleError = error.message;
+    linkingGoogle = false;
+  }
+
+  async function unlinkGoogleAccount() {
+    if (!googleIdentity || !canUnlink) return;
+    linkingGoogle = true;
+    googleError = null;
+    const { error } = await supabase.auth.unlinkIdentity(googleIdentity);
+    if (error) googleError = error.message;
+    await refreshIdentities();
+    linkingGoogle = false;
+  }
+
+  async function sendPasswordReset() {
+    sendingReset = true;
+    resetError = null;
+    resetEmailSent = false;
+
+    // Fetch the live auth email rather than trusting profiles.email, since
+    // the contact email in the profiles table can diverge from the login email.
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !userData.user?.email) {
+      resetError = "Tidak dapat mengesan emel log masuk akaun ini.";
+      sendingReset = false;
+      return;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      userData.user.email,
+      { redirectTo: `${window.location.origin}/auth/reset_password` },
+    );
+
+    sendingReset = false;
+
+    if (error) {
+      resetError = error.message;
+      return;
+    }
+
+    resetEmailSent = true;
   }
 </script>
 
@@ -74,11 +135,6 @@
         </svg>
         Kembali
       </button>
-
-      <div class="badge badge-success badge-soft gap-1.5 p-3">
-        <span class="h-2 w-2 rounded-full bg-success"></span>
-        Akaun Aktif
-      </div>
     </div>
 
     <!-- Main Profile Card -->
@@ -104,9 +160,9 @@
             </div>
           </div>
 
-          <div class="space-y-1 flex-col justify-center">
-            <div class="flex items-center gap-2 flex-wrap pt-2">
-              <h1 class="card-title text-2xl font-bold">
+          <div class="space-y-1 flex-col">
+            <div class="flex items-center gap-2 lg:pt-10">
+              <h1 class="card-title text-2xl font-bold pt-4">
                 {form?.full_name ?? data.profile?.full_name ?? "Pengguna"}
               </h1>
               <div
@@ -115,11 +171,14 @@
                 {userStatus}
               </div>
             </div>
-            <p class="text-xs text-base-content/70">
-              ID: <span class="font-mono">{userStatus}</span>
+            <p class="text-xs text-base-content/70 pt-1">
+              User ID: <span class="font-mono">{data.profile?.id}</span>
             </p>
           </div>
         </div>
+        <p class="text-xs text-gray-500 opacity-80">
+          Gambar profil mengikut akaun Google
+        </p>
 
         <!-- daisyUI Alert Notifications -->
         {#if form?.error}
@@ -166,7 +225,7 @@
             submitting = true;
             return async ({ update }) => {
               submitting = false;
-              await update();
+              await update({ reset: false });
             };
           }}
           class="space-y-6"
@@ -181,9 +240,16 @@
 
             <!-- Full Name Field -->
             <div class="form-control w-full">
-              <label for="full_name" class="label">
+              <label
+                for="full_name"
+                class="label flex flex-col items-start gap-0"
+              >
                 <span class="label-text font-semibold">Nama Penuh</span>
+                <span class="label-text text-xs pb-2"
+                  >Tak perlu tukar jika mahu tukar email sahaja</span
+                >
               </label>
+
               <label class="input input-bordered flex items-center gap-3">
                 <svg
                   class="h-5 w-5 opacity-50"
@@ -223,10 +289,14 @@
 
             <!-- Verified Personal Email Field -->
             <div class="form-control w-full">
-              <label for="email" class="label justify-between">
+              <label for="email" class="label flex flex-wrap items-start pb-2">
                 <span class="label-text font-semibold">Emel Peribadi</span>
                 <span class="badge badge-success badge-sm">Disahkan</span>
+                <span class="text-xs">
+                  Tak perlu tukar jika hanya menukar nama panggilan
+                </span>
               </label>
+
               <label class="input input-bordered flex items-center gap-3">
                 <svg
                   class="h-5 w-5 opacity-50"
@@ -246,14 +316,14 @@
                   name="email"
                   type="email"
                   value={form?.email ?? data.profile?.email}
-                  placeholder="anda@contoh.com"
+                  placeholder="studentabangrumah@gmail.com"
                   class="grow"
                 />
               </label>
             </div>
 
             <!-- Phone Number Input Skeleton -->
-            <div class="form-control w-full">
+            <!-- <div class="form-control w-full">
               <label for="phone" class="label justify-between">
                 <span class="label-text font-semibold">Nombor Telefon</span>
                 <span class="badge badge-warning badge-sm">Sila Kemaskini</span>
@@ -280,10 +350,10 @@
                   class="grow"
                 />
               </label>
-            </div>
+            </div> -->
 
             <!-- Read-Only Login Email Field -->
-            <div
+            <!-- <div
               class="card bg-base-200 border border-base-300 p-4 rounded-xl mt-3"
             >
               <label for="login_email" class="label p-0 pb-2">
@@ -315,8 +385,9 @@
                     d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z"
                   />
                 </svg>
-              </label>
-            </div>
+                <button class="btn bg-[#4a7425]"> Tukar Email </button></label
+              >
+            </div> -->
           </div>
 
           <div class="divider my-2"></div>
@@ -360,17 +431,88 @@
                   </p>
                 </div>
               </div>
+              {#if !hasGoogleLinked}
+                <button
+                  type="button"
+                  onclick={linkGoogleAccount}
+                  disabled={linkingGoogle}
+                  class="btn btn-outline btn-sm sm:w-auto w-full"
+                >
+                  {#if linkingGoogle}
+                    <span class="loading loading-spinner loading-xs"></span>
+                  {:else}
+                    Sambungkan
+                  {/if}
+                </button>
+              {:else if canUnlink}
+                <button
+                  type="button"
+                  onclick={unlinkGoogleAccount}
+                  disabled={linkingGoogle}
+                  class="btn btn-outline btn-error btn-sm sm:w-auto w-full"
+                >
+                  {#if linkingGoogle}
+                    <span class="loading loading-spinner loading-xs"></span>
+                  {:else}
+                    Putuskan
+                  {/if}
+                </button>
+              {:else}
+                <div class="badge badge-success badge-soft gap-1.5 p-3">
+                  Bersambung (kaedah log masuk utama)
+                </div>
+              {/if}
+            </div>
+            {#if googleError}
+              <p class="text-xs text-error">{googleError}</p>
+            {/if}
+          </div>
 
+          <div class="divider my-2"></div>
+
+          <!-- Section 4: Keselamatan / Tetapan Semula Kata Laluan -->
+          <div class="space-y-4">
+            <h2
+              class="text-sm font-bold uppercase tracking-wider text-base-content/60"
+            >
+              Keselamatan
+            </h2>
+
+            {#if resetError}
+              <div role="alert" class="alert alert-error alert-soft">
+                <span class="text-sm">{resetError}</span>
+              </div>
+            {/if}
+
+            {#if resetEmailSent}
+              <div role="alert" class="alert alert-success alert-soft">
+                <span class="text-sm"
+                  >Link tetapan semula kata laluan telah dihantar ke emel log
+                  masuk anda. Sila semak peti 'Inbox' anda.</span
+                >
+              </div>
+            {/if}
+
+            <div
+              class="card bg-base-200 border border-base-300 p-4 rounded-xl flex sm:flex-row items-center justify-between gap-4"
+            >
+              <div>
+                <p class="font-semibold text-sm">Kata Laluan</p>
+                <p class="text-xs text-base-content/60">
+                  Kami akan menghantar pautan ke emel log masuk anda untuk
+                  menetapkan semula kata laluan.
+                </p>
+              </div>
               <button
                 type="button"
-                onclick={linkGoogleAccount}
-                disabled={linkingGoogle}
+                onclick={sendPasswordReset}
+                disabled={sendingReset}
                 class="btn btn-outline btn-sm sm:w-auto w-full"
               >
-                {#if linkingGoogle}
+                {#if sendingReset}
                   <span class="loading loading-spinner loading-xs"></span>
                 {:else}
-                  Sambungkan
+                  Hantar Emel Tetapan Semula
                 {/if}
               </button>
             </div>
@@ -381,7 +523,7 @@
             <button
               type="submit"
               disabled={submitting}
-              class="btn btn-primary w-full"
+              class="btn bg-[#4a7425] text-white w-full"
             >
               {#if submitting}
                 <span class="loading loading-spinner loading-sm"></span>
