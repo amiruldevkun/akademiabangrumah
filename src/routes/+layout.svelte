@@ -192,7 +192,7 @@
               <div class="w-10 rounded-full ring ring-white/50">
                 <img
                   src={user.user_metadata.avatar_url}
-                  alt={user.user_metadata?.name ?? "User avatar"}
+                  alt={user.user_metadata?.full_name ?? "User avatar"}
                 />
               </div>
             {:else}
@@ -213,10 +213,8 @@
               {user.user_metadata?.name ?? user.email}
             </li>
             <li>
-              <button
-                class="disabled:cursor-not-allowed"
-                disabled
-                onclick={profile}>Profil (Akan Datang)</button
+              <button class="disabled:cursor-not-allowed" onclick={profile}
+                >Profil</button
               >
             </li>
             {#if data?.admin}
