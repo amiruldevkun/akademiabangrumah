@@ -39,9 +39,9 @@ export const actions = {
 
     // Cloudflare Turnstile Implementation via Explicit Rendering
 
-    // 1. Verify token
+    // 1. Verify the token exist and not null
     if (!turnstileToken) {
-      return fail(400, { error: "ts missing" });
+      return fail(400, { error: "ts missing sonion ✌️😭🥀🥀" });
     }
 
     // 2. Call verifyTurnstileToken
