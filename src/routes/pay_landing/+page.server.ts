@@ -1,3 +1,5 @@
+import { redirect } from "@sveltejs/kit";
+
 // src/routes/+page.server.ts
 export async function load({ locals }) {
   const { user } = await locals.safeGetSession();

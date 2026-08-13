@@ -1,0 +1,48 @@
+# git-cliff ~ configuration file
+# https://git-cliff.org/docs/configuration
+
+
+[changelog]
+# Render a clean JSON array of releases
+header = "[\n"
+body = """
+  {
+    "version": "{{ version }}",
+    "date": "{{ timestamp | date(format="%Y-%m-%d") }}",
+    "commits": [
+      {%- for commit in commits %}
+      {
+        "id": "{{ commit.id }}",
+        "message": "{{ commit.message | replace(from='"', to='\"') }}",
+        "group": "{{ commit.group }}"
+      }{% if not loop.last %},{% endif %}
+      {%- endfor %}
+    ]
+  }{% if not loop.last %},{% endif %}
+"""
+footer = "\n]\n"
+trim = true
+
+[git]
+# Automatically exclude commits containing specific sensitive keywords
+skip_tags = false
+ignore_tags = ""
+
+commit_parsers = [
+  # Skip specific internal infrastructure keywords explicitly
+  { message = ".*SUPABASE.*", skip = true },
+  { message = ".*ENV.*", skip = true },
+  { message = ".*SECRET.*", skip = true },
+  { message = ".*API_KEY.*", skip = true },
+
+  # Keep standard user-facing commits
+  { message = "^feat", group = "Features" },
+  { message = "^fix", group = "Bug Fixes" },
+
+  # Skip internal routines and non-conventional/raw noise
+  { message = "^chore", skip = true },
+  { message = "^code", skip = true },
+  { message = "^docs", skip = true },
+  { message = ".*", skip = true }, # Drops ANY commit that doesn't follow Conventional Commits
+]
+

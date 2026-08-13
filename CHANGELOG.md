@@ -1,170 +1,45 @@
-## [v2.1] - 2026-08-01
+# Changelog
 
-### Added
+All notable changes to this project will be documented in this file.
 
-- feat: added new stuff on the landing page! (e104f09)
-- code: added more verbose error messages for user and dev (ee0c026)
-- feat: missed one more page server (4a05644)
-- feat: announcements now show newly added videos (0286d87)
-- feat: new notes reader! for extra text docs or pdfs that en ayub wants (9599456)
-- code: added new location in sitemap for bot crawl and removed prerender option in pay_landing as it was failing the payment thing (2247bbd)
-- code: added recovery session function where we log out users when finishing up their password resets (5bc7fec)
-- logs: Changelog for newest deploy is here (d1ca738)
-- code: server side parsing service to enable new tags and button elements (51f0d37)
-- uxui: added button elements for watched button (200d093)
-- uxui: new landing page for people coming from natural seo and links. added login function in pay_landing if user is not logged in (b00daf6)
-- code: added a sign up feature via email and login via email. (9722fa2)
-- code: added a first_seen feature where it adds a "BARU" tag to newly added videos. and title for tab (a5ab7eb)
-- code: added lazy loading and disabling buttons that are not in use (19c55d9)
-- code: added meta description, new public routes and robots.txt for bot scraping (dcf2d23)
-- ui: deleted unused css and adding a phone app preview (5c95505)
-- web: added wrangler.json (8529ed4)
-- qol: added google search console meta tag for SEO purposes (6246f76)
-- code: added reminder to comment local dev url (4b4ba3a)
-- code: changes to config files to accomodate new way to update video entries (e6160f7)
 
-### Fixed
+## [2.2.1] - 2026-08-13
 
-- code: IMPORTANT FIX! failure in toyyibpay reconcilation because of typescript (669f3a8)
-- code: fixed reset password flow via email. improved cta and buttons for old people (af1f16b)
 
-### Changed
 
-- code: pointer events still not working. oh well (e097658)
-- code: routine css and cleanup (e141c31)
-- code: removed trailing slash because of some weird quirk that it has a trailing slash as the site url? (d13db5e)
-- code: reenabled 2 buttons for qna and telegram group invite. (06bfb0f)
-- deps: routine stuff (9427466)
-- chore: cleanup on isle 6! removing irrelevant files (a901478)
-- web: sitemap for better seo and simple prettier (ae17ddc)
-- code: smoothing out the transitions between pages (e2a5305)
-- code: routine css (97622d0)
-- web: changed to cloudflare pages for edge deployment and free bandwidth :) (27acb37)
-- Update wrangler.json configuration (7f3c51d)
-- Remove pages_build_output_dir from wrangler.json (07379e4)
-- Rename project from 'akademi-abang-rumah' to 'akademiabangrumah' (38efaa3)
-- web: changed build script to remove 'wrangler types' (9d4809e)
-- web: forgot we needed this :skull: (e79e598)
-- web: removed unused dep called sveltesitemap (3e89ea5)
-- web: changed adapter from netlify to cloudflare to migrate to cloudflare pages (8974880)
-- qol: changed google search console from personal to work acc (edbee7c)
-- code: atp imma just commit everything. bad practice but too tired anyway (4822ed1)
+### Bug Fixes
 
----
+- Fix reset password failing (0877d8a)
 
-## [v2.0] - 2026-07-30
+### Features
 
-### Added
+- Add changelog popup for update understanding (dedf663)
 
-- code: server side parsing service to enable new tags and button elements (51f0d37)
-- uxui: added button elements for watched button (200d093)
-- uxui: new landing page for people coming from natural seo and links. added login function in pay_landing if user is not logged in (b00daf6)
-- code: added a sign up feature via email and login via email. (9722fa2)
-- code: added a first_seen feature where it adds a "BARU" tag to newly added videos. and title for tab (a5ab7eb)
-- code: added lazy loading and disabling buttons that are not in use (19c55d9)
-- code: added meta description, new public routes and robots.txt for bot scraping (dcf2d23)
-- ui: deleted unused css and adding a phone app preview (5c95505)
-- web: added wrangler.json (8529ed4)
-- qol: added google search console meta tag for SEO purposes (6246f76)
-- code: added reminder to comment local dev url (4b4ba3a)
-- code: changes to config files to accomodate new way to update video entries (e6160f7)
+## [2.2.0] - 2026-08-10
 
-### Changed
 
-- web: sitemap for better seo and simple prettier (ae17ddc)
-- code: smoothing out the transitions between pages (e2a5305)
-- code: routine css (97622d0)
-- web: changed to cloudflare pages for edge deployment and free bandwidth :) (27acb37)
-- Update wrangler.json configuration (7f3c51d)
-- Remove pages_build_output_dir from wrangler.json (07379e4)
-- Rename project from 'akademi-abang-rumah' to 'akademiabangrumah' (38efaa3)
-- web: changed build script to remove 'wrangler types' (9d4809e)
-- web: forgot we needed this :skull: (e79e598)
-- web: removed unused dep called sveltesitemap (3e89ea5)
-- web: changed adapter from netlify to cloudflare to migrate to cloudflare pages (8974880)
-- qol: changed google search console from personal to work acc (edbee7c)
-- code: atp imma just commit everything. bad practice but too tired anyway (4822ed1)
 
----
+### Bug Fixes
 
-## [v1.3.0] - 2026-07-14
+- Added a fix to show "TAHNIAH" banner for newly paid users! (64da684)
+- Fixed locals.supabase policy scope to be able to read announcements (2480eec)
 
-### Added
+### Features
 
-- Merge branch 'feature/mainmenu' (ca5039a)
-- code: added title changes for payment/return, added a bottom nav bar for mobile (d769716)
-- code: added title (1e6aaa9)
-- code: tbh idk what i added here (f29917f)
-- code: added a check for tahniah banner (9d8e5a4)
-- code: added support for video progress (392c72a)
-- code: added video progress tracking (190f6c5)
-- docs: added and crossed some items (8ef4895)
-- code: new branch to build the main menu (38005aa)
-- code: added toyyibpay recheck when callback fails (8bf2bfe)
-- code: added more diag logging (40f15dd)
-- code: testing out new payment method (00a3f5a)
-- code: testing out new branch to add toyyibpay (9915535)
-- docs: added new features in the todo list (64224e6)
-- code: added svelte into configs for integration (d72ebb5)
-- code: added sveltekit and supabase as dependecies for crucial database and framework (e025bd9)
-- code: added a banner for easy installments (0f64099)
-- code: updated sidebar for added videos (17 new videos) (158262c)
-- code: added an about section for a biodata thing (c059407)
-- docs: new essential images needed for webhosting (netlify) (c5bde7d)
-- docs: added readme for feature tracking (654502a)
-- code: added image to homescreen (thank you n welcome image) (19b5d59)
-- code: adding updated sidebar script and removing its gitignore entry (0f9c7fb)
-- code: added 39 sections, 60 lesson items (42 with videos ready, 18 marked Akan Datang) (9cec8f2)
-- docs: init npm, added gitignore and restructuring (8f4a90b)
+- New notes reader! for extra text docs or pdfs that en ayub wants (9599456)
+- Announcements now show newly added videos (0286d87)
+- Missed one more page server (4a05644)
+- Added new stuff on the landing page! (e104f09)
+- New admin dashboards! announcements, notes, orders, users and sidebar is now in the folder (management) for new layouts to enable back button and show email of the logged in admin (b19f70f)
+- Added an admin button for admin users and markdown rendering in announcement block (cdd6ed3)
+- Consolidated ordersDashboard with users so its only one tile to control it all (9314749)
+- Commiting profile to stage for a future feature release (3a87a6c)
+- Added turnstile for bots mitigation and gating logins to improve security (9e31692)
+- Added turnstile via explicit rendering to have control over turnstile box rendering (0a9439c)
+- Profile page is released! (1b05b03)
+- Added a second cta block at the bottom of the page (6e56713)
 
-### Fixed
+## [1.3.1] - 2026-07-12
 
-- code: fixed ui to make it nicer (bdf8cb5)
-- code: fixed rerouting from thank you page to mainmenu instead of video page (91d143d)
-- code: finally fixed the rerouting changes (27e4467)
-- code: fixing rerouting issues (1456b34)
-- code: fixing rerouting again (6db1715)
-- code: fixed open div (7fa2077)
-- code: fixing some redirection issues (ab6dbeb)
-- pls fix (ad95ef9)
-- code: fix publish directory not available (8c52622)
-- code: fixing import missing (a2b16bb)
-- code: fixed up css and init tailwind (a0e2089)
 
-### Changed
 
-- code: major oversight in navigation (91f094a)
-- code: routine css (13a516b)
-- code: changed cat gif for akan datang (f3377ec)
-- docs: important asset for mainmenu (24fd20c)
-- code: placeholder page for coming soon stuff (a0ddb24)
-- code: updated sidebar n routine css (a379e8e)
-- docs: removed comments containing api access (2b4b193)
-- code: hoping on claude rn (850bbbd)
-- code: redun (180a826)
-- code: urgent logging (718e35e)
-- code: cleaning up in-file docs for secret exposure (32d6d94)
-- code: removed url for secret tampering (938b450)
-- code: implemented sveltepwa plugin so it could actually be a pwa (d7929fb)
-- code: svelte implementation of current production + a login system via supabase oauth (70d93bc)
-- docs: MAJOR RESTRUCT AGAIN FOR SVELTE FRAMEWORK (d8c8433)
-- docs: svelte config files (64e1a3d)
-- docs: routine cleanup (3737bf1)
-- docs: netlify config (77fa92a)
-- code: removal of old html because of framework migration to sveltekit + vite (f223770)
-- docs: remove unneccesary items from clogging up the repo (45a47bb)
-- code: changed sidebar implementation from pure html to json+js for ease of use and less complexity (8715f15)
-- code: implemented PWA functionality for ease of access (c595139)
-- docs: MAJOR RESTRUCTURING TO ACCOMDATE PWA STANDARDS (7bab484)
-- docs: ignore parsing file (f074ba0)
-- docs: essential image for about section (beb1736)
-- docs: ticked about me and collapsible headings (c0caedf)
-- code: changed the placeholder to explicitly point towards burger menu (388031e)
-- code: routine tailwindcss (3149755)
-- code: updated index so its cleaner (2de2957)
-- code: updated sidebar builder to include google drive links (1342e1f)
-- code: accidentally left test link in (0be46ab)
-- code: routine code cleanup and tailwindcss updates (3e44a43)
-- code: removed redundant topic files and updated tailwindcss (c0172b3)
-- code: seperated script from html, updated sidebar to be complete and scrollable (eabd6ab)
-- Initial commit via Netlify [skip ci] (4ad620c)

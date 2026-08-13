@@ -8,6 +8,7 @@
   import { page } from "$app/state";
   import { onNavigate } from "$app/navigation";
   import { goto } from "$app/navigation";
+  import ChangelogPopup from "$lib/changelogPopup.svelte";
 
   const userRoutes = ["/classroom", "/notes", "/"];
 
@@ -23,7 +24,9 @@
       "/sign_up",
       "/about",
       "/forgot_password",
-      "/reset_password",
+      "/auth/reset_password",
+      "/auth/error",
+      "/auth/confirm_reset",
     ].some((p) => page.url.pathname.startsWith(p)),
   );
 
@@ -258,6 +261,9 @@
 {/if}
 <div class={hideRoutes ? "" : "pb-8 sm:pb-20"}>
   {@render children()}
+  {#if !hideRoutes}
+    <ChangelogPopup />
+  {/if}
 </div>
 {#if !hideRoutes || !userRoutes}
   <div
