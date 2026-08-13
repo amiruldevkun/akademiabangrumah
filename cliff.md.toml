@@ -1,0 +1,53 @@
+# git-cliff ~ configuration file
+# https://git-cliff.org/docs/configuration
+
+
+[changelog]
+# The main title at the top of CHANGELOG.md
+header = """
+# Changelog\n
+All notable changes to this project will be documented in this file.\n
+"""
+
+# Format for each release section (## [v2.3.0] - 2026-08-13)
+body = """
+{% if version %}
+  ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}
+  ## [unreleased]
+{% endif %}
+
+{% for group, commits in commits | group_by(attribute="group") %}
+  ### {{ group | upper_first }}
+  {% for commit in commits %}
+    - {{ commit.message | upper_first }} ({{ commit.id | truncate(length=7, end="") }})
+  {%- endfor %}
+{% endfor %}
+"""
+
+footer = ""
+trim = true
+
+[git]
+# Automatically exclude commits containing specific sensitive keywords
+skip_tags = false
+ignore_tags = ""
+
+commit_parsers = [
+  # Skip specific internal infrastructure keywords explicitly
+  { message = ".*SUPABASE.*", skip = true },
+  { message = ".*ENV.*", skip = true },
+  { message = ".*SECRET.*", skip = true },
+  { message = ".*API_KEY.*", skip = true },
+
+  # Keep standard user-facing commits
+  { message = "^feat", group = "Features" },
+  { message = "^fix", group = "Bug Fixes" },
+
+  # Skip internal routines and non-conventional/raw noise
+  { message = "^chore", skip = true },
+  { message = "^code", skip = true },
+  { message = "^docs", skip = true },
+  { message = ".*", skip = true }, # Drops ANY commit that doesn't follow Conventional Commits
+]
+
