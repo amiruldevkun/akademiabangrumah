@@ -11,6 +11,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const statusFilter = url.searchParams.get("status");
   const rawSearch = url.searchParams.get("q")?.trim() ?? "";
   const search = rawSearch.replace(/[,()%]/g, "");
+  let searchStatus = false as boolean;
+
+  searchStatus = true;
 
   const { data: profile, error: profileErr } = await locals.supabase
     .from("profiles")
@@ -23,12 +26,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   }
   // If there's no search query and no status filter, don't run heavy queries
   if (!search && !statusFilter) {
+    searchStatus = false;
     return {
       profiles: [],
       orders: [],
       search: "",
       statusFilter: null,
       currentUserId: currentUser?.id,
+      searchStatus,
     };
   }
 
@@ -76,6 +81,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
   if (profilesRes.error) console.error("Profiles error:", profilesRes.error);
   if (ordersRes.error) console.error("Orders error:", ordersRes.error);
+  searchStatus = false;
 
   return {
     profiles: profilesRes.data ?? [],
@@ -83,6 +89,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     search: rawSearch,
     statusFilter,
     currentUserId: currentUser?.id,
+    searchStatus,
   };
 };
 
@@ -90,7 +97,9 @@ export const actions: Actions = {
   toggleAdmin: async ({ request, locals }) => {
     const currentUser = locals.user;
     const formData = await request.formData();
+
     const id = formData.get("id");
+
     if (typeof id !== "string")
       return fail(400, { message: "Missing user id." });
 
