@@ -15,7 +15,7 @@
     let message = $state("");
 
     if (!emailPass) {
-      passError = "input it in sonion";
+      passError = "Kata laluan tidak boleh kosong";
     }
     if (emailPass !== confirmPass) {
       passError = "Kata laluan tidak sama. Perbetulkan";
@@ -38,11 +38,19 @@
     } else if (error?.message.includes("requires")) {
       return fail(400, { passError: "Letakkan kata laluan" });
     } else {
-      console.warn("Password for " + data.user + " has been changed!");
+      console.warn("Password for " + data?.user + " has been changed!");
     }
 
-    const finished = await supabase.auth.signOut();
+    const finalSignOut = await supabase.auth.signOut();
+    console.warn("SIGNING OUT");
+    if (!finalSignOut) {
+      finished = false;
+      passError = "Failed to Sign out";
 
+      return fail(400, "Failed to sign out");
+    }
+    console.warn("Sign out success");
+    finished = true;
     return finished;
   }
 
@@ -82,7 +90,7 @@
     </div>
 
     <div class="flex flex-col">
-      {#if finished}
+      {#if finished === true}
         <p class="text-green-700 text-sm">
           Kata laluan anda telah ditukar! <br />
           Anda akan dialihkan ke page login dalam {redirectSeconds} dan gunakan kata
