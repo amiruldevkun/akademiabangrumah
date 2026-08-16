@@ -56,6 +56,8 @@
           return async ({ update, result }) => {
             if (result.type === "failure") {
               turnstile?.reset();
+              passError = (result.data?.passError as string) ?? "";
+              emailError = (result.data?.emailError as string) ?? "";
             }
             await update();
             signUpStatus = false;
@@ -111,7 +113,10 @@
         {/if}
 
         <!-- Cloudflare Turnstile Implementation for extra bot mitigation on top of cloudflare's cdn -->
-        <TurnstileWidget onVerify={(token) => (turnstileToken = token)} />
+        <TurnstileWidget
+          onVerify={(token) => (turnstileToken = token)}
+          bind:this={turnstile}
+        />
 
         <!-- vvv loading anim-->
         <button
