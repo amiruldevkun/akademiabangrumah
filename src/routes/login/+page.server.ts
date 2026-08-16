@@ -64,23 +64,26 @@ export const actions = {
     });
     console.log(error, data);
     if (error?.message.includes("Password")) {
-      passError =
-        "Kata laluan mestilah sepanjang 6 huruf atau/dan memerlukan 1 huruf besar, 1 huruf kecil, 1 simbol(!,@,$) dan 1 nombor";
+      return fail(
+        400,
+        (passError =
+          "Kata laluan mestilah sepanjang 6 huruf atau/dan memerlukan 1 huruf besar, 1 huruf kecil, 1 simbol(!,@,$) dan 1 nombor"),
+      );
     } else if (error?.message.includes("invalid format")) {
-      emailError = "Email bukan format yang diingini. Perbetulkan email.";
+      return fail(
+        400,
+        (emailError = "Email bukan format yang diingini. Perbetulkan email."),
+      );
     } else if (error?.message.includes("requires")) {
-      passError = "Letakkan kata laluan";
+      return fail(400, (passError = "Letakkan kata laluan"));
     } else if (error?.message.includes("Anonymous")) {
       let message = "Email dan kata laluan kosong";
-      passError = message;
-      emailError = message;
+      return fail(400, ((passError = message), (emailError = message)));
     } else if (error) {
-      passError = "Email atau kata laluan salah";
-    } else {
-      redirect(303, "/");
+      console.log(error);
+      return fail(400, (passError = "Email atau kata laluan salah"));
     }
-
-    signUpStatus = false;
+    redirect(303, "/");
   },
 };
 
