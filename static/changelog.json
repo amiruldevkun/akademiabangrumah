@@ -1,18 +1,8 @@
 [
-  {
-    "version": "v2.2.1",
-    "date": "2026-08-13",
-    "commits": [
-      {
-        "id": "0877d8a6b20b16aefed06f5a9fd23a83802ee3c6",
-        "message": "Baiki reset password",
-        "group": "Bug Fixes"
-      },
-      {
-        "id": "dedf663783c7917d9618576dfb819312dbf14716",
-        "message": "Adakan menu changelog untuk pengetahuan user",
-        "group": "Features"
-      }
-    ]
-  }
+{
+"version": "v.2.2.2",
+"date": "2026-08-16",
+"commits": [
+]
+},
 ]

@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.2.2] - 2026-08-16
+
+
+
+### Bug Fixes
+
+- Fix turnstile token and widget not rotating after failed attempt (366b952)
+- Fix redirect after successful password change (1a3ca80)
+
 ## [2.2.1] - 2026-08-13
 
 
@@ -39,7 +48,7 @@ All notable changes to this project will be documented in this file.
 - Profile page is released! (1b05b03)
 - Added a second cta block at the bottom of the page (6e56713)
 
-## [1.3.1] - 2026-07-12
+## [1.0.0] - 2026-07-02
 
 
 
