@@ -1,18 +1,18 @@
 [
-{
-"version": "v2.2.2",
-"date": "2026-08-16",
-"commits": [
-{
-"id": "366b9527c0e8f529d88d263b56e7770086a85148",
-"message": "fix turnstile token and widget not rotating after failed attempt",
-"group": "Bug Fixes"
-},
-{
-"id": "1a3ca806837d8becb01a8cdfcb91c893201dbbe7",
-"message": "fix redirect after successful password change",
-"group": "Bug Fixes"
-}
-]
-},
+  {
+    "version": "v2.2.2",
+    "date": "2026-08-16",
+    "commits": [
+      {
+        "id": "366b9527c0e8f529d88d263b56e7770086a85148",
+        "message": "fix turnstile token and widget not rotating after failed attempt",
+        "group": "Bug Fixes"
+      },
+      {
+        "id": "1a3ca806837d8becb01a8cdfcb91c893201dbbe7",
+        "message": "fix redirect after successful password change",
+        "group": "Bug Fixes"
+      }
+    ]
+  }
 ]
