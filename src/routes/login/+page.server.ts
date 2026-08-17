@@ -47,7 +47,10 @@ export const actions = {
     // 2. Call verifyTurnstileToken
     const outcome = await verifyTurnstileToken(turnstileToken);
 
+    console.log("Verifying Token...");
+
     if (!outcome.success) {
+      console.log("Turnstile Failed");
       return fail(400, {
         error: "An error has occured",
         codes: outcome["error-codes"],
