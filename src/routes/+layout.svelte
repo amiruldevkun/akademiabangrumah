@@ -5,10 +5,27 @@
   import { supabase } from "$lib/supabaseClient";
   // import { createClient } from '@supabase/supabase-js'
   import { invalidate } from "$app/navigation";
-  import { page } from "$app/state";
+  import { page, navigating } from "$app/state";
   import { onNavigate } from "$app/navigation";
+  import HomeSkeleton from "$lib/homeSkeleton.svelte";
+  import ClassroomSkeleton from "$lib/classroomSkeleton.svelte";
+  import NotesSelectorSkeleton from "$lib/notesSelectorSkeleton.svelte";
+  import NotesDocsSkeleton from "$lib/notesDocsSkeleton.svelte";
   import { goto } from "$app/navigation";
   import ChangelogPopup from "$lib/changelogPopup.svelte";
+
+  const SKELETON_ROUTES: Record<string, any> = {
+    "/": HomeSkeleton,
+    "/classroom": ClassroomSkeleton,
+    "/notes": NotesSelectorSkeleton,
+    "/notes/[id]": NotesDocsSkeleton,
+  };
+
+  let ActiveSkeleton = $derived(
+    navigating.to?.route.id
+      ? SKELETON_ROUTES[navigating.to.route.id]
+      : undefined,
+  );
 
   const userRoutes = ["/classroom", "/notes", "/"];
 
@@ -27,6 +44,7 @@
       "/auth/reset_password",
       "/auth/error",
       "/auth/confirm_reset",
+      "/pay_landing",
     ].some((p) => page.url.pathname.startsWith(p)),
   );
 
@@ -52,6 +70,14 @@
   // smoothens transistions
   onNavigate((navigation) => {
     if (!document.startViewTransition) return;
+
+    // Skip the crossfade between the app's main tabs — we want the
+    // skeleton to appear instantly, not sit hidden behind a frozen
+    // screenshot while the transition waits on it.
+    const appRoutes = ["/", "/classroom", "/notes"];
+    const leavingApp = appRoutes.includes(navigation.from?.route.id ?? "");
+    const enteringApp = appRoutes.includes(navigation.to?.route.id ?? "");
+    if (leavingApp && enteringApp) return;
 
     return new Promise((resolve) => {
       document.startViewTransition(async () => {
@@ -173,9 +199,9 @@
     <div class="navbar-start">
       <a href="/about" class="btn btn-ghost hover:bg-white/10 px-0.5">
         <img
-          src="/assets/images/akademilogov2.webp"
+          src="/assets/pwa-192x192.png"
           alt="Akademi Abang Rumah Logo"
-          class="w-16 h-auto"
+          class="w-16 h-16"
         />
       </a>
       <span class="text-lg font-bold tracking-wider mx-2"
@@ -213,7 +239,7 @@
             class="menu menu-md dropdown-content bg-base-100 text-gray-800 rounded-box z-50 mt-3 w-56 p-2 shadow-lg"
           >
             <li class="menu-title text-xs">
-              {user.user_metadata?.name ?? user.email}
+              {user.user_metadata?.full_name ?? user.email}
             </li>
             <li>
               <button class="disabled:cursor-not-allowed" onclick={profile}
@@ -260,7 +286,12 @@
   </div>
 {/if}
 <div class={hideRoutes ? "" : "pb-8 sm:pb-20"}>
-  {@render children()}
+  {#if ActiveSkeleton}
+    {console.log("Rendering skeletonLoader")}
+    <ActiveSkeleton />
+  {:else}
+    {@render children()}
+  {/if}
   {#if !hideRoutes}
     <ChangelogPopup />
   {/if}
