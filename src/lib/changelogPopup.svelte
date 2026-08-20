@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { PUBLIC_SUPABASE_URL } from "$env/static/public";
 
   type ChangelogCommit = { id: string; message: string; group: string };
   type ChangelogRelease = {
@@ -10,7 +11,9 @@
 
   const STORAGE_KEY = "aar_changelog_last_seen_version";
   // Point this to your Cloudflare R2 bucket URL or local static asset
-  const CHANGELOG_URL = "/changelog.json";
+  const CHANGELOG_URL =
+    PUBLIC_SUPABASE_URL +
+    "/storage/v1/object/public/changelog%20hold/changelog.json";
 
   const GROUP_LABELS: Record<string, string> = {
     Features: "Ciri Baharu",
