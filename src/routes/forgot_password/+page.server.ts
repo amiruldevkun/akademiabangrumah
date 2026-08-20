@@ -1,10 +1,9 @@
 import { fail } from "@sveltejs/kit";
-import { TURNSTILE_KEY } from "$env/static/private";
 
-async function verifyTurnstileToken(token: string) {
+async function verifyTurnstileToken(token: string, key: string) {
   const verifyBody = new URLSearchParams({
     response: token,
-    secret: TURNSTILE_KEY,
+    secret: key,
   });
   try {
     const verifyRes = await fetch(
@@ -27,42 +26,52 @@ async function verifyTurnstileToken(token: string) {
 }
 
 export const actions = {
-  default: async ({ request, locals, url }) => {
+  default: async ({ request, locals, url, platform }) => {
     const formData = await request.formData();
     const email = formData.get("email") as string;
     const turnstileToken = formData.get("cf-turnstile-response") as string;
-    let emailError = "" as string;
-    let signupStatus = true as boolean;
+    const turnstilekey = platform?.env?.TURNSTILE_KEY;
+
+    if (!turnstilekey) {
+      throw new Error("Key is undefined. Please debug me");
+    }
 
     // Cloudflare Turnstile Implementation via Explicit Rendering
     // 1. Verify token
     if (!turnstileToken) {
-      return fail(400, { error: "ts missing" });
+      return fail(400, {
+        emailError: "Sila selesaikan pengesahan keselamatan.",
+      });
     }
 
     // 2. Call verifyTurnstileToken
-    const outcome = await verifyTurnstileToken(turnstileToken);
+    const outcome = await verifyTurnstileToken(turnstileToken, turnstilekey);
 
     if (!outcome.success) {
       return fail(400, {
-        error: "An error has occured",
-        codes: outcome["error-codes"],
+        emailError: "Pengesahan keselamatan gagal. Cuba lagi.",
       });
     }
 
     console.log("Turnstile token verified. Advancing");
 
-    // Supabase forgot pass flow
-    const { data, error } = await locals.supabase.auth.resetPasswordForEmail(
-      email,
-      { redirectTo: `${url.origin}auth/reset_password` },
-    );
-
-    if (!email.includes("@gmail.com")) {
-      emailError = "Bentuk Email tak betul";
-      return fail(400, { emailError });
+    // 3. Validate email format BEFORE calling Supabase
+    if (!email || !email.includes("@gmail.com")) {
+      return fail(400, { emailError: "Bentuk email tak betul" });
     }
-    signupStatus = false;
-    return { success: true, signupStatus };
+
+    // Supabase forgot pass flow
+    const { error } = await locals.supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${url.origin}/auth/reset_password`,
+    });
+
+    if (error) {
+      console.error("resetPasswordForEmail failed:", error.message);
+      return fail(400, {
+        emailError: "Tidak dapat menghantar permintaan. Cuba lagi sebentar.",
+      });
+    }
+
+    return { success: true };
   },
 };

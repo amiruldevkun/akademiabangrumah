@@ -1,11 +1,10 @@
 import { supabaseAdmin } from "$lib/supabaseAdmin";
 import { fail } from "@sveltejs/kit";
-import { TURNSTILE_KEY } from "$env/static/private";
 
-async function verifyTurnstileToken(token: string) {
+async function verifyTurnstileToken(token: string, key: string) {
   const verifyBody = new URLSearchParams({
     response: token,
-    secret: TURNSTILE_KEY,
+    secret: key,
   });
   try {
     const verifyRes = await fetch(
@@ -28,14 +27,19 @@ async function verifyTurnstileToken(token: string) {
 }
 
 export const actions = {
-  default: async ({ request, locals }) => {
+  default: async ({ request, locals, platform }) => {
     const formData = await request.formData();
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const passwordConfirm = formData.get("conPass") as string;
     const name = formData.get("name") as string;
     const turnstileToken = formData.get("cf-turnstile-response") as string;
+    const turnstilekey = platform?.env?.TURNSTILE_KEY;
     let signupStatus = true as boolean;
+
+    if (!turnstilekey) {
+      throw new Error("Turnstile key is undefined. Please debug me");
+    }
 
     // Cloudflare Turnstile Implementation via Explicit Rendering
     // 1. Verify token
@@ -44,7 +48,7 @@ export const actions = {
     }
 
     // 2. Call verifyTurnstileToken
-    const outcome = await verifyTurnstileToken(turnstileToken);
+    const outcome = await verifyTurnstileToken(turnstileToken, turnstilekey);
 
     if (!outcome.success) {
       return fail(400, {
