@@ -20,7 +20,7 @@
 
 import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import { supabaseAdmin } from "$lib/supabaseAdmin";
+import { getSupabaseAdmin } from "$lib/supabaseAdmin";
 
 type Announcement = {
   id: string;
@@ -47,7 +47,10 @@ async function requireAdmin(locals: App.Locals) {
   return user;
 }
 
-async function getManualAnnouncements(): Promise<Announcement[]> {
+async function getManualAnnouncements(
+  platform: App.Platform | undefined,
+): Promise<Announcement[]> {
+  const supabaseAdmin = getSupabaseAdmin(platform);
   const { data } = await supabaseAdmin
     .from("sidebar_content")
     .select("manual_announcements")
@@ -57,13 +60,13 @@ async function getManualAnnouncements(): Promise<Announcement[]> {
   return (data?.manual_announcements as Announcement[] | null) ?? [];
 }
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, platform }) => {
   await requireAdmin(locals);
-  return { announcements: await getManualAnnouncements() };
+  return { announcements: await getManualAnnouncements(platform) };
 };
 
 export const actions: Actions = {
-  add: async ({ request, locals }) => {
+  add: async ({ request, platform }) => {
     const formData = await request.formData();
     const text = formData.get("text");
 
@@ -71,7 +74,7 @@ export const actions: Actions = {
       return fail(400, { message: "Text is required." });
     }
 
-    const current = await getManualAnnouncements();
+    const current = await getManualAnnouncements(platform);
     const next: Announcement[] = [
       {
         id: crypto.randomUUID(),
@@ -80,6 +83,8 @@ export const actions: Actions = {
       },
       ...current,
     ].slice(0, MAX_MANUAL_ANNOUNCEMENTS);
+
+    const supabaseAdmin = getSupabaseAdmin(platform);
 
     const { error: updateErr } = await supabaseAdmin
       .from("sidebar_content")
@@ -94,7 +99,7 @@ export const actions: Actions = {
     return { added: true };
   },
 
-  update: async ({ request, locals }) => {
+  update: async ({ request, platform }) => {
     const formData = await request.formData();
     const id = formData.get("id");
     const text = formData.get("text");
@@ -104,10 +109,12 @@ export const actions: Actions = {
       return fail(400, { message: "Text is required." });
     }
 
-    const current = await getManualAnnouncements();
+    const current = await getManualAnnouncements(platform);
     const next = current.map((a) =>
       a.id === id ? { ...a, text: text.trim() } : a,
     );
+
+    const supabaseAdmin = getSupabaseAdmin(platform);
 
     const { error: updateErr } = await supabaseAdmin
       .from("sidebar_content")
@@ -122,13 +129,15 @@ export const actions: Actions = {
     return { updated: true };
   },
 
-  remove: async ({ request, locals }) => {
+  remove: async ({ request, platform }) => {
     const formData = await request.formData();
     const id = formData.get("id");
     if (typeof id !== "string") return fail(400, { message: "Missing id." });
 
-    const current = await getManualAnnouncements();
+    const current = await getManualAnnouncements(platform);
     const next = current.filter((a) => a.id !== id);
+
+    const supabaseAdmin = getSupabaseAdmin(platform);
 
     const { error: updateErr } = await supabaseAdmin
       .from("sidebar_content")

@@ -3,7 +3,7 @@ import { redirect } from "@sveltejs/kit";
 import { hasPaidAccess, hasAdminAccess } from "$lib/access";
 import type { LayoutServerLoad } from "./$types";
 
-export const load: LayoutServerLoad = async ({ locals, url }) => {
+export const load: LayoutServerLoad = async ({ locals, url, platform }) => {
   const PUBLICROUTE = ["/pay_landing"];
   const lockedRoute = ["/landing", "/login"];
   const adminRoute = ["/admin"];
@@ -15,9 +15,9 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
   if (PUBLICROUTE.includes(url.pathname)) {
     return { session: locals.session, user: locals.user };
   }
-  const paid = await hasPaidAccess(locals.user.id);
+  const paid = await hasPaidAccess(locals.user.id, platform);
 
-  const admin = await hasAdminAccess(locals.user.id);
+  const admin = await hasAdminAccess(locals.user.id, platform);
 
   if (!paid) {
     redirect(303, "/pay_landing"); // back to the payment landing page

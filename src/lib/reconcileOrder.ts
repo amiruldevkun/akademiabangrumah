@@ -5,7 +5,7 @@
 // order's real status and apply it, instead of only ever waiting
 // passively for the webhook to arrive.
 
-import { supabaseAdmin } from "$lib/supabaseAdmin";
+import { getSupabaseAdmin } from "$lib/supabaseAdmin";
 import { getBillTransactions } from "$lib/toyyibpay";
 
 /**
@@ -17,7 +17,11 @@ export type toyyibpayID = {
   orderId?: string | null;
 };
 
-export async function reconcileOrder({ orderId }: toyyibpayID) {
+export async function reconcileOrder(
+  { orderId }: toyyibpayID,
+  platform: App.Platform | undefined,
+) {
+  const supabaseAdmin = getSupabaseAdmin(platform);
   const { data: order, error: fetchError } = await supabaseAdmin
     .from("orders")
     .select(

@@ -2,7 +2,7 @@
 import { redirect } from "@sveltejs/kit";
 import { hasPaidAccess } from "$lib/access";
 
-export async function GET({ url, locals }) {
+export async function GET({ url, locals, platform }) {
   const code = url.searchParams.get("code");
   const error = url.searchParams.get("error");
   const errorDescription = url.searchParams.get("error_description");
@@ -18,7 +18,7 @@ export async function GET({ url, locals }) {
       console.warn(
         `OAuth callback replay for already-logged-in user (${error}: ${errorDescription}) — routing onward instead of showing an error.`,
       );
-      const paid = await hasPaidAccess(user.id);
+      const paid = await hasPaidAccess(user.id, platform);
       throw redirect(303, paid ? "/" : "/pay_landing");
     }
 
@@ -43,7 +43,7 @@ export async function GET({ url, locals }) {
         console.warn(
           `Code exchange failed (${exchangeError.message}) but user already has a valid session — routing onward.`,
         );
-        const paid = await hasPaidAccess(user.id);
+        const paid = await hasPaidAccess(user.id, platform);
         throw redirect(303, paid ? "/" : "/pay_landing");
       }
 
@@ -63,7 +63,7 @@ export async function GET({ url, locals }) {
         console.warn(
           "Exchange returned no session, but user already has a valid one — routing onward.",
         );
-        const paid = await hasPaidAccess(user.id);
+        const paid = await hasPaidAccess(user.id, platform);
         throw redirect(303, paid ? "/" : "/pay_landing");
       }
 
@@ -73,7 +73,7 @@ export async function GET({ url, locals }) {
       throw redirect(303, "/login");
     }
 
-    const paid = await hasPaidAccess(session.user.id);
+    const paid = await hasPaidAccess(session.user.id, platform);
     throw redirect(303, paid ? "/" : "/pay_landing");
   }
 
@@ -82,7 +82,7 @@ export async function GET({ url, locals }) {
   // session shouldn't force a re-login either.
   const { user } = await locals.safeGetSession();
   if (user) {
-    const paid = await hasPaidAccess(user.id);
+    const paid = await hasPaidAccess(user.id, platform);
     throw redirect(303, paid ? "/" : "/pay_landing");
   }
 

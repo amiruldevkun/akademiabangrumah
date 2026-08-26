@@ -9,7 +9,7 @@ import { hasPaidAccess } from "$lib/access";
 import { NOTES_GATED } from "$lib/config";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, platform }) => {
   const { data: docs, error } = await locals.supabase
     .from("documents")
     .select("id, title")
@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
   let paid = true;
   if (NOTES_GATED) {
-    paid = locals.user ? await hasPaidAccess(locals.user.id) : false;
+    paid = locals.user ? await hasPaidAccess(locals.user.id, platform) : false;
   }
 
   return {

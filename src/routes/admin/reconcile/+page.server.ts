@@ -9,63 +9,85 @@
 // Gated by email allowlist since there's no admin-role system yet — set
 // ADMIN_EMAILS in .env as a comma-separated list.
 
-import { error, fail } from '@sveltejs/kit';
-import { ADMIN_EMAILS } from '$env/static/private';
-import { reconcileOrder } from '$lib/reconcileOrder';
+import { error, fail } from "@sveltejs/kit";
+
+import { reconcileOrder } from "$lib/reconcileOrder";
 
 type AdminLocals = {
-	user?: {
-		email?: string | null;
-	} | null;
+  user?: {
+    email?: string | null;
+  } | null;
 };
 
-function assertIsAdmin(locals: AdminLocals) {
-	const allowlist = (ADMIN_EMAILS ?? '').split(',').map((e) => e.trim().toLowerCase());
-	const email = locals.user?.email?.toLowerCase();
-	if (!email || !allowlist.includes(email)) {
-		throw error(403, 'Not authorized');
-	}
+function assertIsAdmin(locals: AdminLocals, admin_emails: string) {
+  const allowlist = (admin_emails ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase());
+  const email = locals.user?.email?.toLowerCase();
+  if (!email || !allowlist.includes(email)) {
+    throw error(403, "Not authorized");
+  }
 }
 
-export async function load({ locals }) {
-	assertIsAdmin(locals);
-	return {};
+export async function load({ locals, platform }) {
+  const admin_Emails = platform?.env?.ADMIN_EMAILS;
+
+  if (!admin_Emails) {
+    throw new Error("Admin emails is undefined. debug");
+  }
+
+  assertIsAdmin(locals, admin_Emails);
+  return {};
 }
 
 export const actions = {
-	reconcile: async ({ request, locals }) => {
-		assertIsAdmin(locals);
+  reconcile: async ({ request, locals, platform }) => {
+    const admin_Emails = platform?.env?.ADMIN_EMAILS;
 
-		const form = await request.formData();
-		const orderId = form.get('order_id')?.toString().trim();
+    if (!admin_Emails) {
+      throw new Error("Admin emails is undefined. debug");
+    }
+    assertIsAdmin(locals, admin_Emails);
 
-		if (!orderId) {
-			return fail(400, { message: 'Order ID is required' });
-		}
+    const form = await request.formData();
+    const orderId = form.get("order_id")?.toString().trim();
 
-		const { order, checkedToyyibPay, error: reconcileError } = await reconcileOrder({orderId});
+    if (!orderId) {
+      return fail(400, { message: "Order ID is required" });
+    }
 
-		if (!order) {
-			return fail(404, { message: `No order found with ID ${orderId}` });
-		}
+    const {
+      order,
+      checkedToyyibPay,
+      error: reconcileError,
+    } = await reconcileOrder({ orderId }, platform);
 
-		if (reconcileError) {
-			return fail(502, { message: `ToyyibPay lookup failed: ${reconcileError}` });
-		}
+    if (!order) {
+      return fail(404, { message: `No order found with ID ${orderId}` });
+    }
 
-		if (!checkedToyyibPay && !order.toyyibpay_bill_code) {
-			return fail(400, { message: 'This order has no ToyyibPay bill code on file — cannot look up.' });
-		}
+    if (reconcileError) {
+      return fail(502, {
+        message: `ToyyibPay lookup failed: ${reconcileError}`,
+      });
+    }
 
-		return {
-			success: true,
-			order: {
-				id: order.id,
-				customerName: order.customer_name,
-				amount: order.amount,
-				newStatus: order.status,
-				profileUpdated: order.status === 'paid'
-			}
-		};
-	}
+    if (!checkedToyyibPay && !order.toyyibpay_bill_code) {
+      return fail(400, {
+        message:
+          "This order has no ToyyibPay bill code on file — cannot look up.",
+      });
+    }
+
+    return {
+      success: true,
+      order: {
+        id: order.id,
+        customerName: order.customer_name,
+        amount: order.amount,
+        newStatus: order.status,
+        profileUpdated: order.status === "paid",
+      },
+    };
+  },
 };

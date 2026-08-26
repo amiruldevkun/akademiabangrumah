@@ -7,9 +7,10 @@
 
 import { getSectionsWithAccess } from "$lib/sections";
 
-export async function load({ locals }) {
+export async function load({ locals, platform }) {
   const { sections: accessSections, paid } = await getSectionsWithAccess(
     locals.user?.id,
+    platform,
   );
 
   let progressByItemId: Record<

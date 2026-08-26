@@ -15,84 +15,118 @@
 //
 //   expected_hash = MD5( userSecretKey + status + order_id + refno + "ok" )
 
-import { createHash } from 'node:crypto';
-import { text } from '@sveltejs/kit';
-import { TOYYIBPAY_SECRET_KEY } from '$env/static/private';
-import { supabaseAdmin } from '$lib/supabaseAdmin';
+import { createHash } from "node:crypto";
+import { text } from "@sveltejs/kit";
+
+import { getSupabaseAdmin } from "$lib/supabaseAdmin";
 
 function md5(str: string) {
-	return createHash('md5').update(str).digest('hex');
+  return createHash("md5").update(str).digest("hex");
 }
 
-export async function POST({ request }) {
-	const form = await request.formData();
+export async function POST({ request, platform }) {
+  const form = await request.formData();
 
-	const refno = form.get('refno') ?? '';
-	const status = form.get('status') ?? ''; // "1" success, "2" pending, "3" fail
-	const reason = form.get('reason');
-	const billcode = form.get('billcode');
-	const orderId = form.get('order_id'); // our externalReferenceNo / orders.id
-	const amount = form.get('amount');
-	const receivedHash = form.get('hash');
+  const refno = form.get("refno") ?? "";
+  const status = form.get("status") ?? ""; // "1" success, "2" pending, "3" fail
+  const reason = form.get("reason");
+  const billcode = form.get("billcode");
+  const orderId = form.get("order_id"); // our externalReferenceNo / orders.id
+  const amount = form.get("amount");
+  const receivedHash = form.get("hash");
+  const tpKey = platform?.env?.TOYYIBPAY_SECRET_KEY;
 
-	console.log('[toyyibpay callback] received', { orderId, billcode, status, refno, amount });
+  if (!tpKey) {
+    throw new Error("toyyibpay key is undefined, debug please");
+  }
 
-	if (!orderId || !receivedHash) {
-		console.warn('[toyyibpay callback] missing order_id or hash — ignoring', { orderId, billcode });
-		// Return 200 anyway so ToyyibPay doesn't endlessly retry a malformed hit.
-		return text('missing order_id or hash', { status: 200 });
-	}
+  console.log("[toyyibpay callback] received", {
+    orderId,
+    billcode,
+    status,
+    refno,
+    amount,
+  });
 
-	const expectedHash = md5(`${TOYYIBPAY_SECRET_KEY}${status}${orderId}${refno}ok`);
+  if (!orderId || !receivedHash) {
+    console.warn("[toyyibpay callback] missing order_id or hash — ignoring", {
+      orderId,
+      billcode,
+    });
+    // Return 200 anyway so ToyyibPay doesn't endlessly retry a malformed hit.
+    return text("missing order_id or hash", { status: 200 });
+  }
 
-	if (receivedHash !== expectedHash) {
-		console.error('[toyyibpay callback] HASH MISMATCH — possible spoofed request or wrong secret key', {
-			orderId,
-			billcode
-		});
-		// 200 so ToyyibPay stops retrying, but we do NOT touch the order.
-		return text('invalid hash', { status: 200 });
-	}
+  const expectedHash = md5(`${tpKey}${status}${orderId}${refno}ok`);
 
-	console.log('[toyyibpay callback] hash verified OK', { orderId, billcode });
+  if (receivedHash !== expectedHash) {
+    console.error(
+      "[toyyibpay callback] HASH MISMATCH — possible spoofed request or wrong secret key",
+      {
+        orderId,
+        billcode,
+      },
+    );
+    // 200 so ToyyibPay stops retrying, but we do NOT touch the order.
+    return text("invalid hash", { status: 200 });
+  }
 
-	// Hash checks out — safe to trust the rest of this payload.
-	const orderStatus = status === '1' ? 'paid' : status === '3' ? 'failed' : 'pending';
+  console.log("[toyyibpay callback] hash verified OK", { orderId, billcode });
 
-	const { data: order, error: updateError } = await supabaseAdmin
-		.from('orders')
-		.update({
-			status: orderStatus,
-			toyyibpay_bill_code: billcode,
-			toyyibpay_ref_no: refno,
-			paid_at: orderStatus === 'paid' ? new Date().toISOString() : null
-		})
-		.eq('id', orderId)
-		.select('user_id')
-		.single();
+  // Hash checks out — safe to trust the rest of this payload.
+  const orderStatus =
+    status === "1" ? "paid" : status === "3" ? "failed" : "pending";
 
-	if (updateError) {
-		console.error('[toyyibpay callback] SUPABASE UPDATE FAILED', updateError, { orderId, reason, amount });
-		return text('db error, logged', { status: 200 });
-	}
+  const supabaseAdmin = getSupabaseAdmin(platform);
 
-	console.log('[toyyibpay callback] order updated', { orderId, orderStatus, userId: order?.user_id });
+  const { data: order, error: updateError } = await supabaseAdmin
+    .from("orders")
+    .update({
+      status: orderStatus,
+      toyyibpay_bill_code: billcode,
+      toyyibpay_ref_no: refno,
+      paid_at: orderStatus === "paid" ? new Date().toISOString() : null,
+    })
+    .eq("id", orderId)
+    .select("user_id")
+    .single();
 
-	// This is the flag that actually grants access — checked on every
-	// login, so it persists across devices/re-logins without needing to
-	// look at `orders` again.
-	if (orderStatus === 'paid' && order?.user_id) {
-		const { error: profileError } = await supabaseAdmin
-			.from('profiles')
-			.update({ has_paid: true, paid_at: new Date().toISOString() })
-			.eq('id', order.user_id);
+  if (updateError) {
+    console.error("[toyyibpay callback] SUPABASE UPDATE FAILED", updateError, {
+      orderId,
+      reason,
+      amount,
+    });
+    return text("db error, logged", { status: 200 });
+  }
 
-		if (profileError) {
-			console.error('[toyyibpay callback] FAILED TO FLIP has_paid', profileError, { orderId, userId: order.user_id });
-		} else {
-			console.log('[toyyibpay callback] has_paid set true', { userId: order.user_id });
-		}
-	}
+  console.log("[toyyibpay callback] order updated", {
+    orderId,
+    orderStatus,
+    userId: order?.user_id,
+  });
 
-	return text('OK', { status: 200 });
+  // This is the flag that actually grants access — checked on every
+  // login, so it persists across devices/re-logins without needing to
+  // look at `orders` again.
+  if (orderStatus === "paid" && order?.user_id) {
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .update({ has_paid: true, paid_at: new Date().toISOString() })
+      .eq("id", order.user_id);
+
+    if (profileError) {
+      console.error(
+        "[toyyibpay callback] FAILED TO FLIP has_paid",
+        profileError,
+        { orderId, userId: order.user_id },
+      );
+    } else {
+      console.log("[toyyibpay callback] has_paid set true", {
+        userId: order.user_id,
+      });
+    }
+  }
+
+  return text("OK", { status: 200 });
 }

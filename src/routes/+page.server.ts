@@ -37,7 +37,7 @@ import type { PageServerLoad } from "./$types";
 
 const YOUTUBE_ID_PATTERN = /embed\/([A-Za-z0-9_-]+)/;
 
-export const load: PageServerLoad = async ({ locals, cookies }) => {
+export const load: PageServerLoad = async ({ locals, cookies, platform }) => {
   const justPaid = cookies.get("just_paid") === "true";
 
   if (justPaid) {
@@ -65,17 +65,20 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
 
   return {
     showElement: justPaid,
-    continueLesson: loadContinueLesson(locals),
+    continueLesson: loadContinueLesson(locals, platform),
     announcements,
   };
 };
 
-async function loadContinueLesson(locals: App.Locals) {
+async function loadContinueLesson(
+  locals: App.Locals,
+  platform: App.Platform | undefined,
+) {
   if (!locals.user) {
     return null;
   }
 
-  const { sections } = await getSectionsWithAccess(locals.user.id);
+  const { sections } = await getSectionsWithAccess(locals.user.id, platform);
 
   // Flatten to playable, unlocked items, remembering which section (=
   // "Modul N") each one belongs to.

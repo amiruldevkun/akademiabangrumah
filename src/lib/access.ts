@@ -5,16 +5,19 @@
 // callback flips — this is what makes access persist across re-logins
 // and devices, since it's stored in Supabase, not client-side.
 
-import { supabaseAdmin } from "$lib/supabaseAdmin";
+import { getSupabaseAdmin } from "$lib/supabaseAdmin";
 
 /**
  * @param {string} userId
  * @returns {Promise<boolean>}
  */
 
-export async function hasPaidAccess(userId: string): Promise<boolean> {
+export async function hasPaidAccess(
+  userId: string,
+  platform: App.Platform | undefined,
+): Promise<boolean> {
   if (!userId) return false;
-
+  const supabaseAdmin = getSupabaseAdmin(platform);
   const { data, error } = await supabaseAdmin
     .from("profiles")
     .select("has_paid")
@@ -29,8 +32,13 @@ export async function hasPaidAccess(userId: string): Promise<boolean> {
   return data?.has_paid === true;
 }
 
-export async function hasAdminAccess(userId: string): Promise<boolean> {
+export async function hasAdminAccess(
+  userId: string,
+  platform: App.Platform | undefined,
+): Promise<boolean> {
   if (!userId) return false;
+
+  const supabaseAdmin = getSupabaseAdmin(platform);
 
   const { data, error } = await supabaseAdmin
     .from("profiles")

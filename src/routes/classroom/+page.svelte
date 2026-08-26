@@ -328,7 +328,7 @@
   </a>
   <aside
     bind:this={sidebarEl}
-    class="absolute top-0 left-0 w-64 h-full bg-[#4a7425] text-white z-40 transform transition-all duration-300 ease-in-out shadow-2xl {sidebarOpen
+    class="absolute top-0 left-0 w-64 bottom-0 bg-[#4a7425] text-white z-40 transform transition-all duration-300 ease-in-out shadow-2xl {sidebarOpen
       ? ''
       : '-translate-x-full'} {warningState ? 'top-18' : 'top-0'}"
   >

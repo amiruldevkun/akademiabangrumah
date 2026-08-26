@@ -17,8 +17,7 @@
 import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { parseSidebarText } from "$lib/sidebarParser";
-import { supabaseAdmin } from "$lib/supabaseAdmin";
-import { hasAdminAccess } from "$lib/access";
+import { getSupabaseAdmin } from "$lib/supabaseAdmin";
 
 // Section titles come out of the parser UPPERCASE (e.g. "KERJA ATAP &
 // BUMBUNG") — prettify for display in the homepage announcement feed.
@@ -38,7 +37,7 @@ type Announcement = {
 
 const MAX_ANNOUNCEMENTS = 5;
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, platform }) => {
   // locals.user is already populated by hooks.server.ts, and hooks.server.ts
   // has already redirected to /login if it's null — but we re-check safely
   // in case this route ever gets added to publicRoutes by accident.
@@ -61,7 +60,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   if (profileErr || !profile?.is_admin) {
     error(403, "Not authorized");
   }
-
+  const supabaseAdmin = getSupabaseAdmin(platform);
   const { data: current } = await supabaseAdmin
     .from("sidebar_content")
     .select("version, updated_at")
@@ -100,7 +99,7 @@ export const actions: Actions = {
   // Takes the already-parsed JSON (submitted back as a hidden field so we
   // don't re-parse and risk a different result than what was previewed)
   // and pushes it to Supabase, backing up the previous version first.
-  push: async ({ request, locals }) => {
+  push: async ({ request, locals, platform }) => {
     // const { user } = await locals.safeGetSession();
     // if (!user) return fail(401, { message: "Not authenticated" });
 
@@ -131,6 +130,8 @@ export const actions: Actions = {
         message: "Parsed content was corrupted — parse again.",
       });
     }
+
+    const supabaseAdmin = getSupabaseAdmin(platform);
 
     // 1. Read current row so we can back it up before overwriting.
     const { data: existing, error: readErr } = await supabaseAdmin

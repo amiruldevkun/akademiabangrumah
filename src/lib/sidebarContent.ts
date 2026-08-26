@@ -14,55 +14,69 @@
 // guaranteed to stay warm), which is fine — worst case is one extra full
 // fetch per cold start, and at ~20KB that's a non-issue either way.
 
-import { supabaseAdmin } from '$lib/supabaseAdmin';
+import { getSupabaseAdmin } from "$lib/supabaseAdmin";
 
 export type RawSectionItem = {
-	id: string;
-	label: string;
-	video: string | null;
+  id: string;
+  label: string;
+  video: string | null;
 };
 
 export type RawSection = {
-	title: string;
-	items: RawSectionItem[];
+  title: string;
+  items: RawSectionItem[];
 };
 
 let cache: { content: RawSection[]; version: number } | null = null;
 
-export async function getSidebarContent(): Promise<RawSection[]> {
-	// Cheap check first — just the version int, not the full blob.
-	const { data: meta, error: metaErr } = await supabaseAdmin
-		.from('sidebar_content')
-		.select('version')
-		.eq('id', 'v1')
-		.single();
+export async function getSidebarContent(
+  platform: App.Platform | undefined,
+): Promise<RawSection[]> {
+  // Cheap check first — just the version int, not the full blob.
+  const supabaseAdmin = getSupabaseAdmin(platform);
 
-	if (metaErr || !meta) {
-		if (cache) {
-			console.error('sidebar_content version check failed, serving stale cache:', metaErr);
-			return cache.content;
-		}
-		throw new Error(`Failed to load sidebar content: ${metaErr?.message ?? 'no row found'}`);
-	}
+  const { data: meta, error: metaErr } = await supabaseAdmin
+    .from("sidebar_content")
+    .select("version")
+    .eq("id", "v1")
+    .single();
 
-	if (cache && cache.version === meta.version) {
-		return cache.content;
-	}
+  if (metaErr || !meta) {
+    if (cache) {
+      console.error(
+        "sidebar_content version check failed, serving stale cache:",
+        metaErr,
+      );
+      return cache.content;
+    }
+    throw new Error(
+      `Failed to load sidebar content: ${metaErr?.message ?? "no row found"}`,
+    );
+  }
 
-	const { data, error } = await supabaseAdmin
-		.from('sidebar_content')
-		.select('content')
-		.eq('id', 'v1')
-		.single();
+  if (cache && cache.version === meta.version) {
+    return cache.content;
+  }
 
-	if (error || !data) {
-		if (cache) {
-			console.error('sidebar_content fetch failed, serving stale cache:', error);
-			return cache.content;
-		}
-		throw new Error(`Failed to load sidebar content: ${error?.message ?? 'no row found'}`);
-	}
+  const { data, error } = await supabaseAdmin
+    .from("sidebar_content")
+    .select("content")
+    .eq("id", "v1")
+    .single();
 
-	cache = { content: data.content as RawSection[], version: meta.version };
-	return cache.content;
+  if (error || !data) {
+    if (cache) {
+      console.error(
+        "sidebar_content fetch failed, serving stale cache:",
+        error,
+      );
+      return cache.content;
+    }
+    throw new Error(
+      `Failed to load sidebar content: ${error?.message ?? "no row found"}`,
+    );
+  }
+
+  cache = { content: data.content as RawSection[], version: meta.version };
+  return cache.content;
 }

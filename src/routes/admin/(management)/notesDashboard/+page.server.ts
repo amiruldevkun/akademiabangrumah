@@ -7,7 +7,7 @@
 
 import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import { supabaseAdmin } from "$lib/supabaseAdmin";
+import { getSupabaseAdmin } from "$lib/supabaseAdmin";
 import { toDriveEmbedUrl } from "$lib/driveEmbed";
 
 async function requireAdmin(locals: App.Locals) {
@@ -25,7 +25,7 @@ async function requireAdmin(locals: App.Locals) {
   return user;
 }
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, platform }) => {
   await requireAdmin(locals);
 
   // const { user } = await locals.safeGetSession();
@@ -38,7 +38,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   // if (profileErr || !profile?.is_admin) {
   //   error(403, "Not authorized");
   // }
-
+  const supabaseAdmin = getSupabaseAdmin(platform);
   const { data: documents } = await supabaseAdmin
     .from("documents")
     .select("id, title, drive_url, position")
@@ -48,7 +48,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-  add: async ({ request, locals }) => {
+  add: async ({ request, platform }) => {
     const formData = await request.formData();
     const title = formData.get("title");
     const driveUrl = formData.get("driveUrl");
@@ -67,7 +67,7 @@ export const actions: Actions = {
           "Could not recognize that as a Google Drive file link. Make sure it's shared as 'Anyone with the link'.",
       });
     }
-
+    const supabaseAdmin = getSupabaseAdmin(platform);
     const { data: maxPos } = await supabaseAdmin
       .from("documents")
       .select("position")
@@ -91,13 +91,14 @@ export const actions: Actions = {
     return { added: true };
   },
 
-  remove: async ({ request, locals }) => {
+  remove: async ({ request, platform }) => {
     const formData = await request.formData();
     const id = formData.get("id");
     if (typeof id !== "string") {
       return fail(400, { message: "Missing id." });
     }
 
+    const supabaseAdmin = getSupabaseAdmin(platform);
     const { error: deleteErr } = await supabaseAdmin
       .from("documents")
       .delete()

@@ -8,7 +8,7 @@ import { hasPaidAccess } from "$lib/access";
 import { NOTES_GATED } from "$lib/config";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async ({ params, locals, platform }) => {
   const { data: doc, error: fetchErr } = await locals.supabase
     .from("documents")
     .select("id, title, embed_url, drive_url")
@@ -20,7 +20,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   }
 
   if (NOTES_GATED) {
-    const paid = locals.user ? await hasPaidAccess(locals.user.id) : false;
+    const paid = locals.user
+      ? await hasPaidAccess(locals.user.id, platform)
+      : false;
     if (!paid) {
       error(403, "Nota ini untuk ahli sahaja");
     }

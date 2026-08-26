@@ -10,8 +10,9 @@
 
 import { json, error } from "@sveltejs/kit";
 import { randomUUID } from "crypto";
-import { supabaseAdmin } from "$lib/supabaseAdmin";
+import { getSupabaseAdmin } from "$lib/supabaseAdmin";
 import { createBill } from "$lib/toyyibpay";
+import { dev } from "$app/environment";
 import {
   product_name,
   product_description,
@@ -27,7 +28,7 @@ const PRODUCT = {
   amountRM: product_amountRM,
 };
 
-export async function POST({ request, url, locals }) {
+export async function POST({ request, url, locals, platform }) {
   const { user } = await locals.safeGetSession();
   if (!user) {
     throw error(401, "Must be logged in to start checkout");
@@ -40,6 +41,8 @@ export async function POST({ request, url, locals }) {
 
   const email = user.email;
   const orderId = randomUUID();
+
+  const supabaseAdmin = getSupabaseAdmin(platform);
 
   // 1. Write a pending order first, so we have a record even if the
   //    customer abandons checkout on ToyyibPay's page.
@@ -61,8 +64,11 @@ export async function POST({ request, url, locals }) {
   }
 
   // COMMENT THIS WHEN PUSHING TO PROD STUPID
-  // const origin = PUBLIC_TESTING_NGROK_URL || url.origin;
+  const origin = dev ? PUBLIC_TESTING_NGROK_URL : url.origin;
 
+  if (dev && origin !== PUBLIC_TESTING_NGROK_URL) {
+    throw new Error("PUBLIC_NGROK_URL IS NOT HERE BOZO");
+  }
   // 2. Ask ToyyibPay for a bill for that order.
   try {
     const { billCode, paymentUrl } = await createBill({

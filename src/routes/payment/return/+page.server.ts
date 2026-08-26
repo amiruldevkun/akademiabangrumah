@@ -14,14 +14,14 @@
 
 import { reconcileOrder } from "$lib/reconcileOrder";
 
-export async function load({ url, cookies }) {
+export async function load({ url, cookies, platform }) {
   const orderId = url.searchParams.get("order_id");
 
   if (!orderId) {
     return { order: null };
   }
 
-  const { order, error } = await reconcileOrder({ orderId });
+  const { order, error } = await reconcileOrder({ orderId }, platform);
 
   if (error && !order) {
     console.error("Could not load/reconcile order:", error, { orderId });

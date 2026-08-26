@@ -1,12 +1,11 @@
 import { error, fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import { supabaseAdmin } from "$lib/supabaseAdmin";
-import { goto } from "$app/navigation";
+import { getSupabaseAdmin } from "$lib/supabaseAdmin";
 
 const VALID_STATUSES = ["paid", "pending", "failed"] as const;
 type OrderStatus = (typeof VALID_STATUSES)[number];
 
-export const load: PageServerLoad = async ({ locals, url }) => {
+export const load: PageServerLoad = async ({ locals, url, platform }) => {
   const currentUser = locals.user;
   const statusFilter = url.searchParams.get("status");
   const rawSearch = url.searchParams.get("q")?.trim() ?? "";
@@ -36,6 +35,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
       searchStatus,
     };
   }
+
+  const supabaseAdmin = getSupabaseAdmin(platform);
 
   // --- 1. Construct Orders Query ---
   let ordersQuery = supabaseAdmin
@@ -94,7 +95,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-  toggleAdmin: async ({ request, locals }) => {
+  toggleAdmin: async ({ request, locals, platform }) => {
     const currentUser = locals.user;
     const formData = await request.formData();
 
@@ -108,6 +109,8 @@ export const actions: Actions = {
         message: "You can't change your own admin status here.",
       });
     }
+
+    const supabaseAdmin = getSupabaseAdmin(platform);
 
     const { data: target, error: readErr } = await supabaseAdmin
       .from("profiles")
@@ -128,11 +131,13 @@ export const actions: Actions = {
     return { toggled: "admin", id };
   },
 
-  toggleHasPaid: async ({ request, locals }) => {
+  toggleHasPaid: async ({ request, locals, platform }) => {
     const formData = await request.formData();
     const id = formData.get("id");
     if (typeof id !== "string")
       return fail(400, { message: "Missing user id." });
+
+    const supabaseAdmin = getSupabaseAdmin(platform);
 
     const { data: target, error: readErr } = await supabaseAdmin
       .from("profiles")
@@ -157,7 +162,7 @@ export const actions: Actions = {
     return { toggled: "paid", id };
   },
 
-  updateStatus: async ({ request }) => {
+  updateStatus: async ({ request, platform }) => {
     const formData = await request.formData();
     const id = formData.get("id");
     const status = formData.get("status");
@@ -173,6 +178,8 @@ export const actions: Actions = {
 
     const updatePayload: Record<string, unknown> = { status };
     if (status === "paid") updatePayload.paid_at = new Date().toISOString();
+
+    const supabaseAdmin = getSupabaseAdmin(platform);
 
     const { error: updateErr } = await supabaseAdmin
       .from("orders")

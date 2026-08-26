@@ -1,8 +1,8 @@
 import { fail, redirect } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { supabaseAdmin } from "$lib/supabaseAdmin";
+import { getSupabaseAdmin } from "$lib/supabaseAdmin";
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, platform }) => {
   const { session } = await locals.safeGetSession();
   if (!session) throw redirect(303, "/login");
 
@@ -31,6 +31,8 @@ export const load: PageServerLoad = async ({ locals }) => {
     profile &&
     profile.avatar_url !== providerAvatarUrl
   ) {
+    const supabaseAdmin = getSupabaseAdmin(platform);
+
     const { data: updated, error: reconcileError } = await supabaseAdmin
       .from("profiles")
       .update({ avatar_url: providerAvatarUrl })

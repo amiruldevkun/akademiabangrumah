@@ -1,4 +1,3 @@
-import { supabaseAdmin } from "$lib/supabaseAdmin";
 import { fail } from "@sveltejs/kit";
 
 async function verifyTurnstileToken(token: string, key: string) {
@@ -110,7 +109,7 @@ export const actions = {
     }
 
     if (data.user) {
-      const { error: profileError } = await supabaseAdmin
+      const { error: profileError } = await locals.supabase
         .from("profiles")
         .update({ full_name: name })
         .eq("id", data.user.id);

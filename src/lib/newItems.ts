@@ -5,14 +5,18 @@
 // sidebar_item_first_seen are written once by the admin push action (see
 // +page.server.ts) and never updated after that, so this is just a read.
 
-import { supabaseAdmin } from "$lib/supabaseAdmin";
+import { getSupabaseAdmin } from "$lib/supabaseAdmin";
 
 export const NEW_BADGE_DAYS = 14;
 
 let cache: { ids: Set<string>; fetchedAt: number } | null = null;
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 min — "new" is a fuzzy concept, doesn't need to be exact to the second
 
-export async function getRecentlyAddedItemIds(): Promise<Set<string>> {
+export async function getRecentlyAddedItemIds(
+  platform: App.Platform | undefined,
+): Promise<Set<string>> {
+  const supabaseAdmin = getSupabaseAdmin(platform);
+
   if (cache && Date.now() - cache.fetchedAt < CACHE_TTL_MS) {
     return cache.ids;
   }

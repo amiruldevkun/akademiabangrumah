@@ -34,12 +34,13 @@ export type AccessibleItem = CourseItem & {
 
 export async function getSectionsWithAccess(
   userId: string | null | undefined,
+  platform: App.Platform | undefined,
 ): Promise<{ sections: CourseSection[]; paid: boolean }> {
-  const paid = userId ? await hasPaidAccess(userId) : false;
+  const paid = userId ? await hasPaidAccess(userId, platform) : false;
   let freeVideosLeft = FREE_VIDEO_LIMIT;
 
-  const rawSections = await getSidebarContent();
-  const newIds = await getRecentlyAddedItemIds();
+  const rawSections = await getSidebarContent(platform);
+  const newIds = await getRecentlyAddedItemIds(platform);
 
   const sections: CourseSection[] = rawSections.map((section: RawSection) => ({
     title: section.title,
