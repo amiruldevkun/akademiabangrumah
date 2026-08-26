@@ -64,24 +64,27 @@ export async function POST({ request, url, locals, platform }) {
   }
 
   // COMMENT THIS WHEN PUSHING TO PROD STUPID
-  const origin = dev ? PUBLIC_TESTING_NGROK_URL : url.origin;
+  const origin = dev ? platform?.env.PUBLIC_TESTING_NGROK_URL : url.origin;
 
   if (dev && origin !== PUBLIC_TESTING_NGROK_URL) {
     throw new Error("PUBLIC_NGROK_URL IS NOT HERE BOZO");
   }
   // 2. Ask ToyyibPay for a bill for that order.
   try {
-    const { billCode, paymentUrl } = await createBill({
-      billName: PRODUCT.name,
-      billDescription: PRODUCT.description,
-      amountRM: PRODUCT.amountRM,
-      customerName: name,
-      customerEmail: email,
-      customerPhone: phone,
-      externalReferenceNo: orderId,
-      returnUrl: `${origin}/payment/return`,
-      callbackUrl: `${origin}/payment/callback`,
-    });
+    const { billCode, paymentUrl } = await createBill(
+      {
+        billName: PRODUCT.name,
+        billDescription: PRODUCT.description,
+        amountRM: PRODUCT.amountRM,
+        customerName: name,
+        customerEmail: email,
+        customerPhone: phone,
+        externalReferenceNo: orderId,
+        returnUrl: `${origin}/payment/return`,
+        callbackUrl: `${origin}/payment/callback`,
+      },
+      platform,
+    );
 
     await supabaseAdmin
       .from("orders")

@@ -47,7 +47,7 @@ export async function reconcileOrder(
 
   let tx;
   try {
-    tx = await getBillTransactions(order.toyyibpay_bill_code);
+    tx = await getBillTransactions(order.toyyibpay_bill_code, platform);
   } catch (err: any) {
     console.error("[reconcileOrder] getBillTransactions failed:", err, {
       orderId,
