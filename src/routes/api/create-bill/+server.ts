@@ -18,7 +18,6 @@ import {
   product_description,
   product_amountRM,
 } from "$lib/productMeta.json";
-import { PUBLIC_TESTING_NGROK_URL } from "$env/static/public";
 
 // TODO: replace with your real product, or look this up from a products
 // table if you sell more than one thing.
@@ -64,9 +63,9 @@ export async function POST({ request, url, locals, platform }) {
   }
 
   // COMMENT THIS WHEN PUSHING TO PROD STUPID
-  const origin = dev ? platform?.env.PUBLIC_TESTING_NGROK_URL : url.origin;
+  const origin = dev ? platform?.env?.PUBLIC_TESTING_NGROK_URL : url.origin;
 
-  if (dev && origin !== PUBLIC_TESTING_NGROK_URL) {
+  if (dev && origin !== platform?.env?.PUBLIC_TESTING_NGROK_URL) {
     throw new Error("PUBLIC_NGROK_URL IS NOT HERE BOZO");
   }
   // 2. Ask ToyyibPay for a bill for that order.

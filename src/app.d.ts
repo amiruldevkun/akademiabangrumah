@@ -21,6 +21,9 @@ declare global {
         TOYYIBPAY_BASE_URL: string;
         ADMIN_EMAILS: string;
         TURNSTILE_KEY: string;
+        PUBLIC_SUPABASE_URL: string;
+        PUBLIC_TESTING_NGROK_URL: string;
+        PUBLIC_SUPABASE_PUBLISHABLE_KEY: string;
       };
     }
   }
