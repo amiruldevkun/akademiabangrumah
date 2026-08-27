@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "$lib/supabaseAdmin";
+import { TURNSTILE_KEY } from "$env/static/private";
 import { fail } from "@sveltejs/kit";
 
 async function verifyTurnstileToken(token: string, key: string) {
@@ -34,7 +35,7 @@ export const actions = {
     const passwordConfirm = formData.get("conPass") as string;
     const name = formData.get("name") as string;
     const turnstileToken = formData.get("cf-turnstile-response") as string;
-    const turnstilekey = platform?.env?.TURNSTILE_KEY;
+    const turnstilekey = TURNSTILE_KEY;
     let signupStatus = true as boolean;
 
     if (!turnstilekey) {

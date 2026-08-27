@@ -1,4 +1,5 @@
 import { fail } from "@sveltejs/kit";
+import { TURNSTILE_KEY } from "$env/static/private";
 
 async function verifyTurnstileToken(token: string, key: string) {
   const verifyBody = new URLSearchParams({
@@ -30,7 +31,7 @@ export const actions = {
     const formData = await request.formData();
     const email = formData.get("email") as string;
     const turnstileToken = formData.get("cf-turnstile-response") as string;
-    const turnstilekey = platform?.env?.TURNSTILE_KEY;
+    const turnstilekey = TURNSTILE_KEY;
 
     if (!turnstilekey) {
       throw new Error("Key is undefined. Please debug me");
