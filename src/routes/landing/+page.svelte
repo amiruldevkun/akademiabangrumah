@@ -66,7 +66,7 @@
       <div class="w-full lg:w-3/5 flex flex-col justify-center pt-8 lg:pt-0">
         <div class="anim-fly-up delay-400">
           <h1
-            class="text-5xl mb-6 md:text-6xl lg:text-[4rem] font-extrabold text-gray-900 uppercase tracking-tight leading-none"
+            class="text-5xl mb-2 md:text-6xl lg:text-[4rem] font-extrabold text-gray-900 uppercase tracking-tight leading-none"
           >
             BINA RUMAH IDAMAN ANDA
           </h1>
@@ -80,7 +80,7 @@
 
         <!-- Call to Action -->
         <!-- Moved out of the green block visually and tied color to the navbar for cohesion -->
-        <div class="mt-8 lg:mt-10 anim-fly-up delay-600">
+        <div class="mt-4 lg:mt-10 anim-fly-up delay-600">
           <a
             href="/login"
             class="inline-block bg-[#2d4a22] hover:bg-[#1a2f13] transition-all duration-300 text-white text-xl lg:text-2xl font-semibold py-5 px-10 rounded-full shadow-xl hover:shadow-2xl hover:-translate-y-1 max-w-lg text-center leading-tight border-2 border-transparent hover:border-[#7ced67]"
@@ -92,21 +92,18 @@
 
       <!-- Right Column: Mobile App Screenshot -->
       <div
-        class="w-full lg:w-2/5 flex justify-center top-3 lg:justify-end anim-fly-right delay-800"
+        class="w-full lg:w-2/5 flex justify-center lg:justify-end anim-fly-right delay-800"
       >
-        <!-- Sleek CSS Device Frame -->
-        <div class="relative bg-black mockup-phone border-[#A9B689]">
+        <div
+          class="mockup-phone border-[#2d4a22] border-[6px] shadow-2xl w-[260px] sm:w-[300px] aspect-[9/20]"
+        >
           <div class="mockup-phone-camera"></div>
           <div class="mockup-phone-display">
             <img
-              src="/assets/images/image.webp"
+              src="/assets/images/mobile screenshot.png"
               alt="Akademi Abang Rumah App Screenshot"
               fetchpriority="high"
             />
-            <!-- Optional: Simulated iPhone Notch
-            <div
-              class="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-[#1f2937] rounded-b-2xl z-10"
-            ></div> -->
           </div>
         </div>
       </div>
@@ -152,6 +149,40 @@
       </div>
     </div>
   </section>
+
+  <!-- How it works — daisyUI steps component. --color-primary /
+         --color-primary-content are scoped locally to match the brand
+         green (this project hardcodes hex rather than a daisyUI theme),
+         since these are just normal inheriting CSS custom properties. -->
+  <section class="bg-white py-16 lg:py-24 relative z-10">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="text-center mb-14 anim-fly-up-sm">
+        <p
+          class="text-sm font-bold text-[#4a7425] uppercase tracking-wide mb-2"
+        >
+          Proses Mudah
+        </p>
+        <h2 class="text-3xl lg:text-4xl font-extrabold text-gray-900">
+          Cara Ia Berfungsi
+        </h2>
+      </div>
+
+      <ul
+        class="steps steps-vertical sm:steps-horizontal w-full anim-fly-up"
+        style="--color-primary: #7ced67; --color-primary-content: #1a2f13;"
+      >
+        {#each [{ title: "Daftar Akaun", desc: "Buat akaun percuma dalam beberapa minit sahaja." }, { title: "Akses Modul", desc: "Tonton video, muat turun nota, dan ikut checklist ikut kadar sendiri." }, { title: "Tanya & Praktik", desc: "Ada persoalan? Tanya terus dengan Abang Rumah sambil anda praktikkan di tapak." }] as step}
+          <li class="step step-primary">
+            <div class="text-left pl-2 pt-1 max-w-[220px]">
+              <div class="font-bold text-gray-900">{step.title}</div>
+              <div class="text-sm text-gray-500">{step.desc}</div>
+            </div>
+          </li>
+        {/each}
+      </ul>
+    </div>
+  </section>
+
   <!-- Feature grid — mirrors the actual home page tiles 1:1, so what's
          pitched here is exactly what a new student sees after logging in.
          "Akan Datang" badges kept honest rather than overselling. -->
@@ -194,6 +225,42 @@
     </div>
   </section>
 
+  <!-- FAQ — real, honest answers only. Pricing question deliberately
+         points to the signup flow rather than quoting a figure here,
+         so this section never goes stale or overpromises.
+         daisyUI join + collapse-arrow: radio inputs share a name so
+         only one answer is open at a time. -->
+  <section class="bg-gray-50 py-16 lg:py-24 relative z-10">
+    <div class="max-w-3xl mx-auto px-6">
+      <div class="text-center mb-12 anim-fly-up-sm">
+        <p
+          class="text-sm font-bold text-[#4a7425] uppercase tracking-wide mb-2"
+        >
+          Ada Persoalan?
+        </p>
+        <h2 class="text-3xl lg:text-4xl font-extrabold text-gray-900">
+          Soalan Lazim
+        </h2>
+      </div>
+
+      <div class="join join-vertical w-full anim-fly-up">
+        {#each [{ q: "Siapa yang sesuai belajar di Akademi Abang Rumah?", a: "Sesiapa sahaja yang ingin bina atau renovate rumah sendiri, dan mahu faham proses pembinaan supaya tidak mudah ditipu oleh kontraktor tak bertauliah — tak kira ada pengalaman pembinaan atau tidak." }, { q: "Berapa kos untuk sertai?", a: "Maklumat harga terkini boleh dilihat semasa proses pendaftaran akaun." }, { q: "Adakah saya perlu pengalaman pembinaan sebelum ini?", a: "Tidak. Modul disusun untuk mudah difahami walaupun anda baru pertama kali mendalami bidang pembinaan rumah." }, { q: "Bagaimana jika saya ada soalan semasa belajar?", a: "Anda boleh terus bertanya dengan Abang Rumah melalui ciri 'Tanya Abang Rumah' dalam aplikasi." }, { q: "Bolehkah saya akses di telefon?", a: "Boleh. Akademi Abang Rumah direka untuk diakses dengan selesa di telefon mahupun komputer." }] as item, i}
+          <div
+            class="collapse collapse-arrow join-item border border-base-300 bg-white"
+          >
+            <input type="radio" name="faq-accordion" checked={i === 0} />
+            <div class="collapse-title font-bold text-gray-900">
+              {item.q}
+            </div>
+            <div class="collapse-content text-sm text-gray-500 leading-relaxed">
+              {item.a}
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+  </section>
+
   <!-- Closing CTA — final nudge after the feature grid, before any footer. -->
   <section class="bg-[#2d4a22] py-16 lg:py-20 relative z-10">
     <div class="max-w-3xl mx-auto px-6 text-center">
@@ -212,9 +279,61 @@
       </a>
     </div>
   </section>
+
+  <!-- Social links — skeleton strip. TikTok href is a placeholder;
+         swap it for the real profile URL once that account is live,
+         or remove the TikTok <a> entirely if it doesn't happen. -->
+  <section class="bg-white py-10 relative z-10">
+    <div
+      class="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6"
+    >
+      <span class="text-sm font-semibold text-gray-500">Ikuti Kami</span>
+      <div class="flex items-center gap-3">
+        <a
+          href="https://www.facebook.com/profile.php?id=61552360927881"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Facebook Akademi Abang Rumah"
+          class="btn btn-circle btn-ghost text-gray-700 hover:bg-[#7ced67] hover:text-[#1a2f13]"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M22 12.06C22 6.505 17.523 2 12 2S2 6.505 2 12.06c0 5.02 3.657 9.184 8.438 9.94v-7.03H7.898v-2.91h2.54V9.845c0-2.507 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.631.771-1.631 1.562v1.878h2.777l-.444 2.91h-2.333V22c4.78-.756 8.438-4.92 8.438-9.94Z"
+            />
+          </svg>
+        </a>
+        <!-- TODO: TikTok not yet confirmed live — remove this <a> if it
+               doesn't launch, or replace href with the real handle URL -->
+        <a
+          href="https://www.tiktok.com/@abangrumah_"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="TikTok Akademi Abang Rumah"
+          class="btn btn-circle btn-ghost text-gray-700 hover:bg-[#7ced67] hover:text-[#1a2f13]"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M16.6 5.82c-.94-.86-1.5-2.06-1.6-3.37h-3.02v13.5c0 1.5-1.22 2.72-2.72 2.72a2.72 2.72 0 0 1-2.72-2.72 2.72 2.72 0 0 1 2.72-2.72c.28 0 .55.04.8.12v-3.07a5.8 5.8 0 0 0-.8-.06A5.75 5.75 0 0 0 3.5 15.95 5.75 5.75 0 0 0 9.26 21.7a5.75 5.75 0 0 0 5.75-5.75V9.01a8.7 8.7 0 0 0 5.06 1.62V7.61c-1.24 0-2.42-.4-3.47-1.79Z"
+            />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
 </div>
 
 <style>
+  /* Rigid phone frame — override daisyUI's default squircle/soft corners */
+  :global(.mockup-phone) {
+    border-radius: 2rem;
+    padding-block: 16px; /* extends top & bottom bezel */
+    padding-inline: 6px; /* keep side bezel as-is */
+    corner-shape: normal; /* kill the superellipse squircle */
+  }
+  :global(.mockup-phone-display) {
+    border-radius: 1.25rem;
+    corner-shape: normal;
+  }
   @keyframes fadeIn {
     from {
       opacity: 0;
