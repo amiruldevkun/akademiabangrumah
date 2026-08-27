@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import type { PageData } from "./$types";
 
   let { data }: { data: PageData } = $props();
@@ -15,7 +16,7 @@
     >
       <div class="flex items-center gap-2 min-w-0">
         <a
-          href="/"
+          href={resolve("/")}
           aria-label="Back to main menu"
           class="flex items-center gap-1.5 p-2 -ml-2 rounded-md hover:bg-gray-100 active:bg-gray-200 transition shrink-0 text-gray-600"
         >
@@ -48,7 +49,7 @@
   <main class="max-w-3xl mx-auto px-4 sm:px-6 py-10">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <a
-        href="/admin/sidebarDashboard"
+        href={resolve("/admin/sidebarDashboard")}
         data-sveltekit-preload-data="hover"
         class="bg-white border border-gray-200 rounded-lg p-6 text-left hover:shadow-md hover:border-indigo-300 transition"
       >
@@ -59,7 +60,7 @@
       </a>
 
       <a
-        href="/admin/notesDashboard"
+        href={resolve("/admin/notesDashboard")}
         data-sveltekit-preload-data="hover"
         class="bg-white border border-gray-200 rounded-lg p-6 text-left hover:shadow-md hover:border-emerald-300 transition"
       >
@@ -68,7 +69,7 @@
       </a>
 
       <a
-        href="/admin/announcementDashboard"
+        href={resolve("/admin/announcementDashboard")}
         data-sveltekit-preload-data="hover"
         class="bg-white border border-gray-200 rounded-lg p-6 text-left hover:shadow-md hover:border-sky-300 transition"
       >
@@ -79,7 +80,7 @@
       </a>
 
       <a
-        href="/admin/usersDashboard"
+        href={resolve("/admin/usersDashboard")}
         data-sveltekit-preload-data="hover"
         class="bg-white border border-gray-200 rounded-lg p-6 text-left hover:shadow-md hover:border-rose-300 transition"
       >

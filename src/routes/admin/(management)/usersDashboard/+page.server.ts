@@ -1,7 +1,6 @@
-import { error, fail, redirect } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { supabaseAdmin } from "$lib/supabaseAdmin";
-import { goto } from "$app/navigation";
 
 const VALID_STATUSES = ["paid", "pending", "failed"] as const;
 type OrderStatus = (typeof VALID_STATUSES)[number];
@@ -13,7 +12,11 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const search = rawSearch.replace(/[,()%]/g, "");
   let searchStatus = false as boolean;
 
+  console.log(searchStatus);
+
   searchStatus = true;
+
+  console.log(searchStatus);
 
   const { data: profile, error: profileErr } = await locals.supabase
     .from("profiles")
@@ -128,7 +131,7 @@ export const actions: Actions = {
     return { toggled: "admin", id };
   },
 
-  toggleHasPaid: async ({ request, locals }) => {
+  toggleHasPaid: async ({ request }) => {
     const formData = await request.formData();
     const id = formData.get("id");
     if (typeof id !== "string")

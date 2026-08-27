@@ -3,6 +3,7 @@
   import { Eye, EyeOff } from "@lucide/svelte";
   import { supabase } from "$lib/supabaseClient";
   import { fail } from "@sveltejs/kit";
+  import { resolve } from "$app/paths";
   let redirectSeconds = $state(0);
   let signUpStatus = $state(false);
   let emailPass = $state("");
@@ -60,7 +61,7 @@
       redirectSeconds -= 1;
       if (redirectSeconds <= 0) {
         clearInterval(timer);
-        goto("/login");
+        goto(resolve("/login"));
       }
     }, 1000);
     return timer;
@@ -172,7 +173,7 @@
       {/if}
     </div>
     <p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">
-      Teringat password? <a href="/login" class="font-bold"
+      Teringat password? <a href={resolve("/login")} class="font-bold"
         >Klik saya untuk log masuk</a
       >
     </p>

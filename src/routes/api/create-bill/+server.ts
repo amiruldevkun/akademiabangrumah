@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/routes/api/create-bill/+server.js
 //
 // POST { phone } -> creates a "pending" order in Supabase, tied to the
@@ -27,7 +28,7 @@ const PRODUCT = {
   amountRM: product_amountRM,
 };
 
-export async function POST({ request, url, locals }) {
+export async function POST({ request, locals }) {
   const { user } = await locals.safeGetSession();
   if (!user) {
     throw error(401, "Must be logged in to start checkout");
@@ -70,7 +71,7 @@ export async function POST({ request, url, locals }) {
       billDescription: PRODUCT.description,
       amountRM: PRODUCT.amountRM,
       customerName: name,
-      customerEmail: email,
+      customerEmail: email as string,
       customerPhone: phone,
       externalReferenceNo: orderId,
       returnUrl: `${origin}/payment/return`,

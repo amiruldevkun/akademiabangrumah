@@ -12,7 +12,7 @@
     </div>
 
     <div class="grid gap-3">
-      {#each Array(6) as _}
+      {#each [1, 2, 3, 4, 5, 6] as _ (_)}
         <div
           class="bg-white rounded-xl shadow p-4 flex items-center justify-between animate-pulse"
         >

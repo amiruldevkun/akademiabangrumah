@@ -1,5 +1,6 @@
 <!-- src/routes/auth/confirm_reset/+page.svelte -->
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { page } from "$app/state";
 
   let submitting = $state(false);
@@ -52,7 +53,7 @@
         </div>
 
         <a
-          href="/forgot_password"
+          href={resolve("/forgot_password")}
           class="btn mt-6 w-full bg-[#4a7425] text-white border-none hover:bg-[#3d5f1f]"
         >
           Mohon Pautan Baharu
@@ -108,7 +109,7 @@
       {/if}
 
       <p class="text-xs text-gray-400 text-center mt-4 leading-relaxed">
-        Teringat password? <a href="/login" class="font-bold"
+        Teringat password? <a href={resolve("/login")} class="font-bold"
           >Klik saya untuk log masuk</a
         >
       </p>

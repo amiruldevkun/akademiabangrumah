@@ -29,7 +29,7 @@
 
     <!-- Menu grid (8 tiles, matches menuTiles length) -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      {#each Array(8) as _}
+      {#each [1, 2, 3, 4, 5, 6, 7, 8] as index (index)}
         <div
           class="bg-white rounded-xl shadow p-4 flex flex-col items-center text-center gap-2 animate-pulse"
         >

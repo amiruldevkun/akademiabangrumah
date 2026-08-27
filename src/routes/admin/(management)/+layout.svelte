@@ -1,6 +1,7 @@
 <!-- src/routes/admin/(management)/+layout.svelte -->
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
   import { page } from "$app/state";
 
   let { children } = $props();
@@ -20,7 +21,7 @@
   <div class="bg-white border-b border-gray-200">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
       <button
-        onclick={() => goto("/admin")}
+        onclick={() => goto(resolve("/admin"))}
         aria-label="Back to admin dashboard"
         class="p-2 -ml-2 rounded-md hover:bg-gray-100 active:bg-gray-200 transition"
       >

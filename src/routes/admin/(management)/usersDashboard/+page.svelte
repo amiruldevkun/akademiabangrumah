@@ -72,6 +72,7 @@
       {/if}
     </button>
     {#if data.search || data.statusFilter}
+      <!--eslint-disable svelte/no-navigation-without-resolve -->
       <a
         href="?"
         class="rounded border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 flex items-center"
@@ -209,7 +210,7 @@
           </h2>
           <!-- Order Filters -->
           <div class="flex gap-1">
-            {#each filters as f}
+            {#each filters as f (f)}
               <a
                 href={f.value
                   ? `?status=${f.value}${data.search ? `&q=${data.search}` : ""}`

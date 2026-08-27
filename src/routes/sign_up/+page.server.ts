@@ -28,7 +28,7 @@ async function verifyTurnstileToken(token: string, key: string) {
 }
 
 export const actions = {
-  default: async ({ request, locals, platform }) => {
+  default: async ({ request, locals }) => {
     const formData = await request.formData();
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
@@ -37,6 +37,8 @@ export const actions = {
     const turnstileToken = formData.get("cf-turnstile-response") as string;
     const turnstilekey = TURNSTILE_KEY;
     let signupStatus = true as boolean;
+
+    console.log(signupStatus);
 
     if (!turnstilekey) {
       throw new Error("Turnstile key is undefined. Please debug me");
@@ -101,7 +103,7 @@ export const actions = {
       } else if (error?.message.includes("requires")) {
         return fail(400, { passError: "Letakkan kata laluan" });
       } else if (error?.message.includes("Anonymous")) {
-        let message = "Email dan kata laluan kosong";
+        const message = "Email dan kata laluan kosong";
         return fail(400, { emailError: message, passError: message });
       } else if (data.user) {
         console.log("user data exist, need to verify email");

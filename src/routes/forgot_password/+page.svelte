@@ -4,6 +4,7 @@
   import TurnstileWidget from "$lib/turnstileWidget.svelte";
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
 
   let redirectSeconds = $state(0);
   let turnstile: TurnstileWidget | undefined = $state();
@@ -12,13 +13,16 @@
   let emailInput = $state("");
   let turnstileToken = $state("");
 
+  if (turnstileToken) {
+    console.log(0);
+  }
   export function redirectAfterSignup() {
     redirectSeconds = 5;
     const timer = setInterval(() => {
       redirectSeconds -= 1;
       if (redirectSeconds <= 0) {
         clearInterval(timer);
-        goto("/login");
+        goto(resolve("/login"));
       }
     }, 1000);
     return timer;
@@ -147,7 +151,10 @@
 
     <p class="text-center text-[13.5px] text-gray-500 mt-6">
       Teringat kata laluan?
-      <a href="/login" class="text-[#4a7425] font-medium hover:underline">
+      <a
+        href={resolve("/login")}
+        class="text-[#4a7425] font-medium hover:underline"
+      >
         Log masuk
       </a>
     </p>

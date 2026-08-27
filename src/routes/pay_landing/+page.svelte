@@ -1,17 +1,17 @@
 <script lang="ts">
   // pay_landing/+page.svelte
-  import { supabase } from "$lib/supabaseClient";
   import {
     product_name,
     product_description,
     product_amountRM,
   } from "$lib/productMeta.json";
+  import { resolve } from "$app/paths";
   let { data } = $props();
 
   let name = $state(data.suggestedName ?? "");
   let phone = $state("");
   let submitting = $state(false);
-  let signingIn = $state(false);
+
   let errorMsg = $state("");
 
   const PRODUCT = {
@@ -20,34 +20,7 @@
     amountRM: product_amountRM,
   };
 
-  // Same pattern as /login's signInWithGoogle — redirectTo goes to
-  // /auth/callback, which already sends unpaid users straight back to
-  // /pay_landing on its own (see the paid ? '/main_menu' : '/pay_landing'
-  // branch there), so no extra next= param is needed here.
-  async function signInWithGoogle() {
-    errorMsg = "";
-    signingIn = true;
-    try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            prompt: "select_account",
-          },
-        },
-      });
-      if (oauthError) throw oauthError;
-      // On success the browser navigates away to Google — nothing more to
-      // do here. signingIn intentionally stays true until that happens.
-    } catch (err) {
-      console.error(err);
-      errorMsg = "Tidak dapat menyambung ke Google. Sila cuba lagi.";
-      signingIn = false;
-    }
-  }
-
-  async function submit(e: any) {
+  async function submit(e: SubmitEvent) {
     e.preventDefault();
     errorMsg = "";
     submitting = true;
@@ -159,7 +132,7 @@
           Pernah alami masalah ini?
         </h3>
         <ul class="space-y-3">
-          {#each ["Tak tahu proses bina rumah dari awal", "Takut ditipu kontraktor", "Tak tahu harga sebenar kerja pembinaan", "Tak tahu kerja mana yang perlu dipantau", "Tak pandai membaca pelan", "Tak tahu bagaimana mengelakkan kerugian"] as item}
+          {#each ["Tak tahu proses bina rumah dari awal", "Takut ditipu kontraktor", "Tak tahu harga sebenar kerja pembinaan", "Tak tahu kerja mana yang perlu dipantau", "Tak pandai membaca pelan", "Tak tahu bagaimana mengelakkan kerugian"] as item (item)}
             <li class="flex items-center gap-2"><span>❌</span> {item}</li>
           {/each}
         </ul>
@@ -184,7 +157,7 @@
       <div>
         <h3 class="text-2xl font-bold mb-6">APA YANG ABANG AKAN BELAJAR?</h3>
         <div class="grid sm:grid-cols-2 gap-4">
-          {#each modules as mod, i}
+          {#each modules as mod, i (mod)}
             <div
               class="bg-white p-4 rounded-lg shadow border-l-4 border-[#ff9c00]"
             >
@@ -243,11 +216,17 @@
 
         {#if data.userEmail}
           <div
-            class="flex items-center gap-2 bg-emerald-50 rounded-lg px-3 py-1 mb-5"
+            class="flex-col items-center gap-2 bg-emerald-50 rounded-lg px-3 py-1 mb-5"
           >
             <span class="text-sm font-medium text-gray-700 truncate"
               >{data.userEmail}</span
             >
+            <br />
+            <span
+              class="text-xs font-semibold uppercase tracking-wide text-gray-400"
+            >
+              Mengikut email log masuk anda
+            </span>
           </div>
 
           <label for="name" class="text-xs font-semibold text-gray-600 mb-1.5">
@@ -307,7 +286,7 @@
 						       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
 						       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full"
           >
-            {submitting ? "Memulakan pembayaran…" : "Bayar dengan ToyyibPay"}
+            {submitting ? "Memulakan pembayaran…" : "Bayar melalui ToyyibPay"}
           </button>
 
           <p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">
@@ -316,7 +295,7 @@
           </p>
         {:else}
           <a
-            href="/login"
+            href={resolve("/login")}
             class="bg-white text-gray-700 border border-gray-300 px-6 py-3.5 rounded-xl font-semibold
 						       hover:bg-gray-50 transition flex items-center justify-center gap-3 w-full
 						       disabled:opacity-60 disabled:cursor-not-allowed"

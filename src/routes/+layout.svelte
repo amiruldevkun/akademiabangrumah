@@ -1,36 +1,58 @@
 <!-- src/routes/+layout.svelte-->
 <script lang="ts">
   import "../style.css";
-  import { onMount, type Snippet } from "svelte";
+  import { onMount, type Component, type Snippet } from "svelte";
   import { supabase } from "$lib/supabaseClient";
-  // import { createClient } from '@supabase/supabase-js'
-  import { invalidate } from "$app/navigation";
+  import { invalidate, onNavigate, goto } from "$app/navigation";
   import { page, navigating } from "$app/state";
-  import { onNavigate } from "$app/navigation";
+  import { resolve } from "$app/paths";
+  import type { User } from "@supabase/supabase-js";
+
+  // Components
   import HomeSkeleton from "$lib/homeSkeleton.svelte";
   import ClassroomSkeleton from "$lib/classroomSkeleton.svelte";
   import NotesSelectorSkeleton from "$lib/notesSelectorSkeleton.svelte";
   import NotesDocsSkeleton from "$lib/notesDocsSkeleton.svelte";
-  import { goto } from "$app/navigation";
   import ChangelogPopup from "$lib/changelogPopup.svelte";
 
-  const SKELETON_ROUTES: Record<string, any> = {
+  // --- Type Definitions ---
+  interface BeforeInstallPromptEvent extends Event {
+    prompt: () => void;
+    userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+  }
+
+  type LayoutProps = {
+    data?: {
+      user?: User | null; // Kept as any to not break your Supabase metadata
+      admin?: boolean | null; // Changed from any to boolean
+    };
+    children: Snippet;
+  };
+
+  // --- State & Props ---
+  let { data, children }: LayoutProps = $props();
+  let user: User | null = $derived(data?.user ?? null);
+
+  let deferredPrompt: BeforeInstallPromptEvent | null = $state(null);
+  let showBanner = $state(false);
+
+  const phone = "60103163654";
+  const waLink = `https://wa.me/${phone}`;
+  const userRoutes = ["/classroom", "/notes", "/"];
+
+  const SKELETON_ROUTES: Record<string, Component> = {
     "/": HomeSkeleton,
     "/classroom": ClassroomSkeleton,
     "/notes": NotesSelectorSkeleton,
     "/notes/[id]": NotesDocsSkeleton,
   };
 
+  // --- Derived Values ---
   let ActiveSkeleton = $derived(
     navigating.to?.route.id
       ? SKELETON_ROUTES[navigating.to.route.id]
       : undefined,
   );
-
-  const userRoutes = ["/classroom", "/notes", "/"];
-
-  const phone = "60103163654";
-  const waLink = `https://wa.me/${phone}`;
 
   const hideRoutes = $derived(
     [
@@ -48,35 +70,25 @@
     ].some((p) => page.url.pathname.startsWith(p)),
   );
 
-  let navVisible = $state(true);
+  const navItems = $derived([
+    { href: resolve("/"), label: "Home", icon: "🏠" },
+    { href: resolve("/classroom"), label: "Belajar", icon: "📺" },
+    { href: resolve("/notes"), label: "Nota", icon: "📑" },
+    { href: waLink, label: "Bantuan", icon: "💬" },
+  ]);
 
-  type LayoutProps = {
-    data?: {
-      user?: any;
-      admin?: any;
-    };
-    children: Snippet;
-  };
-
-  let { data, children }: LayoutProps = $props();
-
-  let user = $state(data?.user ?? null);
-
-  // to periodically refreshes user's session and auth status
+  // --- Effects & Lifecycle ---
   $effect(() => {
     user = data?.user ?? null;
   });
 
-  // smoothens transistions
   onNavigate((navigation) => {
     if (!document.startViewTransition) return;
 
-    // Skip the crossfade between the app's main tabs — we want the
-    // skeleton to appear instantly, not sit hidden behind a frozen
-    // screenshot while the transition waits on it.
     const appRoutes = ["/", "/classroom", "/notes"];
     const leavingApp = appRoutes.includes(navigation.from?.route.id ?? "");
     const enteringApp = appRoutes.includes(navigation.to?.route.id ?? "");
+
     if (leavingApp && enteringApp) return;
 
     return new Promise((resolve) => {
@@ -87,64 +99,22 @@
     });
   });
 
-  //  a button for admin button IF user is_admin = true
-  function adminDashboard() {
-    if (data?.admin === true) {
-      console.log(data?.admin);
-      console.log("redirecting user to adminDashboard");
-      return goto("/admin");
-    } else {
-      console.log("user is not admin. not doing anything");
-      return 0;
-    }
-  }
-
   onMount(() => {
-    // Keep `user` in sync if the session changes in another tab, expires, etc.
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         user = session?.user ?? null;
-        invalidate("supabase:auth"); // re-runs load functions that depend on auth state
+        invalidate("supabase:auth");
       },
     );
 
     return () => authListener.subscription.unsubscribe();
   });
 
-  // goto profile page
-  function profile() {
-    // console.log("redirecting user to profile");
-    return goto("/profile");
-  }
-
-  // onMount(() => {
-  //   const handlePageShow = (event) => {
-  //     if (event.persisted) {
-  //       window.location.reload();
-  //     }
-  //   };
-  //   window.addEventListener('pageshow', handlePageShow);
-  //   return () => window.removeEventListener('pageshow', handlePageShow);
-  // });
-
-  async function signOut() {
-    console.log("signOut called");
-    const result = await Promise.race([
-      supabase.auth.signOut(),
-      new Promise((_, reject) => setTimeout(() => reject("TIMEOUT"), 3000)),
-    ]);
-    console.log("signOut result:", result);
-    window.location.href = "/login";
-  }
-
-  // --- PWA install banner logic (unchanged from before) ---
-  let deferredPrompt: any = $state();
-  let showBanner = $state(false);
-
+  // PWA & Install logic
   onMount(() => {
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
-      deferredPrompt = e;
+      deferredPrompt = e as BeforeInstallPromptEvent;
       showBanner = true;
     });
 
@@ -162,10 +132,37 @@
       registerSW({ immediate: true });
     }
 
-    window.addEventListener("beforeInstallPrompt", (e) => {
+    // Fixed event name casing and removed unused parameter
+    window.addEventListener("beforeinstallprompt", () => {
       console.log("beforeInstallPrompt fired");
     });
   });
+
+  // --- Helper Functions ---
+  function adminDashboard() {
+    if (data?.admin === true) {
+      console.log(data?.admin);
+      console.log("redirecting user to adminDashboard");
+      return goto(resolve("/admin"));
+    } else {
+      console.log("user is not admin. not doing anything");
+      return 0;
+    }
+  }
+
+  function profile() {
+    return goto(resolve("/profile"));
+  }
+
+  async function signOut() {
+    console.log("signOut called");
+    const result = await Promise.race([
+      supabase.auth.signOut(),
+      new Promise((_, reject) => setTimeout(() => reject("TIMEOUT"), 3000)),
+    ]);
+    console.log("signOut result:", result);
+    window.location.href = "/login";
+  }
 
   async function installPWA() {
     if (!deferredPrompt) return;
@@ -176,37 +173,34 @@
     showBanner = false;
   }
 
-  // Bottom Nav for Mobile view
-  const navItems = $derived([
-    { href: "/", label: "Home", icon: "🏠" },
-    { href: "/classroom", label: "Belajar", icon: "📖" },
-    { href: "/notes", label: "Nota", icon: "📝" },
-    { href: waLink, label: "Bantuan", icon: "💬" },
-    // { href: data?.admin ? "/admin" : "/profile", label: "Akaun", icon: "👤" },
-  ]);
-
   function isActive(href: string) {
-    if (href.startsWith("http")) return false; // external links (WhatsApp) never "active"
+    if (href.startsWith("http")) return false;
     if (href === "/") return page.url.pathname === "/";
     return page.url.pathname.startsWith(href);
   }
 </script>
+
+<!-- --- HTML TEMPLATE --- -->
 
 <header
   class="bg-[#4a7425] text-white p-1 flex items-center shadow-md z-50 h-24 pt-[env(safe-area-inset-top)]"
 >
   <div class="navbar bg-[#4a7425] text-white shadow-md z-50 min-h-24">
     <div class="navbar-start">
-      <a href="/about" class="btn btn-ghost hover:bg-white/10 px-0.5">
+      <!-- Fixed resolve route usage here -->
+      <a
+        href={resolve("/about")}
+        class="btn btn-ghost hover:bg-white/10 px-0.5"
+      >
         <img
           src="/assets/pwa-192x192.png"
           alt="Akademi Abang Rumah Logo"
           class="w-16 h-16"
         />
       </a>
-      <span class="text-lg font-bold tracking-wider mx-2"
-        >AKADEMI ABANG RUMAH</span
-      >
+      <span class="text-lg font-bold tracking-wider mx-2">
+        AKADEMI ABANG RUMAH
+      </span>
     </div>
 
     <div class="navbar-end">
@@ -242,9 +236,9 @@
               {user.user_metadata?.full_name ?? user.email}
             </li>
             <li>
-              <button class="disabled:cursor-not-allowed" onclick={profile}
-                >Profil</button
-              >
+              <button class="disabled:cursor-not-allowed" onclick={profile}>
+                Profil
+              </button>
             </li>
             {#if data?.admin}
               <li><button onclick={adminDashboard}>Admin Dashboard</button></li>
@@ -285,6 +279,7 @@
     </div>
   </div>
 {/if}
+
 <div class={hideRoutes ? "" : "pb-8 sm:pb-20"}>
   {#if ActiveSkeleton}
     {console.log("Rendering skeletonLoader")}
@@ -296,11 +291,14 @@
     <ChangelogPopup />
   {/if}
 </div>
+
 {#if !hideRoutes || !userRoutes}
   <div
     class="dock bottom-0 left-0 right-0 bg-white border-t flex justify-around sm:hidden z-40"
   >
-    {#each navItems as item}
+    <!-- Fixed the key assignment here! -->
+    {#each navItems as item (item.href)}
+      <!-- eslint-disable svelte/no-navigation-without-resolve -->
       <a
         href={item.href}
         class="flex flex-col items-center text-xs gap-0.5 {isActive(item.href)

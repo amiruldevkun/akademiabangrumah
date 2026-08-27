@@ -28,7 +28,7 @@ async function verifyTurnstileToken(token: string, key: string) {
 }
 
 export const actions = {
-  default: async ({ request, locals, platform }) => {
+  default: async ({ request, locals }) => {
     const formData = await request.formData();
     const emailInput = formData.get("email") as string;
     const emailPass = formData.get("pass") as string;

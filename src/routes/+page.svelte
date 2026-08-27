@@ -7,6 +7,7 @@
   const teleLink = "https://t.me/+3EReJANa7eszNjJl";
   import quotes from "$lib/quotes.json";
   import { renderAnnouncementMarkdown } from "$lib/markdown";
+  import { resolve } from "$app/paths";
   const phone = "60103163654";
   const waLink = `https://wa.me/${phone}`;
 
@@ -152,7 +153,7 @@
     {:then continueLesson}
       {#if continueLesson}
         <a
-          href="/classroom?item={continueLesson.id}"
+          href={resolve("/classroom?item={continueLesson.id}")}
           class="block bg-emerald-50 rounded-xl p-4 sm:p-5 hover:shadow-md transition"
         >
           <div class="flex items-center justify-between mb-3">
@@ -222,7 +223,7 @@
         <!-- No progress yet (new user, or nothing accessible) — a starting
 			     prompt instead of fabricated placeholder progress. -->
         <a
-          href="/classroom"
+          href={resolve("/classroom")}
           class="block bg-emerald-50 rounded-xl p-5 hover:shadow-md transition text-center"
         >
           <p class="font-bold text-[#4a7425] mb-1">▶ Mula Belajar Sekarang</p>
@@ -235,7 +236,7 @@
       <!-- Rare: only fires if loadContinueLesson() throws server-side —
 		     same fallback as the "nothing accessible" empty state. -->
       <a
-        href="/classroom"
+        href={resolve("/classroom")}
         class="block bg-emerald-50 rounded-xl p-5 hover:shadow-md transition text-center"
       >
         <p class="font-bold text-[#4a7425] mb-1">▶ Mula Belajar Sekarang</p>
@@ -247,7 +248,7 @@
 
     <!-- Menu grid -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      {#each menuTiles as tile}
+      {#each menuTiles as tile (tile)}
         <svelte:element
           this={tile.disabled ? "div" : "a"}
           href={tile.disabled ? undefined : tile.href}
@@ -360,6 +361,7 @@
           {#each data.announcements as item (item.id)}
             <li class="text-sm text-gray-700 flex gap-2">
               <span class="text-[#4a7425]">•</span>
+              <!-- eslint-disable-next-line svelte/no-at-html-tags -->
               <span>{@html renderAnnouncementMarkdown(item.text)}</span>
             </li>
           {:else}

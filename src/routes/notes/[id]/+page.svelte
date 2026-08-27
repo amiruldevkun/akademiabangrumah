@@ -1,5 +1,7 @@
 <!-- src/routes/notes/[id]/+page.svelte -->
 <script lang="ts">
+  import { resolve } from "$app/paths";
+
   let { data } = $props();
 </script>
 
@@ -9,7 +11,7 @@
 
 <main class="bg-gray-50 min-h-screen pb-24">
   <div class="max-w-4xl mx-auto px-4 py-6 space-y-4">
-    <a href="/notes" class="text-sm text-gray-500">‹ Nota & PDF</a>
+    <a href={resolve("/notes")} class="text-sm text-gray-500">‹ Nota & PDF</a>
     <h1 class="text-lg font-bold text-gray-900">{data.document.title}</h1>
 
     <div class="bg-white rounded-xl shadow overflow-hidden">
@@ -25,7 +27,7 @@
          iframe reliably — this link is the fallback so nobody gets stuck
          looking at a blank box. -->
     <a
-      href={data.document.drive_url}
+      href={resolve(data.document.drive_url)}
       target="_blank"
       rel="noopener noreferrer"
       class="inline-block text-sm text-gray-500 underline"

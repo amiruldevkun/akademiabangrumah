@@ -63,6 +63,9 @@
 
   onMount(async () => {
     let lastSeen: string | null = null;
+
+    console.log(lastSeen);
+
     try {
       lastSeen = localStorage.getItem(STORAGE_KEY);
     } catch {
@@ -116,13 +119,13 @@
       <p class="text-xs text-base-content/60 mt-0.5">{latest.date}</p>
 
       <div class="mt-4 space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-        {#each GROUP_ORDER.filter((g) => grouped[g]?.length) as group}
+        {#each GROUP_ORDER.filter((g) => grouped[g]?.length) as group (group)}
           <div>
             <h4 class="font-semibold text-sm mb-1">{GROUP_LABELS[group]}</h4>
             <ul
               class="list-disc list-inside space-y-1 text-sm text-base-content/80"
             >
-              {#each grouped[group] as commit}
+              {#each grouped[group] as commit (commit)}
                 <li>{commit.message}</li>
               {/each}
             </ul>
@@ -135,7 +138,7 @@
             <ul
               class="list-disc list-inside space-y-1 text-sm text-base-content/80"
             >
-              {#each grouped["Other"] as commit}
+              {#each grouped["Other"] as commit (commit)}
                 <li>{commit.message}</li>
               {/each}
             </ul>

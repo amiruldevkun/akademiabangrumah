@@ -9,7 +9,9 @@ function isRecoverySession(accessToken: string): boolean {
       Buffer.from(accessToken.split(".")[1], "base64").toString(),
     );
     return (
-      payload.amr?.some((entry: any) => entry.method === "recovery") ?? false
+      payload.amr?.some(
+        (entry: { method: string }) => entry.method === "recovery",
+      ) ?? false
     );
   } catch {
     return false;
