@@ -153,7 +153,7 @@
     {:then continueLesson}
       {#if continueLesson}
         <a
-          href={resolve("/classroom?item={continueLesson.id}")}
+          href="{resolve('/classroom')}?item={continueLesson.id}"
           class="block bg-emerald-50 rounded-xl p-4 sm:p-5 hover:shadow-md transition"
         >
           <div class="flex items-center justify-between mb-3">
