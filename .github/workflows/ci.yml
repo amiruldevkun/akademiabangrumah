@@ -20,6 +20,8 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    environment:
+      name: productions
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,12 +34,24 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+    
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
 
       - name: Lint
         run: npm run lint
 
       - name: Typecheck
         run: npm run check
-
-      - name: Audit dependencies
-        run: npm audit --audit-level=high
+        env:
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{vars.PUBLIC_SUPABASE_PUBLISHABLE_KEY}}
+          PUBLIC_SUPABASE_URL: ${{vars.PUBLIC_SUPABASE_URL}}
+          PUBLIC_TESTING_NGROK_URL: ${{vars.PUBLIC_TESTING_NGROK_URL}}
+          PUBLIC_TURNSTILE_SITE_KEY: ${{vars.PUBLIC_TURNSTILE_SITE_KEY}}
+          ADMIN_EMAILS: ADMIN_EMAILS
+          CLIENT_SECRET_GOOGLE: CLIENT_SECRET_GOOGLE
+          SUPABASE_SECRET_KEY: SUPABASE_SECRET_KEY
+          TOYYIBPAY_BASE_URL: TOYYIBPAY_BASE_URL
+          TOYYIBPAY_CATEGORY_CODE: TOYYIBPAY_CATEGORY_CODE
+          TOYYIBPAY_SECRET_KEY: TOYYIBPAY_SECRET_KEY
+          TURNSTILE_KEY: TURNSTILE_KEY
