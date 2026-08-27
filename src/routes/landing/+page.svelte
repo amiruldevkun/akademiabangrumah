@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
+
   const features = [
     {
       label: "Modul Video",
@@ -82,7 +84,7 @@
         <!-- Moved out of the green block visually and tied color to the navbar for cohesion -->
         <div class="mt-4 lg:mt-10 anim-fly-up delay-600">
           <a
-            href="/login"
+            href={resolve("/login")}
             class="inline-block bg-[#2d4a22] hover:bg-[#1a2f13] transition-all duration-300 text-white text-xl lg:text-2xl font-semibold py-5 px-10 rounded-full shadow-xl hover:shadow-2xl hover:-translate-y-1 max-w-lg text-center leading-tight border-2 border-transparent hover:border-[#7ced67]"
           >
             Mula belajar sekarang!
@@ -141,7 +143,7 @@
           ditipu kontraktor tak bertauliah.
         </p>
         <a
-          href="/about"
+          href={resolve("/about")}
           class="inline-flex items-center gap-1 text-[#2d4a22] font-semibold hover:gap-2 transition-all"
         >
           Baca lebih lanjut mengenai En Ayub ›
@@ -171,7 +173,7 @@
         class="steps steps-vertical sm:steps-horizontal w-full anim-fly-up"
         style="--color-primary: #7ced67; --color-primary-content: #1a2f13;"
       >
-        {#each [{ title: "Daftar Akaun", desc: "Buat akaun percuma dalam beberapa minit sahaja." }, { title: "Akses Modul", desc: "Tonton video, muat turun nota, dan ikut checklist ikut kadar sendiri." }, { title: "Tanya & Praktik", desc: "Ada persoalan? Tanya terus dengan Abang Rumah sambil anda praktikkan di tapak." }] as step}
+        {#each [{ title: "Daftar Akaun", desc: "Buat akaun percuma dalam beberapa minit sahaja." }, { title: "Akses Modul", desc: "Tonton video, muat turun nota, dan ikut checklist ikut kadar sendiri." }, { title: "Tanya & Praktik", desc: "Ada persoalan? Tanya terus dengan Abang Rumah sambil anda praktikkan di tapak." }] as step (step)}
           <li class="step step-primary">
             <div class="text-left pl-2 pt-1 max-w-[220px]">
               <div class="font-bold text-gray-900">{step.title}</div>
@@ -200,7 +202,7 @@
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 lg:gap-6">
-        {#each features as feature, i}
+        {#each features as feature, i (feature)}
           <div
             class="bg-white rounded-xl shadow p-5 flex flex-col items-center text-center gap-2 relative hover:shadow-md transition anim-fly-up-card"
             style="animation-delay: {100 * i}ms"
@@ -244,7 +246,7 @@
       </div>
 
       <div class="join join-vertical w-full anim-fly-up">
-        {#each [{ q: "Siapa yang sesuai belajar di Akademi Abang Rumah?", a: "Sesiapa sahaja yang ingin bina atau renovate rumah sendiri, dan mahu faham proses pembinaan supaya tidak mudah ditipu oleh kontraktor tak bertauliah — tak kira ada pengalaman pembinaan atau tidak." }, { q: "Berapa kos untuk sertai?", a: "Maklumat harga terkini boleh dilihat semasa proses pendaftaran akaun." }, { q: "Adakah saya perlu pengalaman pembinaan sebelum ini?", a: "Tidak. Modul disusun untuk mudah difahami walaupun anda baru pertama kali mendalami bidang pembinaan rumah." }, { q: "Bagaimana jika saya ada soalan semasa belajar?", a: "Anda boleh terus bertanya dengan Abang Rumah melalui ciri 'Tanya Abang Rumah' dalam aplikasi." }, { q: "Bolehkah saya akses di telefon?", a: "Boleh. Akademi Abang Rumah direka untuk diakses dengan selesa di telefon mahupun komputer." }] as item, i}
+        {#each [{ q: "Siapa yang sesuai belajar di Akademi Abang Rumah?", a: "Sesiapa sahaja yang ingin bina atau renovate rumah sendiri, dan mahu faham proses pembinaan supaya tidak mudah ditipu oleh kontraktor tak bertauliah — tak kira ada pengalaman pembinaan atau tidak." }, { q: "Berapa kos untuk sertai?", a: "Maklumat harga terkini boleh dilihat semasa proses pendaftaran akaun." }, { q: "Adakah saya perlu pengalaman pembinaan sebelum ini?", a: "Tidak. Modul disusun untuk mudah difahami walaupun anda baru pertama kali mendalami bidang pembinaan rumah." }, { q: "Bagaimana jika saya ada soalan semasa belajar?", a: "Anda boleh terus bertanya dengan Abang Rumah melalui ciri 'Tanya Abang Rumah' dalam aplikasi." }, { q: "Bolehkah saya akses di telefon?", a: "Boleh. Akademi Abang Rumah direka untuk diakses dengan selesa di telefon mahupun komputer." }] as item, i (item)}
           <div
             class="collapse collapse-arrow join-item border border-base-300 bg-white"
           >
@@ -272,7 +274,7 @@
         kontraktor tak bertauliah, dan bina dengan yakin.
       </p>
       <a
-        href="/login"
+        href={resolve("/login")}
         class="inline-block bg-[#7ced67] hover:bg-[#65d452] transition-all duration-300 text-[#1a2f13] text-lg lg:text-xl font-semibold py-4 px-10 rounded-full shadow-xl hover:shadow-2xl hover:-translate-y-1 text-center leading-tight"
       >
         Mula belajar sekarang!

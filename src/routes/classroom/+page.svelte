@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { page } from "$app/state";
   import { supabase } from "$lib/supabaseClient";
+  import { resolve } from "$app/paths";
 
   type LessonItem = {
     id: string;
@@ -347,7 +348,7 @@
     <div class="h-full overflow-y-auto p-4 pt-6">
       {#if !data.hasPaid}
         <a
-          href="/pay_landing"
+          href={resolve("/pay_landing")}
           class="block mb-4 bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-xs text-center hover:bg-white/20 transition"
         >
           🔓 Naik taraf untuk buka semua video
@@ -365,7 +366,7 @@
       </div>
 
       <div class="space-y-6">
-        {#each filteredSections as section}
+        {#each filteredSections as section (section)}
           {#if section.anySectionItemVisible}
             <details
               class="lesson-section space-y-2 group"
@@ -377,7 +378,7 @@
                 {section.title}
               </summary>
               <ul class="pl-2 space-y-1 text-sm text-slate-200 mt-2">
-                {#each section.items as item}
+                {#each section.items as item (item)}
                   {#if item.visible}
                     {#if item.locked}
                       <button

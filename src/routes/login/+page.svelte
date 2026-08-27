@@ -4,6 +4,7 @@
   import { page } from "$app/state";
   import { Eye, EyeOff } from "@lucide/svelte";
   import TurnstileWidget from "$lib/turnstileWidget.svelte";
+  import { resolve } from "$app/paths";
 
   let turnstile: TurnstileWidget | undefined = $state();
   let turnstileToken = $state("");
@@ -15,6 +16,10 @@
   let emailError = $state("");
   let showPassword = $state(false);
   let bannerMessage = $derived(errorMessage || passError || emailError);
+
+  if (turnstileToken) {
+    console.log(0);
+  }
 
   async function signInWithGoogle() {
     await supabase.auth.signInWithOAuth({
@@ -138,7 +143,7 @@
 
         <div class="flex justify-end mb-4">
           <a
-            href="/forgot_password"
+            href={resolve("/forgot_password")}
             class="text-[13.5px] text-gray-500 hover:text-gray-700 py-1"
           >
             Lupa kata laluan?
@@ -212,7 +217,10 @@
 
     <p class="text-center text-[13.5px] text-gray-500 mt-6">
       Belum ada akaun?
-      <a href="/sign_up" class="text-[#4a7425] font-medium hover:underline">
+      <a
+        href={resolve("/sign_up")}
+        class="text-[#4a7425] font-medium hover:underline"
+      >
         Daftar sekarang
       </a>
     </p>

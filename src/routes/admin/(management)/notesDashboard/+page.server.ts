@@ -48,7 +48,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-  add: async ({ request, locals }) => {
+  add: async ({ request }) => {
     const formData = await request.formData();
     const title = formData.get("title");
     const driveUrl = formData.get("driveUrl");
@@ -91,7 +91,7 @@ export const actions: Actions = {
     return { added: true };
   },
 
-  remove: async ({ request, locals }) => {
+  remove: async ({ request }) => {
     const formData = await request.formData();
     const id = formData.get("id");
     if (typeof id !== "string") {

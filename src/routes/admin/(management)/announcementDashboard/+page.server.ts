@@ -63,7 +63,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-  add: async ({ request, locals }) => {
+  add: async ({ request }) => {
     const formData = await request.formData();
     const text = formData.get("text");
 
@@ -94,7 +94,7 @@ export const actions: Actions = {
     return { added: true };
   },
 
-  update: async ({ request, locals }) => {
+  update: async ({ request }) => {
     const formData = await request.formData();
     const id = formData.get("id");
     const text = formData.get("text");
@@ -122,7 +122,7 @@ export const actions: Actions = {
     return { updated: true };
   },
 
-  remove: async ({ request, locals }) => {
+  remove: async ({ request }) => {
     const formData = await request.formData();
     const id = formData.get("id");
     if (typeof id !== "string") return fail(400, { message: "Missing id." });

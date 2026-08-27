@@ -44,11 +44,13 @@ export async function reconcileOrder({ orderId }: toyyibpayID) {
   let tx;
   try {
     tx = await getBillTransactions(order.toyyibpay_bill_code);
-  } catch (err: any) {
+  } catch (err) {
+    // 1. Safely figure out the error message
+    const errorMessage = err instanceof Error ? err.message : String(err);
     console.error("[reconcileOrder] getBillTransactions failed:", err, {
       orderId,
     });
-    return { order, checkedToyyibPay: true, error: err.message };
+    return { order, checkedToyyibPay: true, error: errorMessage };
   }
 
   if (!tx) {

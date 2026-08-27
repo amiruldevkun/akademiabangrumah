@@ -18,7 +18,6 @@ import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { parseSidebarText } from "$lib/sidebarParser";
 import { supabaseAdmin } from "$lib/supabaseAdmin";
-import { hasAdminAccess } from "$lib/access";
 
 // Section titles come out of the parser UPPERCASE (e.g. "KERJA ATAP &
 // BUMBUNG") — prettify for display in the homepage announcement feed.

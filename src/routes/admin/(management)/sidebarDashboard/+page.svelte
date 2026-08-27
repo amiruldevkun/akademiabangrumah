@@ -3,6 +3,7 @@
   import { enhance } from "$app/forms";
   import type { ActionData, PageData } from "./$types";
   import type { SidebarSection } from "$lib/sidebarParser";
+  import { resolve } from "$app/paths";
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -111,7 +112,7 @@
         <div class="rounded bg-yellow-50 p-3 text-sm text-yellow-800">
           <p class="font-medium">Warnings — these lines were skipped:</p>
           <ul class="list-disc pl-5">
-            {#each stats.warnings as w}
+            {#each stats.warnings as w (w)}
               <li>{w}</li>
             {/each}
           </ul>
@@ -119,13 +120,13 @@
       {/if}
 
       <div class="max-h-96 space-y-3 overflow-y-auto">
-        {#each parsedSections as section}
+        {#each parsedSections as section (section)}
           <details class="rounded border border-gray-100 p-2" open>
             <summary class="cursor-pointer font-medium">
               {section.title} ({section.items.length})
             </summary>
             <ul class="mt-2 space-y-1 pl-4 text-sm">
-              {#each section.items as item}
+              {#each section.items as item (item)}
                 <li class="flex items-center gap-2">
                   <span class={item.video ? "text-green-700" : "text-gray-400"}>
                     {item.video ? "●" : "○"}
@@ -160,7 +161,7 @@
       </form>
 
       <a
-        href="/classroom"
+        href={resolve("/classroom")}
         hidden={!form?.pushed}
         class="rounded bg-green-700 px-4 py-2 text-white mb-1 disabled:opacity-50"
       >

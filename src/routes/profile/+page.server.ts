@@ -94,6 +94,10 @@ export const actions: Actions = {
       .eq("id", session.user.id)
       .single();
 
+    if (profile) {
+      console.log(0);
+    }
+
     if (profError) {
       console.error("Failed to load profile:", error);
     }

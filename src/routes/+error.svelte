@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { page } from "$app/state";
 
   let status = $derived(page.status);
@@ -80,7 +81,7 @@
 
       <div class="flex flex-col gap-3">
         <a
-          href="/"
+          href={resolve("/")}
           class="w-full flex items-center justify-center bg-[#4a7425] text-white font-semibold text-[15px] rounded-2xl cursor-pointer
           hover:bg-[#3d5f1f] active:scale-[0.98] transition-all"
           style="height: 48px;"

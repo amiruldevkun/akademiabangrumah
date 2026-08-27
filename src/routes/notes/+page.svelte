@@ -1,5 +1,7 @@
 <!-- src/routes/notes/+page.svelte -->
 <script lang="ts">
+  import { resolve } from "$app/paths";
+
   let { data } = $props();
 </script>
 
@@ -10,7 +12,7 @@
 <main class="bg-gray-50 min-h-screen pb-24">
   <div class="max-w-3xl mx-auto px-4 py-6 space-y-4">
     <div>
-      <a href="/" class="text-sm text-gray-500">‹ Menu Utama</a>
+      <a href={resolve("/")} class="text-sm text-gray-500">‹ Menu Utama</a>
       <h1 class="text-xl font-bold text-gray-900 mt-1">📄 Nota & PDF</h1>
     </div>
 
@@ -29,7 +31,7 @@
           </div>
         {:else}
           <a
-            href="/notes/{doc.id}"
+            href={resolve("/notes/{doc.id}")}
             class="bg-white rounded-xl shadow p-4 flex items-center justify-between hover:shadow-md transition"
           >
             <span class="font-semibold text-gray-900">{doc.title}</span>
