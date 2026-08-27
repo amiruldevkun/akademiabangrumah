@@ -14,6 +14,7 @@
   let passError = $state("");
   let emailError = $state("");
   let showPassword = $state(false);
+  let bannerMessage = $derived(errorMessage || passError || emailError);
 
   async function signInWithGoogle() {
     await supabase.auth.signInWithOAuth({
@@ -37,18 +38,31 @@
   />
 </svelte:head>
 
-<div class="max-h-screen flex items-center justify-center bg-gray-50">
-  <div class="bg-white p-8 rounded-lg shadow-md text-center">
-    <!-- Title + logo side by side -->
-    <div class="flex items-center justify-center gap-3 mb-6">
-      <h1 class="text-2xl font-bold text-[#4a7425]">Log Masuk</h1>
+<div
+  class="min-h-dvh flex items-center justify-center bg-[#FAF9F5] px-4"
+  style="padding-top: max(1.5rem, env(safe-area-inset-top)); padding-bottom: max(1.5rem, env(safe-area-inset-bottom));"
+>
+  <div class="w-full max-w-[400px]">
+    <!-- brand mark -->
+    <div class="flex flex-col items-center mb-8">
+      <h1 class="text-[22px] font-semibold text-gray-900">Log masuk</h1>
+      <p class="text-[14px] text-gray-500 mt-1 text-center">
+        Selamat kembali ke Akademi Abang Rumah
+      </p>
     </div>
 
-    {#if errorMessage}
-      <p class="text-red-600 text-sm mb-4">{errorMessage}</p>
-    {/if}
+    <div
+      class="bg-white rounded-3xl border border-gray-200 px-5 py-6 sm:px-7 sm:py-7"
+    >
+      {#if bannerMessage}
+        <div
+          class="flex items-start gap-2.5 rounded-2xl bg-red-50 text-red-700 text-[13.5px] leading-relaxed px-4 py-3 mb-5"
+        >
+          <span class="font-semibold shrink-0">!</span>
+          <span>{bannerMessage}</span>
+        </div>
+      {/if}
 
-    <div class="flex flex-col gap-2">
       <form
         method="POST"
         use:enhance={() => {
@@ -64,97 +78,110 @@
           };
         }}
       >
-        <label class="gap-2 text-black">
-          Masukkan email anda
+        <label class="block mb-4">
+          <span class="block text-[13.5px] font-medium text-gray-700 mb-1.5">
+            Email
+          </span>
           <input
             type="email"
             id="email"
             name="email"
             bind:value={emailInput}
             placeholder="studentabangrumah@gmail.com"
-            class="w-full mt-2 rounded-lg border px-3 py-2.5 text-sm text-black mb-2 focus:outline-none focus:ring-2
-        {emailError
-              ? 'border-red-500 focus:ring-red-500'
-              : 'border-gray-300 focus:ring-[#4a7425]'}"
+            autocomplete="email"
+            inputmode="email"
+            class="w-full rounded-2xl border px-4 text-[16px] text-gray-900 outline-none transition-colors placeholder:text-gray-400
+            focus:ring-2
+            {emailError
+              ? 'border-red-400 focus:ring-red-400/40 focus:border-red-400'
+              : 'border-gray-200 focus:ring-[#4a7425]/25 focus:border-[#4a7425]'}"
+            style="height: 52px;"
           />
         </label>
-        <label class="flex flex-col text-black">
-          Masukkan password yang kuat
-          <div class="relative gap-2">
+
+        <label class="block mb-2">
+          <span class="block text-[13.5px] font-medium text-gray-700 mb-1.5">
+            Kata laluan
+          </span>
+          <div class="relative">
             <input
               type={showPassword ? "text" : "password"}
               id="pass"
               name="pass"
               bind:value={emailPass}
               placeholder="Student@2026"
-              class="w-full mt-2 rounded-lg border px-3 py-2.5 text-sm text-gray-900 mb-2 focus:outline-none focus:ring-2
-        {passError
-                ? 'border-red-500 focus:ring-red-500'
-                : 'border-gray-300 focus:ring-[#4a7425]'}"
+              autocomplete="current-password"
+              class="w-full rounded-2xl border px-4 pr-12 text-[16px] text-gray-900 outline-none transition-colors placeholder:text-gray-400
+              focus:ring-2
+              {passError
+                ? 'border-red-400 focus:ring-red-400/40 focus:border-red-400'
+                : 'border-gray-200 focus:ring-[#4a7425]/25 focus:border-[#4a7425]'}"
+              style="height: 52px;"
             />
             <button
               type="button"
               onclick={() => (showPassword = !showPassword)}
               hidden={!emailPass}
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              aria-label={showPassword
+                ? "Sembunyikan kata laluan"
+                : "Papar kata laluan"}
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 w-10 h-10 flex items-center justify-center"
             >
               {#if showPassword === false}
-                <Eye />
+                <Eye size={19} />
               {:else}
-                <EyeOff />
+                <EyeOff size={19} />
               {/if}
             </button>
-          </div></label
-        >
+          </div>
+        </label>
 
-        {#if emailError != null || passError != null}
-          <p class="text-sm">{passError}</p>
-          <p class="text-sm">{emailError}</p>
-        {/if}
+        <div class="flex justify-end mb-4">
+          <a
+            href="/forgot_password"
+            class="text-[13.5px] text-gray-500 hover:text-gray-700 py-1"
+          >
+            Lupa kata laluan?
+          </a>
+        </div>
 
         <!-- Cloudflare Turnstile Implementation for extra bot mitigation on top of cloudflare's cdn -->
-        <TurnstileWidget
-          onVerify={(token) => (turnstileToken = token)}
-          bind:this={turnstile}
-        />
+        <div class="mb-5 flex justify-center">
+          <TurnstileWidget
+            onVerify={(token) => (turnstileToken = token)}
+            bind:this={turnstile}
+          />
+        </div>
 
-        <!-- vvv loading anim-->
         <button
           type="submit"
           value="Submit"
-          class="bg-[#4a7425] text-white font-semibold text-base px-6 py-3.5 rounded-xl shadow-lg cursor-pointer
-						       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
-						       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full
-                  "
+          disabled={signUpStatus}
+          class="w-full flex items-center justify-center gap-2.5 bg-[#4a7425] text-white font-semibold text-[15.5px] rounded-2xl cursor-pointer
+          hover:bg-[#3d5f1f] active:scale-[0.98] transition-all
+          disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100"
+          style="height: 52px;"
         >
           {#if signUpStatus === true}
             <span class="loading loading-spinner loading-sm"></span>
             Melog masuk...
           {:else}
-            Log Masuk
+            Log masuk
           {/if}
         </button>
       </form>
-      <a href="/forgot_password" class="text-xs text-gray-500 hover:underline">
-        Lupa kata laluan? Tekan saya untuk tukar kata laluan.
-      </a>
-      <p class="text-xs text-gray-500 text-center mt-1 leading-relaxed">
-        Tiada google? Boleh gunakan email.
-      </p>
-      <a
-        href="/sign_up"
-        class="bg-[#4a7425] text-white font-semibold text-base px-1.5 py-2 rounded-xl pointer-events-auto shadow-lg
-						       hover:bg-[#3d5f1f] transition-all transform hover:-translate-y-1 active:translate-y-0
-						       disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 w-full"
-      >
-        Buat akaun baharu
-      </a>
 
-      <hr class="opacity-10" />
-      <!-- <p class="text-xs text-gray-400 text-center mt-3.5 leading-relaxed">ATAU</p> -->
+      <div class="flex items-center gap-3 my-5 text-gray-400 text-[12px]">
+        <div class="flex-1 h-px bg-gray-200"></div>
+        ATAU
+        <div class="flex-1 h-px bg-gray-200"></div>
+      </div>
+
       <button
         onclick={signInWithGoogle}
-        class="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center cursor-pointer gap-3"
+        class="w-full flex items-center justify-center gap-3 bg-white text-gray-700 border border-gray-200 rounded-2xl font-medium text-[15px]
+        hover:bg-gray-50 active:scale-[0.98] transition-all cursor-pointer"
+        style="height: 52px;"
       >
         <svg class="w-5 h-5" viewBox="0 0 48 48">
           <path
@@ -179,8 +206,15 @@
             c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"
           />
         </svg>
-        Log Masuk Melalui Google
+        Log masuk melalui Google
       </button>
     </div>
+
+    <p class="text-center text-[13.5px] text-gray-500 mt-6">
+      Belum ada akaun?
+      <a href="/sign_up" class="text-[#4a7425] font-medium hover:underline">
+        Daftar sekarang
+      </a>
+    </p>
   </div>
 </div>
