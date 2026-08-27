@@ -31,7 +31,7 @@
           </div>
         {:else}
           <a
-            href={resolve("/notes/{doc.id}")}
+            href="{resolve('/notes/')}{doc.id}"
             class="bg-white rounded-xl shadow p-4 flex items-center justify-between hover:shadow-md transition"
           >
             <span class="font-semibold text-gray-900">{doc.title}</span>
