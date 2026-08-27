@@ -20,6 +20,8 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    environment:
+      name: productions
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,3 +43,8 @@ jobs:
 
       - name: Typecheck
         run: npm run check
+        env:
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{vars.PUBLIC_SUPABASE_PUBLISHABLE_KEY}}
+          PUBLIC_SUPABASE_URL: ${{vars.PUBLIC_SUPABASE_URL}}
+          PUBLIC_TESTING_NGROK_URL: ${{vars.PUBLIC_TESTING_NGROK_URL}}
+          PUBLIC_TURNSTILE_SITE_KEY: ${{vars.PUBLIC_TURNSTILE_SITE_KEY}}
