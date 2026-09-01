@@ -4,6 +4,7 @@
   import type { PageData, ActionData } from "./$types";
   import { onMount } from "svelte";
   import type { UserIdentity } from "@supabase/supabase-js";
+  import { capturePostHog } from "$lib/posthogClient";
   // import { linkUserIdentViaGoogle } from "$lib/identLink";
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -104,6 +105,7 @@
     }
 
     resetEmailSent = true;
+    capturePostHog("password_reset_requested");
   }
 </script>
 
@@ -111,14 +113,14 @@
   <title>Profil Saya | Akademi Abang Rumah</title>
 </svelte:head>
 
-<div class="min-h-screen bg-base-200 pb-16 pt-6">
+<div class="min-h-dvh bg-[#FAF9F5] pb-16 pt-6">
   <div class="mx-auto max-w-2xl px-4 sm:px-6">
     <!-- Top Action Navigation -->
     <div class="mb-6 flex items-center justify-between">
       <button
         type="button"
         onclick={goBack}
-        class="btn btn-outline btn-sm gap-2"
+        class="btn btn-outline btn-sm gap-2 rounded-2xl border-gray-200 text-gray-700 hover:border-[#4a7425]/40 hover:bg-transparent"
       >
         <svg
           class="h-4 w-4"
@@ -139,7 +141,7 @@
 
     <!-- Main Profile Card -->
     <div
-      class="card bg-base-100 shadow-sm border border-base-300 overflow-hidden"
+      class="card bg-white shadow-none border border-gray-200 rounded-3xl overflow-hidden"
     >
       <!-- Decorative Banner Header -->
       <div class="h-28 bg-[#4a7425]"></div>
@@ -151,7 +153,7 @@
         >
           <div class="avatar placeholder relative">
             <div
-              class="bg-neutral text-neutral-content w-24 rounded-2xl ring-4 ring-base-100 shadow-md"
+              class="bg-neutral text-neutral-content w-24 rounded-2xl ring-4 ring-white shadow-md"
             >
               <img src={data.profile?.avatar_url} alt="User Avatar" />
               {#if !data.profile?.avatar_url}
@@ -166,7 +168,7 @@
                 {form?.full_name ?? data.profile?.full_name ?? "Pengguna"}
               </h1>
               <div
-                class="badge badge-primary badge-outline text-xs font-semibold"
+                class="badge badge-outline text-xs font-semibold border-[#4a7425]/40 text-[#4a7425]"
               >
                 {userStatus}
               </div>
@@ -182,7 +184,10 @@
 
         <!-- daisyUI Alert Notifications -->
         {#if form?.error}
-          <div role="alert" class="alert alert-error alert-soft mb-6">
+          <div
+            role="alert"
+            class="alert alert-error alert-soft rounded-2xl mb-6 mt-4"
+          >
             <svg
               class="h-6 w-6 shrink-0 stroke-current"
               fill="none"
@@ -200,7 +205,10 @@
         {/if}
 
         {#if form?.success}
-          <div role="alert" class="alert alert-success alert-soft mb-6">
+          <div
+            role="alert"
+            class="alert alert-success alert-soft rounded-2xl mb-6 mt-4"
+          >
             <svg
               class="h-6 w-6 shrink-0 stroke-current"
               fill="none"
@@ -223,12 +231,15 @@
           action="?/updateProfile"
           use:enhance={() => {
             submitting = true;
-            return async ({ update }) => {
+            return async ({ update, result }) => {
               submitting = false;
+              if (result.type === "success") {
+                capturePostHog("profile_updated");
+              }
               await update({ reset: false });
             };
           }}
-          class="space-y-6"
+          class="space-y-6 mt-6"
         >
           <!-- Section 1: Maklumat Peribadi -->
           <div class="space-y-4">
@@ -250,7 +261,9 @@
                 >
               </label>
 
-              <label class="input input-bordered flex items-center gap-3">
+              <label
+                class="input input-bordered rounded-2xl border-gray-200 focus-within:border-[#4a7425] flex items-center gap-3"
+              >
                 <svg
                   class="h-5 w-5 opacity-50"
                   fill="none"
@@ -297,7 +310,9 @@
                 </span>
               </label>
 
-              <label class="input input-bordered flex items-center gap-3">
+              <label
+                class="input input-bordered rounded-2xl border-gray-200 focus-within:border-[#4a7425] flex items-center gap-3"
+              >
                 <svg
                   class="h-5 w-5 opacity-50"
                   fill="none"
@@ -401,10 +416,10 @@
             </h2>
 
             <div
-              class="card bg-base-200 border border-base-300 p-4 rounded-xl flex sm:flex-row items-center justify-between gap-4"
+              class="card bg-gray-50 border border-gray-200 p-4 rounded-2xl flex sm:flex-row items-center justify-between gap-4"
             >
               <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-base-100 shadow-sm">
+                <div class="p-2 rounded-xl bg-white border border-gray-200">
                   <svg class="h-6 w-6" viewBox="0 0 24 24">
                     <path
                       fill="#4285F4"
@@ -436,7 +451,7 @@
                   type="button"
                   onclick={linkGoogleAccount}
                   disabled={linkingGoogle}
-                  class="btn btn-outline btn-sm sm:w-auto w-full"
+                  class="btn btn-outline btn-sm sm:w-auto w-full rounded-2xl border-gray-300 text-gray-700 hover:border-[#4a7425]/40 hover:bg-transparent"
                 >
                   {#if linkingGoogle}
                     <span class="loading loading-spinner loading-xs"></span>
@@ -449,7 +464,7 @@
                   type="button"
                   onclick={unlinkGoogleAccount}
                   disabled={linkingGoogle}
-                  class="btn btn-outline btn-error btn-sm sm:w-auto w-full"
+                  class="btn btn-outline btn-error btn-sm sm:w-auto w-full rounded-2xl"
                 >
                   {#if linkingGoogle}
                     <span class="loading loading-spinner loading-xs"></span>
@@ -479,13 +494,19 @@
             </h2>
 
             {#if resetError}
-              <div role="alert" class="alert alert-error alert-soft">
+              <div
+                role="alert"
+                class="alert alert-error alert-soft rounded-2xl"
+              >
                 <span class="text-sm">{resetError}</span>
               </div>
             {/if}
 
             {#if resetEmailSent}
-              <div role="alert" class="alert alert-success alert-soft">
+              <div
+                role="alert"
+                class="alert alert-success alert-soft rounded-2xl"
+              >
                 <span class="text-sm"
                   >Link tetapan semula kata laluan telah dihantar ke emel log
                   masuk anda. Sila semak peti 'Inbox' anda.</span
@@ -494,7 +515,7 @@
             {/if}
 
             <div
-              class="card bg-base-200 border border-base-300 p-4 rounded-xl flex sm:flex-row items-center justify-between gap-4"
+              class="card bg-gray-50 border border-gray-200 p-4 rounded-2xl flex sm:flex-row items-center justify-between gap-4"
             >
               <div>
                 <p class="font-semibold text-sm">Kata Laluan</p>
@@ -507,7 +528,7 @@
                 type="button"
                 onclick={sendPasswordReset}
                 disabled={sendingReset}
-                class="btn btn-outline btn-sm sm:w-auto w-full"
+                class="btn btn-outline btn-sm sm:w-auto w-full rounded-2xl border-gray-300 text-gray-700 hover:border-[#4a7425]/40 hover:bg-transparent"
               >
                 {#if sendingReset}
                   <span class="loading loading-spinner loading-xs"></span>
@@ -523,7 +544,7 @@
             <button
               type="submit"
               disabled={submitting}
-              class="btn bg-[#4a7425] text-white w-full"
+              class="btn bg-[#4a7425] hover:bg-[#3d5f1f] border-none text-white w-full rounded-2xl"
             >
               {#if submitting}
                 <span class="loading loading-spinner loading-sm"></span>

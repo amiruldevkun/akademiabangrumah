@@ -5,7 +5,9 @@
     product_description,
     product_amountRM,
   } from "$lib/productMeta.json";
+  import { capturePostHog } from "$lib/posthogClient";
   import { resolve } from "$app/paths";
+
   let { data } = $props();
 
   let name = $state(data.suggestedName ?? "");
@@ -24,6 +26,12 @@
     e.preventDefault();
     errorMsg = "";
     submitting = true;
+    // PostHog logs payment flow
+    capturePostHog("checkout_started", {
+      product_name: PRODUCT.name,
+      amount: PRODUCT.amountRM,
+      currency: "MYR",
+    });
     try {
       const res = await fetch("/api/create-bill", {
         method: "POST",

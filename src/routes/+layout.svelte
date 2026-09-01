@@ -3,6 +3,7 @@
   import "../style.css";
   import { onMount, type Component, type Snippet } from "svelte";
   import { supabase } from "$lib/supabaseClient";
+  import { env } from "$env/dynamic/public";
   import { invalidate, onNavigate, goto } from "$app/navigation";
   import { page, navigating } from "$app/state";
   import { resolve } from "$app/paths";
@@ -35,6 +36,7 @@
 
   let deferredPrompt: BeforeInstallPromptEvent | null = $state(null);
   let showBanner = $state(false);
+  let identifiedUserId: string | null = null;
 
   const phone = "60103163654";
   const waLink = `https://wa.me/${phone}`;
@@ -99,10 +101,57 @@
     });
   });
 
+  async function identifyUser(authenticatedUser: User) {
+    if (
+      !env.PUBLIC_POSTHOG_PROJECT_TOKEN ||
+      !env.PUBLIC_POSTHOG_HOST ||
+      identifiedUserId === authenticatedUser.id
+    ) {
+      return;
+    }
+
+    const { default: posthog } = await import("posthog-js");
+
+    if (identifiedUserId && identifiedUserId !== authenticatedUser.id) {
+      posthog.reset();
+    }
+
+    posthog.identify(authenticatedUser.id, {
+      ...(authenticatedUser.email ? { email: authenticatedUser.email } : {}),
+      ...(typeof authenticatedUser.user_metadata?.full_name === "string"
+        ? { name: authenticatedUser.user_metadata.full_name }
+        : {}),
+    });
+    identifiedUserId = authenticatedUser.id;
+  }
+
+  async function resetIdentity() {
+    if (
+      !identifiedUserId ||
+      !env.PUBLIC_POSTHOG_PROJECT_TOKEN ||
+      !env.PUBLIC_POSTHOG_HOST
+    ) {
+      return;
+    }
+
+    const { default: posthog } = await import("posthog-js");
+    posthog.reset();
+    identifiedUserId = null;
+  }
+
   onMount(() => {
+    if (user) void identifyUser(user);
+
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         user = session?.user ?? null;
+
+        if (event === "SIGNED_OUT") {
+          void resetIdentity();
+        } else if (session?.user) {
+          void identifyUser(session.user);
+        }
+
         invalidate("supabase:auth");
       },
     );
@@ -161,6 +210,7 @@
       new Promise((_, reject) => setTimeout(() => reject("TIMEOUT"), 3000)),
     ]);
     console.log("signOut result:", result);
+    await resetIdentity();
     window.location.href = "/login";
   }
 

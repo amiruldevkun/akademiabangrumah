@@ -2,6 +2,7 @@
   import { enhance } from "$app/forms";
   import { navigating } from "$app/state";
   import type { ActionData, PageData } from "./$types";
+  import { capturePostHog } from "$lib/posthogClient";
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -155,7 +156,12 @@
                     action="?/toggleHasPaid"
                     use:enhance={() => {
                       activeId = profile.id;
-                      return async ({ update }) => {
+                      return async ({ update, result }) => {
+                        if (result.type === "success") {
+                          capturePostHog("user_access_updated", {
+                            access_granted: !profile.has_paid,
+                          });
+                        }
                         await update();
                         activeId = null;
                       };
@@ -177,7 +183,12 @@
                       action="?/toggleAdmin"
                       use:enhance={() => {
                         activeId = profile.id;
-                        return async ({ update }) => {
+                        return async ({ update, result }) => {
+                          if (result.type === "success") {
+                            capturePostHog("user_admin_role_updated", {
+                              admin_granted: !profile.is_admin,
+                            });
+                          }
                           await update();
                           activeId = null;
                         };
@@ -278,7 +289,10 @@
                   action="?/updateStatus"
                   use:enhance={() => {
                     activeId = order.id;
-                    return async ({ update }) => {
+                    return async ({ update, result }) => {
+                      if (result.type === "success") {
+                        capturePostHog("order_status_updated");
+                      }
                       await update();
                       activeId = null;
                     };

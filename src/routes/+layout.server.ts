@@ -4,7 +4,7 @@ import { hasPaidAccess, hasAdminAccess } from "$lib/access";
 import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
-  const PUBLICROUTE = ["/pay_landing"];
+  const PUBLICROUTE = ["/pay_landing", "/payment/return"];
   const lockedRoute = ["/landing", "/login"];
   const adminRoute = ["/admin"];
 

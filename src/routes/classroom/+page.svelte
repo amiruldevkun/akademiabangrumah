@@ -3,6 +3,7 @@
   import { page } from "$app/state";
   import { supabase } from "$lib/supabaseClient";
   import { resolve } from "$app/paths";
+  import { capturePostHog } from "$lib/posthogClient";
 
   type LessonItem = {
     id: string;
@@ -90,7 +91,7 @@
         .find(
           (item) => item.id === requestedItemId && item.video && !item.locked,
         );
-      if (requestedItem) selectLesson(requestedItem);
+      if (requestedItem) selectLesson(requestedItem, false);
     }
 
     // Load the YouTube IFrame API once per page load.
@@ -152,7 +153,7 @@
     return match ? match[1] : null;
   }
 
-  function selectLesson(item: LessonItem) {
+  function selectLesson(item: LessonItem, isUserAction = true) {
     if (item.locked) {
       // Send them to the payment landing page instead of doing nothing.
       window.location.href = "/pay_landing";
@@ -167,6 +168,14 @@
     clearProgressSaveInterval();
     ytPlayer?.destroy?.();
     ytPlayer = null;
+
+    if (isUserAction) {
+      capturePostHog("lesson_selected", {
+        lesson_id: item.id,
+        content_source: isYouTube(item.video) ? "youtube" : "google_drive",
+        resumed: Boolean(item.resumeSeconds),
+      });
+    }
 
     selectedLesson = item.label;
     selectedItem = item;
@@ -233,20 +242,33 @@
     const current = ytPlayer.getCurrentTime();
     const duration = ytPlayer.getDuration() ?? 0;
     const watched = forceWatched || (duration > 0 && current / duration >= 0.9);
-    await persistProgress(
+    const saved = await persistProgress(
       item.id,
       Math.floor(current),
       watched,
       duration > 0 ? Math.floor(duration) : null,
     );
-    if (watched && selectedItem?.id === item.id) {
+    if (saved && watched && !item.watched) {
+      capturePostHog("lesson_completed", {
+        lesson_id: item.id,
+        content_source: "youtube",
+      });
+    }
+    if (saved && watched && selectedItem?.id === item.id) {
       selectedItem = { ...selectedItem, watched: true };
     }
   }
 
   async function markDriveWatched() {
     if (!selectedItem || !data.userId) return;
-    await persistProgress(selectedItem.id, 0, true, null);
+    const saved = await persistProgress(selectedItem.id, 0, true, null);
+    if (!saved) return;
+    if (!selectedItem.watched) {
+      capturePostHog("lesson_completed", {
+        lesson_id: selectedItem.id,
+        content_source: "google_drive",
+      });
+    }
     selectedItem = { ...selectedItem, watched: true };
   }
 
@@ -272,7 +294,11 @@
     const { error } = await supabase
       .from("video_progress")
       .upsert(payload, { onConflict: "user_id,item_id" });
-    if (error) console.error("Failed to save video progress:", error);
+    if (error) {
+      console.error("Failed to save video progress:", error);
+      return false;
+    }
+    return true;
   }
 
   function toggleSidebar(e: MouseEvent) {
@@ -303,17 +329,24 @@
 </svelte:head>
 
 <!-- MAIN CONTAINER -->
-<div class="flex flex-1 relative flex-col">
+<div class="flex flex-1 relative flex-col bg-[#FAF9F5]">
   {#if warningState === true}
     <div
-      class="bg-[#9bd964] text-center justify-center flex text-red-600 px-3 py-3"
+      class="flex items-start gap-2.5 bg-red-50 text-red-700 text-[13.5px] leading-relaxed px-4 py-3"
     >
-      <h1 class="ml-auto">
+      <span class="font-semibold shrink-0">!</span>
+      <span class="flex-1">
         Video yang menggunakan Google Drive mempunyai UI yang tak menyenangkan.
         Maaf atas kesulitan ini. Kami akan berusaha untuk memindahkan semua
         video ke Youtube secepat mungkin.
-      </h1>
-      <button onclick={closeWarning} class="ml-auto"> ⤫</button>
+      </span>
+      <button
+        onclick={closeWarning}
+        aria-label="Tutup"
+        class="shrink-0 text-red-700/70 hover:text-red-700"
+      >
+        ⤫
+      </button>
     </div>
   {/if}
   <!-- SYLLABUS SIDEBAR (Hidden everywhere by default) -->
@@ -321,9 +354,10 @@
     href="#"
     onclick={goBack}
     id="back"
-    class="bg-[#4a7425] hidden md:block right-4 mt-4 pt-2 absolute btn btn-soft text-white {warningState
+    class="bg-[#4a7425] hidden md:flex items-center gap-1.5 right-4 mt-4 absolute rounded-2xl text-white font-semibold text-[13.5px] px-4 hover:bg-[#3d5f1f] active:scale-[0.98] transition-all {warningState
       ? 'top-16'
       : 'top-4'}"
+    style="height: 40px;"
   >
     &larrhk; Kembali
   </a>
@@ -349,7 +383,7 @@
       {#if !data.hasPaid}
         <a
           href={resolve("/pay_landing")}
-          class="block mb-4 bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-xs text-center hover:bg-white/20 transition"
+          class="block mb-4 bg-white/10 border border-white/30 rounded-2xl px-3 py-2 text-[13.5px] text-center hover:bg-white/20 active:scale-[0.98] transition-all"
         >
           🔓 Naik taraf untuk buka semua video
         </a>
@@ -361,7 +395,8 @@
           bind:value={searchQuery}
           onclick={(e) => e.stopPropagation()}
           placeholder="Cari topik/video..."
-          class="w-full px-3 py-2 text-sm text-black rounded bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300 shadow-inner"
+          class="w-full px-3.5 text-[14.5px] text-black rounded-2xl bg-white placeholder-gray-400 border border-transparent focus:outline-none focus:border-white/60 transition-colors"
+          style="height: 44px;"
         />
       </div>
 
@@ -373,18 +408,18 @@
               open={section.forceOpen}
             >
               <summary
-                class="lesson-section-title bg-white text-black font-semibold px-3 py-1.5 rounded text-center shadow-sm cursor-pointer list-none select-none outline-none"
+                class="lesson-section-title bg-white text-black font-semibold px-3 py-1.5 rounded-xl text-center cursor-pointer list-none select-none outline-none"
               >
                 {section.title}
               </summary>
-              <ul class="pl-2 space-y-1 text-sm text-slate-200 mt-2">
+              <ul class="pl-2 space-y-1 text-[13.5px] text-slate-200 mt-2">
                 {#each section.items as item (item)}
                   {#if item.visible}
                     {#if item.locked}
                       <button
                         type="button"
                         onclick={() => selectLesson(item)}
-                        class="w-full text-left lesson-item cursor-pointer p-1 rounded flex items-center justify-between text-amber-200 hover:text-white transform transition-all duration-200 hover:translate-y-0.5"
+                        class="w-full text-left lesson-item cursor-pointer p-1.5 rounded-xl flex items-center justify-between text-amber-200 hover:text-white transform transition-all duration-200 hover:translate-y-0.5"
                       >
                         <span>{item.label}</span>
                         <span class="flex items-center gap-1 shrink-0 ml-2">
@@ -401,9 +436,9 @@
                       <button
                         type="button"
                         onclick={() => selectLesson(item)}
-                        class="w-full text-left lesson-item cursor-pointer hover:text-white p-1 rounded flex items-center justify-between transform transition-all duration-200 hover:translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm {selectedLesson ===
+                        class="w-full text-left lesson-item cursor-pointer hover:text-white p-1.5 rounded-xl flex items-center justify-between transform transition-all duration-200 hover:translate-y-0.5 active:translate-y-0 {selectedLesson ===
                         item.label
-                          ? 'bg-blue-800 text-white'
+                          ? 'bg-white/15 text-white'
                           : ''}"
                       >
                         <span>{item.label}</span>
@@ -424,7 +459,7 @@
                       </button>
                     {:else}
                       <div
-                        class="lesson-item lesson-item-disabled p-1 rounded text-slate-400 italic cursor-not-allowed select-none flex items-center justify-between"
+                        class="lesson-item lesson-item-disabled p-1.5 rounded-xl text-slate-400 italic cursor-not-allowed select-none flex items-center justify-between"
                       >
                         <span
                           >{item.label}
@@ -450,19 +485,19 @@
 
   <!-- MAIN CANVAS -->
   <main
-    class="flex-1 p-4 lg:p-8 bg-gray-50 transition-all duration-300 items-center flex-col"
+    class="flex-1 p-4 lg:p-8 bg-[#FAF9F5] transition-all duration-300 items-center flex-col"
   >
     <div class="max-w-4xl mx-auto flex flex-col items-center">
       <!-- Active Lesson Title -->
       <h1
-        class="text-3xl font-bold text-gray-800 mb-6 text-center lg:text-left"
+        class="text-[22px] font-semibold text-gray-900 mb-6 text-center lg:text-left"
       >
         {selectedLesson}
       </h1>
 
       <!-- Responsive Video Container Player Using HTML iframe -->
       <div
-        class="aspect-[9/16] max-w-[450px] w-full bg-black rounded-lg shadow-inner overflow-hidden relative"
+        class="aspect-[9/16] max-w-[450px] w-full bg-black rounded-3xl border border-gray-200 overflow-hidden relative"
       >
         {#key selectedItem?.id}
           {#if isYouTube(currentVideo)}
@@ -489,13 +524,14 @@
       {#if selectedItem?.video && !isYouTube(selectedItem.video) && data.userId}
         <div class="mt-3 text-center">
           {#if selectedItem.watched}
-            <span class="text-emerald-600 text-sm font-medium"
+            <span class="text-[#4a7425] text-[13.5px] font-semibold"
               >✔ Selesai ditonton</span
             >
           {:else}
             <button
               onclick={markDriveWatched}
-              class="text-sm px-4 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition"
+              class="text-[13.5px] font-semibold px-4 rounded-2xl bg-[#4a7425] text-white hover:bg-[#3d5f1f] active:scale-[0.98] transition-all"
+              style="height: 40px;"
             >
               Tandakan sebagai selesai
             </button>
@@ -504,7 +540,7 @@
       {/if}
 
       <p
-        class="lg:hidden block sm:hidden text-center text-sm text-gray-500 mb-2 pt-10"
+        class="lg:hidden block sm:hidden text-center text-[13.5px] text-gray-500 mb-2 pt-10"
       >
         Tip: Putarkan peranti secara melintang untuk melihat video dengan lebih
         baik.
