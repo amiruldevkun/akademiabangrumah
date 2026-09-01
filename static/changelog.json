@@ -1,17 +1,32 @@
 [
   {
-    "version": "v2.2.2",
-    "date": "2026-08-16",
+    "version": "v3.0.0",
+    "date": "2026-09-01",
     "commits": [
       {
-        "id": "366b9527c0e8f529d88d263b56e7770086a85148",
-        "message": "Baiki alur log masuk",
+        "id": "1785ee15e376917c1fa848a35016a5a02c223550",
+        "message": "fix spinner anim not showing",
         "group": "Bug Fixes"
       },
       {
-        "id": "1a3ca806837d8becb01a8cdfcb91c893201dbbe7",
-        "message": "Baiki alur penukaran kata laluan",
+        "id": "b8c017d2fda23b307f8f689419aabe1301307564",
+        "message": "Mengadakan halaman 'error'",
+        "group": "Features"
+      },
+      {
+        "id": "1a60ea48535535d18b60faf8789ecf919265a279",
+        "message": "Adakan 'skeleton loader' sebagai maklum balas secara langsung",
+        "group": "Features"
+      },
+      {
+        "id": "3b710b7d9f87c7ce5ed5dbb5e528138a0b9ee64e",
+        "message": "Membetulkan isu 'routing'",
         "group": "Bug Fixes"
+      },
+      {
+        "id": "ce1f70657116431f6abb130b90e1aa9f7ffd7811",
+        "message": "Adakan integrasi perisian logging untuk kelancaran dalam mencegah 'error'",
+        "group": "Features"
       }
     ]
   }
