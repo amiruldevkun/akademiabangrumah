@@ -30,13 +30,10 @@
     --color-emerald-50: oklch(97.9% 0.021 166.113);
     --color-emerald-200: oklch(90.5% 0.093 164.15);
     --color-emerald-300: oklch(84.5% 0.143 164.978);
-    --color-emerald-600: oklch(59.6% 0.145 163.225);
-    --color-emerald-700: oklch(50.8% 0.118 165.612);
     --color-emerald-800: oklch(43.2% 0.095 166.913);
     --color-sky-300: oklch(82.8% 0.111 230.318);
     --color-blue-50: oklch(97% 0.014 254.604);
     --color-blue-200: oklch(88.2% 0.059 254.128);
-    --color-blue-800: oklch(42.4% 0.199 265.638);
     --color-indigo-100: oklch(93% 0.034 272.788);
     --color-indigo-300: oklch(78.5% 0.115 274.713);
     --color-indigo-800: oklch(39.8% 0.195 277.366);
@@ -3526,6 +3523,11 @@
         --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
       }
     }
+  }
+  .isolate {
+    isolation: isolate;
+  }
+  @layer daisyui.l1.l2.l3 {
     .mockup-phone-camera {
       grid-column: 1/1;
       grid-row: 1/1;
@@ -4051,9 +4053,6 @@
   }
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
-  }
-  .ml-auto {
-    margin-left: auto;
   }
   @layer daisyui.l1.l2.l3 {
     .status {
@@ -4803,6 +4802,9 @@
   .border-\[\#2d4a22\] {
     border-color: #2d4a22;
   }
+  .border-\[\#4a7425\]\/40 {
+    border-color: color-mix(in oklab, #4a7425 40%, transparent);
+  }
   .border-\[\#d1d5dc\] {
     border-color: #d1d5dc;
   }
@@ -4842,14 +4844,6 @@
       border-color: color-mix(in oklab, var(--color-white) 30%, transparent);
     }
   }
-  .glass {
-    border: none;
-    backdrop-filter: blur(var(--glass-blur, 40px));
-    background-color: #0000;
-    background-image: linear-gradient( 135deg, oklch(100% 0 0 / var(--glass-opacity, 30%)) 0%, oklch(0% 0 0 / 0%) 100% ), linear-gradient( var(--glass-reflect-degree, 100deg), oklch(100% 0 0 / var(--glass-reflect-opacity, 5%)) 25%, oklch(0% 0 0 / 0%) 25% );
-    box-shadow: 0 0 0 1px oklch(100% 0 0 / var(--glass-border-opacity, 20%)) inset, 0 0 0 2px oklch(0% 0 0 / 5%);
-    text-shadow: 0 1px oklch(0% 0 0 / var(--glass-text-shadow-opacity, 5%));
-  }
   .bg-\[\#2d4a22\] {
     background-color: #2d4a22;
   }
@@ -4861,9 +4855,6 @@
   }
   .bg-\[\#7ced67\] {
     background-color: #7ced67;
-  }
-  .bg-\[\#9bd964\] {
-    background-color: #9bd964;
   }
   .bg-\[\#94bd7b\] {
     background-color: #94bd7b;
@@ -4898,9 +4889,6 @@
       background-color: color-mix(in oklab, var(--color-blue-200) 60%, transparent);
     }
   }
-  .bg-blue-800 {
-    background-color: var(--color-blue-800);
-  }
   .bg-emerald-50 {
     background-color: var(--color-emerald-50);
   }
@@ -4909,9 +4897,6 @@
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-emerald-200) 60%, transparent);
     }
-  }
-  .bg-emerald-600 {
-    background-color: var(--color-emerald-600);
   }
   .bg-gray-50 {
     background-color: var(--color-gray-50);
@@ -4965,6 +4950,12 @@
     background-color: color-mix(in srgb, #fff 10%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-white) 10%, transparent);
+    }
+  }
+  .bg-white\/15 {
+    background-color: color-mix(in srgb, #fff 15%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-white) 15%, transparent);
     }
   }
   .bg-white\/20 {
@@ -5038,37 +5029,6 @@
       --btn-inset: 0 0 0 0 oklch(0% 0 0/0);
       --btn-shadow: 0 0 0 0 oklch(0% 0 0/0);
     }
-    .btn-soft {
-      --btn-bg: var(--btn-color, var(--color-base-content));
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      .btn-soft {
-        --btn-bg: color-mix(
-      in oklab,
-      var(--btn-color, var(--color-base-content)) 8%,
-      var(--btn-soft-bg, var(--color-base-100))
-    );
-      }
-    }
-    .btn-soft {
-      color: var(--btn-rest-fg, var(--btn-color, var(--color-base-content)));
-      --btn-border: var(--btn-color, var(--color-base-content));
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      .btn-soft {
-        --btn-border: color-mix(
-      in oklab,
-      var(--btn-color, var(--color-base-content)) 10%,
-      var(--btn-soft-bg, var(--color-base-100))
-    );
-      }
-    }
-    .btn-soft {
-      --btn-border-style: solid;
-      background-image: none;
-      --btn-inset: 0 0 0 0 oklch(0% 0 0/0);
-      --btn-shadow: 0 0 0 0 oklch(0% 0 0/0);
-    }
     .btn-ghost {
       --btn-bg: #0000;
       color: var(--btn-rest-fg, var(--btn-color, var(--color-base-content, currentColor)));
@@ -5107,6 +5067,9 @@
   }
   .p-1 {
     padding: var(--spacing);
+  }
+  .p-1\.5 {
+    padding: calc(var(--spacing) * 1.5);
   }
   .p-2 {
     padding: calc(var(--spacing) * 2);
@@ -5182,6 +5145,9 @@
   .px-3 {
     padding-inline: calc(var(--spacing) * 3);
   }
+  .px-3\.5 {
+    padding-inline: calc(var(--spacing) * 3.5);
+  }
   .px-4 {
     padding-inline: calc(var(--spacing) * 4);
   }
@@ -5227,6 +5193,9 @@
   .py-6 {
     padding-block: calc(var(--spacing) * 6);
   }
+  .py-7 {
+    padding-block: calc(var(--spacing) * 7);
+  }
   .py-8 {
     padding-block: calc(var(--spacing) * 8);
   }
@@ -5247,9 +5216,6 @@
   }
   .pt-1 {
     padding-top: var(--spacing);
-  }
-  .pt-2 {
-    padding-top: calc(var(--spacing) * 2);
   }
   .pt-4 {
     padding-top: calc(var(--spacing) * 4);
@@ -5393,6 +5359,9 @@
   .text-\[16px\] {
     font-size: 16px;
   }
+  .text-\[19px\] {
+    font-size: 19px;
+  }
   .text-\[20px\] {
     font-size: 20px;
   }
@@ -5501,9 +5470,6 @@
   .text-emerald-300 {
     color: var(--color-emerald-300);
   }
-  .text-emerald-600 {
-    color: var(--color-emerald-600);
-  }
   .text-emerald-800 {
     color: var(--color-emerald-800);
   }
@@ -5551,6 +5517,12 @@
   }
   .text-red-700 {
     color: var(--color-red-700);
+  }
+  .text-red-700\/70 {
+    color: color-mix(in srgb, oklch(50.5% 0.213 27.518) 70%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-red-700) 70%, transparent);
+    }
   }
   .text-red-800 {
     color: var(--color-red-800);
@@ -5620,6 +5592,10 @@
     --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
+  .shadow-none {
+    --tw-shadow: 0 0 #0000;
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
   .shadow-sm {
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
@@ -5643,11 +5619,11 @@
   .ring-\[\#4a7425\] {
     --tw-ring-color: #4a7425;
   }
-  .ring-base-100 {
-    --tw-ring-color: var(--color-base-100);
-  }
   .ring-transparent {
     --tw-ring-color: transparent;
+  }
+  .ring-white {
+    --tw-ring-color: var(--color-white);
   }
   .ring-white\/50 {
     --tw-ring-color: color-mix(in srgb, #fff 50%, transparent);
@@ -5661,12 +5637,6 @@
   }
   .ring-offset-gray-50 {
     --tw-ring-offset-color: var(--color-gray-50);
-  }
-  .outline-emerald-200\/60 {
-    outline-color: color-mix(in srgb, oklch(90.5% 0.093 164.15) 60%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      outline-color: color-mix(in oklab, var(--color-emerald-200) 60%, transparent);
-    }
   }
   .transition {
     transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events;
@@ -5744,10 +5714,6 @@
       --btn-p: 0.75rem;
       --size: calc(var(--size-field, 0.25rem) * 8);
     }
-    .badge-primary {
-      --badge-color: var(--color-primary);
-      --badge-fg: var(--color-primary-content);
-    }
     .badge-success {
       --badge-color: var(--color-success);
       --badge-fg: var(--color-success-content);
@@ -5788,6 +5754,9 @@
   .placeholder\:text-gray-400::placeholder {
     color: var(--color-gray-400);
   }
+  .focus-within\:border-\[\#4a7425\]:focus-within {
+    border-color: #4a7425;
+  }
   @media (hover: hover) {
     .hover\:-translate-y-0\.5:hover {
       --tw-translate-y: calc(var(--spacing) * -0.5);
@@ -5806,6 +5775,9 @@
     }
     .hover\:border-\[\#4a7425\]:hover {
       border-color: #4a7425;
+    }
+    .hover\:border-\[\#4a7425\]\/40:hover {
+      border-color: color-mix(in oklab, #4a7425 40%, transparent);
     }
     .hover\:border-\[\#7ced67\]:hover {
       border-color: #7ced67;
@@ -5840,14 +5812,14 @@
     .hover\:bg-emerald-50:hover {
       background-color: var(--color-emerald-50);
     }
-    .hover\:bg-emerald-700:hover {
-      background-color: var(--color-emerald-700);
-    }
     .hover\:bg-gray-50:hover {
       background-color: var(--color-gray-50);
     }
     .hover\:bg-gray-100:hover {
       background-color: var(--color-gray-100);
+    }
+    .hover\:bg-transparent:hover {
+      background-color: transparent;
     }
     .hover\:bg-white\/10:hover {
       background-color: color-mix(in srgb, #fff 10%, transparent);
@@ -5873,6 +5845,9 @@
     }
     .hover\:text-gray-700:hover {
       color: var(--color-gray-700);
+    }
+    .hover\:text-red-700:hover {
+      color: var(--color-red-700);
     }
     .hover\:text-white:hover {
       color: var(--color-white);
@@ -5909,6 +5884,12 @@
   .focus\:border-red-400:focus {
     border-color: var(--color-red-400);
   }
+  .focus\:border-white\/60:focus {
+    border-color: color-mix(in srgb, #fff 60%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-white) 60%, transparent);
+    }
+  }
   .focus\:ring-2:focus {
     --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
@@ -5918,9 +5899,6 @@
   }
   .focus\:ring-\[\#4a7425\]\/25:focus {
     --tw-ring-color: color-mix(in oklab, #4a7425 25%, transparent);
-  }
-  .focus\:ring-emerald-300:focus {
-    --tw-ring-color: var(--color-emerald-300);
   }
   .focus\:ring-red-400\/40:focus {
     --tw-ring-color: color-mix(in srgb, oklch(70.4% 0.191 22.216) 40%, transparent);
@@ -5947,10 +5925,6 @@
   }
   .active\:bg-gray-200:active {
     background-color: var(--color-gray-200);
-  }
-  .active\:shadow-sm:active {
-    --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
   .disabled\:cursor-not-allowed:disabled {
     cursor: not-allowed;
@@ -6088,8 +6062,8 @@
     }
   }
   @media (width >= 48rem) {
-    .md\:block {
-      display: block;
+    .md\:flex {
+      display: flex;
     }
     .md\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
