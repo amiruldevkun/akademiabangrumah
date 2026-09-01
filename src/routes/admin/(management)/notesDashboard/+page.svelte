@@ -2,6 +2,7 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
   import type { ActionData, PageData } from "./$types";
+  import { capturePostHog } from "$lib/posthogClient";
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
   let isAdding = $state(false);
@@ -19,7 +20,10 @@
     action="?/add"
     use:enhance={() => {
       isAdding = true;
-      return async ({ update }) => {
+      return async ({ update, result }) => {
+        if (result.type === "success") {
+          capturePostHog("learning_resource_created");
+        }
         await update();
         isAdding = false;
       };
@@ -65,7 +69,18 @@
         class="flex items-center justify-between rounded border border-gray-200 p-3"
       >
         <span class="text-sm">{doc.title}</span>
-        <form method="POST" action="?/remove" use:enhance>
+        <form
+          method="POST"
+          action="?/remove"
+          use:enhance={() => {
+            return async ({ update, result }) => {
+              if (result.type === "success") {
+                capturePostHog("learning_resource_deleted");
+              }
+              await update();
+            };
+          }}
+        >
           <input type="hidden" name="id" value={doc.id} />
           <button type="submit" class="text-sm text-red-600">Padam</button>
         </form>

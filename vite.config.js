@@ -5,11 +5,17 @@ import { sveltekit } from "@sveltejs/kit/vite";
 
 export default defineConfig({
   preview: {
-    allowedHosts: ["jaundice-elliptic-luminance.ngrok-free.dev"],
+    allowedHosts: [
+      "jaundice-elliptic-luminance.ngrok-free.dev",
+      "akademidev.shares.zrok.io",
+    ],
   },
 
   server: {
-    allowedHosts: ["jaundice-elliptic-luminance.ngrok-free.dev"],
+    allowedHosts: [
+      "jaundice-elliptic-luminance.ngrok-free.dev",
+      "akademidev.shares.zrok.io",
+    ],
   },
 
   plugins: [

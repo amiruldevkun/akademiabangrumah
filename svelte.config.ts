@@ -7,11 +7,13 @@ const config = {
     adapter: adapter(), // FIXED: Handled by Netlify adapter now instead of adapter-auto
     paths: {
       base: "",
+      relative: false,
     },
     csrf: {
       trustedOrigins: [
         "https://jaundice-elliptic-luminance.ngrok-free.dev",
         "https://akademi.ayjo.my",
+        "akademidev.shares.zrok.io",
       ],
     },
 
@@ -28,6 +30,8 @@ const config = {
           "https://accounts.google.com",
           "https://www.youtube.com",
           "https://s.ytimg.com",
+          "https://*.posthog.com",
+          "https://aar.ayjo.my",
         ],
 
         "connect-src": [
@@ -37,6 +41,8 @@ const config = {
           "wss://*.supabase.co",
           "https://accounts.google.com",
           "https://www.youtube.com",
+          "https://*.i.posthog.com",
+          "https://aar.ayjo.my",
         ],
 
         "frame-src": [
@@ -58,6 +64,8 @@ const config = {
         // 'unsafe-inline' here is fine — style-src isn't the attack vector
         // script-src is, and that's covered by the auto-nonce above
         "style-src": ["self", "unsafe-inline"],
+
+        "worker-src": ["self", "blob:"],
 
         "font-src": ["self"],
 

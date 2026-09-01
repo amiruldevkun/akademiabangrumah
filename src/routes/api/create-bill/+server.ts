@@ -18,7 +18,6 @@ import {
   product_description,
   product_amountRM,
 } from "$lib/productMeta.json";
-import { PUBLIC_TESTING_NGROK_URL } from "$env/static/public";
 
 // TODO: replace with your real product, or look this up from a products
 // table if you sell more than one thing.
@@ -28,7 +27,7 @@ const PRODUCT = {
   amountRM: product_amountRM,
 };
 
-export async function POST({ request, locals }) {
+export async function POST({ request, locals, url }) {
   const { user } = await locals.safeGetSession();
   if (!user) {
     throw error(401, "Must be logged in to start checkout");
@@ -62,7 +61,7 @@ export async function POST({ request, locals }) {
   }
 
   // COMMENT THIS WHEN PUSHING TO PROD STUPID
-  // const origin = PUBLIC_TESTING_NGROK_URL || url.origin;
+  const origin = url.origin;
 
   // 2. Ask ToyyibPay for a bill for that order.
   try {

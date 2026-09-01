@@ -93,23 +93,34 @@
   />
 </svelte:head>
 
-<main class="bg-gray-50 pb-24">
-  {#if warningState === true}
-    <div
-      class="bg-[#9bd964] text-center justify-center flex text-red-600 px-3 py-3"
-    >
-      <h1 class="ml-auto">
-        Ada beberapa video tidak dapat ditrack. Harap maaf atas kesulitan ini.
-        Kami akan baikinya dalam masa terdekat ini
-      </h1>
-      <button onclick={closeWarning} class="ml-auto"> ⤫</button>
-    </div>
-  {/if}
-  <div class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+<main
+  class="min-h-dvh bg-[#FAF9F5] pb-24"
+  style="padding-top: max(1.5rem, env(safe-area-inset-top));"
+>
+  <div class="max-w-5xl mx-auto px-4 space-y-6">
+    {#if warningState === true}
+      <div
+        class="flex items-start gap-2.5 rounded-2xl bg-red-50 text-red-700 text-[13.5px] leading-relaxed px-4 py-3"
+      >
+        <span class="font-semibold shrink-0">!</span>
+        <span class="flex-1">
+          Ada beberapa video tidak dapat ditrack. Harap maaf atas kesulitan ini.
+          Kami akan baikinya dalam masa terdekat ini
+        </span>
+        <button
+          onclick={closeWarning}
+          aria-label="Tutup"
+          class="shrink-0 text-red-700/70 hover:text-red-700"
+        >
+          ⤫
+        </button>
+      </div>
+    {/if}
+
     {#if data.showElement}
       <!-- Welcome / registration banner -->
       <div
-        class="bg-linear-to-r from-[#1a1a1a] to-[#3a3a3a] rounded-xl overflow-hidden shadow-lg relative"
+        class="bg-linear-to-r from-[#1a1a1a] to-[#3a3a3a] rounded-3xl overflow-hidden relative"
       >
         <div class="p-6 sm:p-8">
           <p class="text-red-500 font-extrabold text-2xl sm:text-3xl italic">
@@ -131,22 +142,24 @@
     {#await data.continueLesson}
       <!-- Skeleton mirrors the resolved card's layout so there's no
 			     layout shift when the real data streams in. -->
-      <div class="bg-emerald-50 rounded-xl p-4 sm:p-5 animate-pulse glass">
+      <div
+        class="bg-white rounded-3xl border border-gray-200 px-5 py-6 sm:px-7 sm:py-7 animate-pulse"
+      >
         <div class="flex items-center justify-between mb-3">
-          <div class="h-4 w-32 bg-emerald-200/60 rounded"></div>
-          <div class="h-4 w-16 bg-emerald-200/60 rounded"></div>
+          <div class="h-4 w-32 bg-gray-200 rounded"></div>
+          <div class="h-4 w-16 bg-gray-200 rounded"></div>
         </div>
         <div class="flex flex-col sm:flex-row items-center gap-4">
           <div
-            class="w-full sm:w-40 h-24 rounded-lg bg-emerald-200/60 shrink-0"
+            class="w-full sm:w-40 h-24 rounded-2xl bg-gray-200 shrink-0"
           ></div>
           <div class="flex-1 w-full space-y-3">
-            <div class="h-3 w-16 bg-emerald-200/60 rounded"></div>
-            <div class="h-4 w-3/4 bg-emerald-200/60 rounded"></div>
-            <div class="h-2 w-full bg-emerald-200/60 rounded-full"></div>
+            <div class="h-3 w-16 bg-gray-200 rounded"></div>
+            <div class="h-4 w-3/4 bg-gray-200 rounded"></div>
+            <div class="h-2 w-full bg-gray-200 rounded-full"></div>
           </div>
           <div
-            class="h-12 w-full sm:w-32 bg-emerald-200/60 rounded-lg shrink-0"
+            class="h-12 w-full sm:w-32 bg-gray-200 rounded-2xl shrink-0"
           ></div>
         </div>
       </div>
@@ -154,15 +167,15 @@
       {#if continueLesson}
         <a
           href="{resolve('/classroom')}?item={continueLesson.id}"
-          class="block bg-emerald-50 rounded-xl p-4 sm:p-5 hover:shadow-md transition"
+          class="block bg-white rounded-3xl border border-gray-200 px-5 py-6 sm:px-7 sm:py-7 hover:border-[#4a7425]/40 transition-colors"
         >
           <div class="flex items-center justify-between mb-3">
             <div
-              class="flex items-center gap-2 text-[#4a7425] font-bold text-sm"
+              class="flex items-center gap-2 text-[#4a7425] font-semibold text-[13.5px]"
             >
               <span class="text-lg">▶</span> SAMBUNG BELAJAR
             </div>
-            <span class="text-sm text-gray-500">Lihat Semua ›</span>
+            <span class="text-[13.5px] text-gray-500">Lihat Semua ›</span>
           </div>
           <div class="flex flex-col sm:flex-row items-center gap-4">
             <div class="relative w-full sm:w-40 shrink-0">
@@ -170,14 +183,14 @@
                 <img
                   src={continueLesson.thumbnail}
                   alt={continueLesson.title}
-                  class="w-full h-24 object-cover rounded-lg"
+                  class="w-full h-24 object-cover rounded-2xl"
                   fetchpriority="high"
                 />
               {:else}
                 <!-- No thumbnail source for Google Drive lessons — generic
 								     placeholder instead of a broken/missing image. -->
                 <div
-                  class="w-full h-24 rounded-lg bg-[#4a7425]/10 flex items-center justify-center text-3xl"
+                  class="w-full h-24 rounded-2xl bg-[#4a7425]/10 flex items-center justify-center text-3xl"
                 >
                   🎬
                 </div>
@@ -200,7 +213,9 @@
               <p class="text-xs font-semibold text-[#4a7425] mb-0.5">
                 Modul {continueLesson.moduleNumber}
               </p>
-              <p class="font-bold text-gray-900 mb-2">{continueLesson.title}</p>
+              <p class="font-semibold text-gray-900 mb-2">
+                {continueLesson.title}
+              </p>
               <div class="w-full bg-gray-200 rounded-full h-2">
                 <div
                   class="bg-[#4a7425] h-2 rounded-full"
@@ -212,8 +227,9 @@
               </p>
             </div>
             <button
-              class="btn bg-[#4a7425] outline-emerald-200/60 text-white
-            "
+              class="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 bg-[#4a7425] text-white font-semibold text-[14.5px] rounded-2xl px-5
+              hover:bg-[#3d5f1f] active:scale-[0.98] transition-all cursor-pointer"
+              style="height: 48px;"
             >
               Sambung Belajar ▶
             </button>
@@ -224,10 +240,12 @@
 			     prompt instead of fabricated placeholder progress. -->
         <a
           href={resolve("/classroom")}
-          class="block bg-emerald-50 rounded-xl p-5 hover:shadow-md transition text-center"
+          class="block bg-white rounded-3xl border border-gray-200 px-5 py-7 hover:border-[#4a7425]/40 transition-colors text-center"
         >
-          <p class="font-bold text-[#4a7425] mb-1">▶ Mula Belajar Sekarang</p>
-          <p class="text-sm text-gray-600">
+          <p class="font-semibold text-[#4a7425] mb-1">
+            ▶ Mula Belajar Sekarang
+          </p>
+          <p class="text-[13.5px] text-gray-500">
             Belum ada video ditonton lagi — jom mula modul pertama anda.
           </p>
         </a>
@@ -237,10 +255,12 @@
 		     same fallback as the "nothing accessible" empty state. -->
       <a
         href={resolve("/classroom")}
-        class="block bg-emerald-50 rounded-xl p-5 hover:shadow-md transition text-center"
+        class="block bg-white rounded-3xl border border-gray-200 px-5 py-7 hover:border-[#4a7425]/40 transition-colors text-center"
       >
-        <p class="font-bold text-[#4a7425] mb-1">▶ Mula Belajar Sekarang</p>
-        <p class="text-sm text-gray-600">
+        <p class="font-semibold text-[#4a7425] mb-1">
+          ▶ Mula Belajar Sekarang
+        </p>
+        <p class="text-[13.5px] text-gray-500">
           Belum ada video ditonton lagi — jom mula modul pertama anda.
         </p>
       </a>
@@ -252,25 +272,25 @@
         <svelte:element
           this={tile.disabled ? "div" : "a"}
           href={tile.disabled ? undefined : tile.href}
-          class="bg-white rounded-xl shadow p-4 flex flex-col items-center text-center gap-2 transition relative pointer-events-auto
+          class="bg-white rounded-2xl border border-gray-200 p-4 flex flex-col items-center text-center gap-2 transition-all relative pointer-events-auto
 					{tile.disabled
             ? 'opacity-50 pointer-events-none select-none'
-            : 'hover:shadow-md hover:-translate-y-0.5'}"
+            : 'hover:border-[#4a7425]/40 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'}"
         >
           {#if tile.disabled}
             <span
-              class="absolute top-1.5 right-1.5 text-[9px] font-semibold bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full"
+              class="absolute top-1.5 right-1.5 text-[9px] font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full"
             >
               Akan Datang
             </span>
           {/if}
           <span
-            class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-[#4a7425] text-xl"
+            class="w-10 h-10 rounded-xl bg-[#4a7425]/10 flex items-center justify-center text-[#4a7425] text-xl"
           >
             {#if tile.icon === "play"}▶{:else if tile.icon === "doc"}📄{:else if tile.icon === "clipboard"}📋{:else if tile.icon === "calculator"}🧮{:else if tile.icon === "hardhat"}👷{:else if tile.icon === "chat"}💬{:else if tile.icon === "users"}👥{:else if tile.icon === "gift"}🎁{/if}
           </span>
           <span
-            class="font-semibold text-sm {tile.disabled
+            class="font-semibold text-[13.5px] {tile.disabled
               ? 'text-gray-500'
               : 'text-gray-900'}">{tile.label}</span
           >
@@ -287,14 +307,14 @@
     <div class="grid sm:grid-cols-2 gap-4">
       <!-- Progress donut (disabled) -->
       <div
-        class="bg-white rounded-xl shadow p-5 opacity-50 pointer-events-none select-none relative sm:col-span-2"
+        class="bg-white rounded-3xl border border-gray-200 p-5 opacity-50 pointer-events-none select-none relative sm:col-span-2"
       >
         <span
-          class="absolute top-3 right-3 text-[10px] font-semibold bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full"
+          class="absolute top-3 right-3 text-[10px] font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full"
         >
           Akan Datang
         </span>
-        <p class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <p class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
           📊 KEMAJUAN BELAJAR SAYA
         </p>
         <div class="flex items-center gap-5">
@@ -309,7 +329,7 @@
             </div>
           </div>
           <div class="flex-1">
-            <p class="font-bold text-gray-400">-- / -- Modul</p>
+            <p class="font-semibold text-gray-400">-- / -- Modul</p>
             <p class="text-xs text-gray-400 mb-2">Modul selesai</p>
             <div class="w-full bg-gray-200 rounded-full h-2 mb-2"></div>
             <p class="text-xs text-gray-400">
@@ -320,26 +340,25 @@
       </div>
 
       <!-- Latest videos (disabled) -->
-      <!-- <div class="bg-white rounded-xl shadow p-5 opacity-50 pointer-events-none select-none relative">
-			<span class="absolute top-3 right-3 text-[10px] font-semibold bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
-				Akan Datang
-			</span>
-			<p class="font-bold text-gray-900 mb-3 flex items-center gap-2">▶ VIDEO TERBARU</p>
-			<p class="text-sm text-gray-400">Ciri ini akan datang tidak lama lagi.</p>
-		</div> -->
+      <!-- <div class="bg-white rounded-3xl border border-gray-200 p-5 opacity-50 pointer-events-none select-none relative">
+				<span class="absolute top-3 right-3 text-[10px] font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+					Akan Datang
+				</span>
+				<p class="font-semibold text-gray-900 mb-3 flex items-center gap-2">▶ VIDEO TERBARU</p>
+				<p class="text-[13.5px] text-gray-400">Ciri ini akan datang tidak lama lagi.</p>
+			</div> -->
     </div>
 
     <!-- Tip + Pengumuman -->
     <div class="grid sm:grid-cols-2 gap-4">
-      <div class="bg-yellow-50 rounded-xl p-5 flex items-center gap-4">
+      <div class="bg-yellow-50 rounded-3xl p-5 flex items-center gap-4">
         <div class="flex-1">
           {#key current.id}
-            {console.log(current.id)}
-            <p class="font-bold text-gray-900 mb-2 flex items-center gap-2">
+            <p class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
               💡 TIP HARI INI
             </p>
-            <p class="font-bold">{current.category}</p>
-            <p class="text-sm text-gray-700 italic">
+            <p class="font-semibold text-[#4a7425]">{current.category}</p>
+            <p class="text-[13.5px] text-gray-700 italic">
               {current.quote}
             </p>
             <p class="text-xs text-gray-500 mt-1">– Abang Rumah</p>
@@ -351,21 +370,21 @@
           class="w-16 h-16 rounded-full object-cover shrink-0"
         />
       </div>
-      <div class="bg-blue-50 rounded-xl p-5">
+      <div class="bg-blue-50 rounded-3xl p-5">
         <div class="flex items-center justify-between mb-3">
-          <p class="font-bold text-gray-900 flex items-center gap-2">
+          <p class="font-semibold text-gray-900 flex items-center gap-2">
             📢 PENGUMUMAN
           </p>
         </div>
         <ul class="space-y-2">
           {#each data.announcements as item (item.id)}
-            <li class="text-sm text-gray-700 flex gap-2">
+            <li class="text-[13.5px] text-gray-700 flex gap-2">
               <span class="text-[#4a7425]">•</span>
               <!-- eslint-disable-next-line svelte/no-at-html-tags -->
               <span>{@html renderAnnouncementMarkdown(item.text)}</span>
             </li>
           {:else}
-            <li class="text-sm text-gray-400">
+            <li class="text-[13.5px] text-gray-400">
               Tiada pengumuman buat masa ini.
             </li>
           {/each}

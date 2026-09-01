@@ -4,6 +4,7 @@
   import type { ActionData, PageData } from "./$types";
   import type { SidebarSection } from "$lib/sidebarParser";
   import { resolve } from "$app/paths";
+  import { capturePostHog } from "$lib/posthogClient";
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -144,7 +145,12 @@
         action="?/push"
         use:enhance={() => {
           isPushing = true;
-          return async ({ update }) => {
+          return async ({ update, result }) => {
+            if (result.type === "success") {
+              capturePostHog("sidebar_content_published", {
+                section_count: parsedSections?.length ?? 0,
+              });
+            }
             await update();
             isPushing = false;
           };

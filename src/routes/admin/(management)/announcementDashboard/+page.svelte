@@ -3,6 +3,7 @@
   import { enhance } from "$app/forms";
   import type { ActionData, PageData } from "./$types";
   import { renderAnnouncementMarkdown } from "$lib/markdown";
+  import { capturePostHog } from "$lib/posthogClient";
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -51,7 +52,10 @@
     action="?/add"
     use:enhance={() => {
       isAdding = true;
-      return async ({ update }) => {
+      return async ({ update, result }) => {
+        if (result.type === "success") {
+          capturePostHog("announcement_created");
+        }
         await update();
         newText = "";
         isAdding = false;
@@ -95,7 +99,10 @@
             action="?/update"
             use:enhance={() => {
               savingId = a.id;
-              return async ({ update }) => {
+              return async ({ update, result }) => {
+                if (result.type === "success") {
+                  capturePostHog("announcement_updated");
+                }
                 await update();
                 savingId = null;
                 editingId = null;
@@ -147,7 +154,18 @@
               >
                 Edit
               </button>
-              <form method="POST" action="?/remove" use:enhance>
+              <form
+                method="POST"
+                action="?/remove"
+                use:enhance={() => {
+                  return async ({ update, result }) => {
+                    if (result.type === "success") {
+                      capturePostHog("announcement_deleted");
+                    }
+                    await update();
+                  };
+                }}
+              >
                 <input type="hidden" name="id" value={a.id} />
                 <button
                   type="submit"
