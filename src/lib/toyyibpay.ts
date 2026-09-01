@@ -100,7 +100,7 @@ export async function getBillTransactions(billCode: string) {
     `${TOYYIBPAY_BASE_URL}/index.php/api/getBillTransactions`,
     {
       method: "POST",
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body,
     },
   );
