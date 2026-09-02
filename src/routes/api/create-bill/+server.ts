@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/routes/api/create-bill/+server.js
 //
 // POST { phone } -> creates a "pending" order in Supabase, tied to the
